@@ -52,7 +52,7 @@ const matchDict=[
                 if(!setting["Q&A"].some((o,i)=>{
                     if (o.question===msg){
                         setting["Q&A"].splice(i,1)
-                        global['reloadSetting'](setting,'./src',__dirname.split("\\").pop())
+                        global['reloadSetting'](setting,'./src/plugins',__dirname.split("\\").pop())
                         initMatchSetting()
                         context["message"]=`已删除问答:${msg}`
                         return true
