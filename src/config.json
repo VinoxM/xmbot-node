@@ -1,0 +1,18 @@
+{
+  "ws": {
+    "host":"127.0.0.1",
+    "port":9222,
+    "enableAPI":true,
+    "enableEvent":true,
+    "reconnection":true,
+    "reconnectionAttempts":10,
+    "reconnectionDelay":1000
+  },
+  "prefixOn": true,
+  "prefix": ["ue"],
+  "master": [760254674],
+  "isBlackGroup": true,
+  "blackGroup": [],
+  "whiteGroup": [],
+  "enablePrivate": true
+}

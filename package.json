@@ -1,0 +1,16 @@
+{
+  "name": "xmbot-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cq-websocket": "^2.1.1",
+    "esm": "^3.2.25",
+    "fs-extra": "^9.0.1"
+  }
+}
