@@ -1,2 +1,7 @@
 # Project exclude paths
 /node_modules/
+.idea/jsLibraryMappings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/xmbot-node.iml
+.idea/vcs.xml
