@@ -10,7 +10,8 @@ const source = {// 路径
     db:path.join(__dirname, 'database'),
     web:path.join(__dirname,'web'),
     repeat:path.join(__dirname,'src','repeat'),
-    plugins:path.join(__dirname,'src','plugins')
+    plugins:path.join(__dirname,'src','plugins'),
+    resource:path.join(__dirname,'resource')
 }
 
 // 装填配置
