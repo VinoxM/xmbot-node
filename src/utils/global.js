@@ -3,9 +3,9 @@ export const globalReg = obj => Object.assign(global,obj)
 globalReg({
     now:()=>new Date().toLocaleString(),
     //控制台日志打印封装
-    LOG : msg => console.log(`[${global.now()}][INFO]${getCallerFileNameAndLine('LOG')}  `+ msg),
+    LOG: msg => console.log(`[${global.now()}][INFO]${getCallerFileNameAndLine('LOG')}  `+ msg),
     //控制台错误打印封装
-    ERR : err => console.error(`[${global.now()}][ERROR]${getCallerFileNameAndLine('ERR')}  `+ err)
+    ERR: err => console.error(`[${global.now()}][ERROR]${getCallerFileNameAndLine('ERR')}  `+ err)
 })
 
 //获取日志打印的文件名和行数

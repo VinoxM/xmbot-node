@@ -6,7 +6,7 @@
     "enableEvent":true,
     "reconnection":true,
     "reconnectionAttempts":10,
-    "reconnectionDelay":1000
+    "reconnectionDelay":2000
   },
   "prefixOn": true,
   "prefix": ["ue"],
@@ -14,5 +14,6 @@
   "isBlackGroup": true,
   "blackGroup": [],
   "whiteGroup": [],
-  "enablePrivate": true
+  "enablePrivate": true,
+  "readyFeedBack": false
 }
