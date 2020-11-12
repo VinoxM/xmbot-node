@@ -65,7 +65,7 @@ function checkVersion(isForced = false) {
 
 function update(user_id) {
     let dir = global['source'].main
-    let pid = process.pid
+    let pid = process.ppid
     let script =
         'cd '+dir+' \n' +
         'taskkill /pid '+pid+' /f\n' +
