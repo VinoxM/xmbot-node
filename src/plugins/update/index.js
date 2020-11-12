@@ -38,7 +38,6 @@ function match(context) {
 }
 
 function checkVersion(isForced = false) {
-    if (isForced) return new Promise((resolve, reject) => resolve())
     let ver = global['version'].split('.')
     let needUpdate = false
     return new Promise((resolve, reject) => {
@@ -55,7 +54,7 @@ function checkVersion(isForced = false) {
                         break
                     }
                 }
-                resolve({needUpdate,ver:web_ver})
+                resolve({needUpdate:isForced||needUpdate,ver:web_ver})
             })
             .catch(err=>{
                 global['ERR'](err)
