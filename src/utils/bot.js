@@ -3,16 +3,16 @@ import {CQ} from "./CQCode";
 
 let bot = null
 
-export function initBot(isRestart = false){
+export function initBot(args){
     let ops = global['config']["default"]["ws"]
     bot = new CQWebSocket(ops);
-    addListener(isRestart)
+    addListener(args)
     bot.connect()
 }
 
 export function restartBot() {
     bot.disconnect()
-    initBot(true)
+    initBot(['restart'])
 }
 
 const msgType = {
@@ -28,7 +28,7 @@ const msgType = {
     }
 }
 
-function addListener(isRestart){
+function addListener(args){
     // 添加WebSocket监听
     bot.on('socket.connecting', (wsType, attempts) => global['LOG'](`WebSocket连接中:${wsType}`))
         .on('socket.failed', (wsType, attempts) => global['ERR'](`WebSocket连接失败:${wsType},${Number(global['config']['default']['ws']['reconnectionDelay']/1000).toFixed(0)}秒后重连`))
@@ -41,9 +41,15 @@ function addListener(isRestart){
                 group:(params)=>bot("send_group_msg",params)
             }
             global['LOG']('xmBot已启动')
-            if (global['config'].default['readyFeedBack']) {
-                for (const m of global['config'].default['master']){
-                    replyPrivate({user_id:m,self_id:'system',message:isRestart?'xmBot已重启':'xmBot已启动'})
+            let isRestart = args&&args.length>0&&args[0]==='restart'
+            let isUpdate = args&&args.length>0&&args[0]==='update'
+            if (isUpdate){
+                replyPrivate({user_id:args[1],self_id:'system',message:'更新完成,当前版本:'+global['version']})
+            } else {
+                if (global['config'].default['readyFeedBack']) {
+                    for (const m of global['config'].default['master']){
+                        replyPrivate({user_id:m,self_id:'system',message:isRestart?'xmBot已重启':'xmBot已启动'})
+                    }
                 }
             }
         })

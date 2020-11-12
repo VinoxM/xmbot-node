@@ -5,8 +5,10 @@ import * as http from './src/http'
 import path from 'path'
 import {db,lite} from './src/db/index'
 import {initBot,restartBot,replyMsg,replyPrivate,replyGroup} from "./src/utils/bot";
+import * as func from './src/utils/funcs'
 
 const source = {// 路径
+    main:__dirname,
     db:path.join(__dirname, 'database'),
     web:path.join(__dirname,'web'),
     repeat:path.join(__dirname,'src','repeat'),
@@ -16,7 +18,7 @@ const source = {// 路径
 
 // 装填配置
 globalReg({
-    version:'0.0.1',// 版本信息
+    version:'0.0.2',// 版本信息
     replyMsg,// 发送信息
     replyPrivate,// 发送私聊信息
     replyGroup,// 发送群组信息
@@ -30,10 +32,13 @@ globalReg({
     source:source,// 路径
     http,// http连接
     liteDb:db,// 数据库连接
+    func
 })
 
+const args = process.argv.splice(2)
+
 // 启动Bot
-initBot()
+initBot(args)
 
 // 加载插件
 loadPlugins('./src/plugins')

@@ -43,11 +43,11 @@ const matchDict=[
                 msg += o.question+":"+o.answer+"\n"
             }
             context["message"]=msg;
-            global.replyMsg(context,null,checkIsGroup(context))
+            global.replyMsg(context,null,global['func']['checkIsGroup'](context))
         }
     },
     {match: ["删除问答:"],startWith: true,func:(context)=>{
-            if (checkIsAdmin(context)){
+            if (global['func']['checkIsAdmin'](context)){
                 let msg = context["raw_message"].replace("删除问答:","")
                 if(!setting["Q&A"].some((o,i)=>{
                     if (o.question===msg){
@@ -60,11 +60,11 @@ const matchDict=[
                     return false
                 }))context["message"] = `未找到问答:${msg}`
             }else context["message"]="只有主人可以这么命令我~"
-            global.replyMsg(context,null,checkIsGroup(context))
+            global.replyMsg(context,null,global['func']['checkIsGroup'](context))
         }
     },
     {match: ['重载模块:'],startWith: true,func:(context)=>{
-            if (checkIsAdmin(context)){
+            if (global['func']['checkIsAdmin'](context)){
                 if (context['message_type']==='private'){
                     let msg = context['raw_message'].replace('重载模块:','')
                     let keys = Object.keys(global['plugins'])
@@ -86,17 +86,17 @@ const matchDict=[
                     }else context['message']='未找到该模块'
                 }else context['message']='请私聊使用该指令~'
             }else context['message']='只有主人可以这么命令我~'
-            global.replyMsg(context,null,checkIsGroup(context))
+            global.replyMsg(context,null,global['func']['checkIsGroup'](context))
         }
     },
     {match: ['重启'],func:(context)=>{
-            if (checkIsAdmin(context)){
+            if (global['func']['checkIsAdmin'](context)){
                 if (context['message_type']==='private'){
                     global['restartBot']()
                     return
                 }else context['message']='请私聊使用该指令~'
             }else context['message']='只有主人可以这么命令我~'
-            global.replyMsg(context,null,checkIsGroup(context))
+            global.replyMsg(context,null,global['func']['checkIsGroup'](context))
         }
     },
 ]
@@ -133,14 +133,6 @@ function match(context) {//返回true则该条信息可以触发复读,返回fal
         }
     }
     return true
-}
-
-function checkIsAdmin(context){
-    return global["config"].default["master"].some((o)=>o===context['user_id'])
-}
-
-function checkIsGroup(context) {
-    return context['message_type']==='group'
 }
 
 export default {
