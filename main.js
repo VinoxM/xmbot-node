@@ -6,6 +6,7 @@ import path from 'path'
 import {db,lite} from './src/db/index'
 import {initBot,restartBot,replyMsg,replyPrivate,replyGroup} from "./src/utils/bot";
 import * as func from './src/utils/funcs'
+import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
 
 const source = {// 路径
     main:__dirname,
@@ -16,9 +17,18 @@ const source = {// 路径
     resource:path.join(__dirname,'resource')
 }
 
+// 版本信息
+let version;
+
+try{
+    version = readJsonSync(path.join(__dirname,'docs','v3','ver.json')) // 读取版本信息
+}catch (e) {
+    global['LOG']('读取版本信息失败')
+}
+
 // 装填配置
 globalReg({
-    version:'0.0.2',// 版本信息
+    version:version?version.version:'0.0.0',// 版本信息
     replyMsg,// 发送信息
     replyPrivate,// 发送私聊信息
     replyGroup,// 发送群组信息

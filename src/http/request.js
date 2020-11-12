@@ -25,9 +25,10 @@ export function addListener(app) {
 
 const listener = {
     get:{
-        '/': {
+        '/xmbot': {
             needAuth:false,
             func:(req,res)=>{
+                global['LOG']('user access')
                 res.setHeader('Content-Type', 'text/html')
                 res.sendFile(global['source'].web + '/index.html')
             }
