@@ -11,7 +11,7 @@ function initSetting() {
 initSetting()
 
 function match(context) {
-    if (context['raw_message']!=='更新'||context['raw_message']!=='强制更新')return
+    if (context['raw_message']!=='更新'&&context['raw_message']!=='强制更新')return
     let isAdmin = global['func']['checkIsAdmin'](context)
     let isPrivate = global['func']['checkIsPrivate'](context)
     let isGroup = global['func']['checkIsGroup'](context)
