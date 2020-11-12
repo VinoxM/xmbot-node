@@ -66,14 +66,16 @@ function checkVersion(isForced = false) {
 function update(user_id) {
     let dir = global['source'].main
     let pid = process.pid
+    let ppid = process.ppid
     let script =
         'cd '+dir+' \n' +
         'taskkill /pid '+pid+' /f\n' +
+        'taskkill /pid '+ppid+' /f\n' +
         'git pull\n' +
         'ping 127.0.0.1 -n 3\n' +
         'node index.js update ' + user_id
     let filePath = dir+'/update.bat'
-    fs.writeFile(filePath,Buffer.from(script),(err)=>{
+    fs['writeFile'](filePath,Buffer.from(script),(err)=>{
         if (err) return false
         else {
             exec('powershell.exe -Command Start-Process -FilePath "' + filePath + '"', function (err, stdout, stderr) {
