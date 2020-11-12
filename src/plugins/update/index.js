@@ -11,7 +11,7 @@ function initSetting() {
 initSetting()
 
 function match(context) {
-    if (context['raw_message']!=='更新')return
+    if (context['raw_message']!=='更新'||context['raw_message']!=='强制更新')return
     let isAdmin = global['func']['checkIsAdmin'](context)
     let isPrivate = global['func']['checkIsPrivate'](context)
     let isGroup = global['func']['checkIsGroup'](context)
@@ -19,9 +19,9 @@ function match(context) {
         if (isPrivate){
             context['message']='正在检查更新...'
             replyMsg(context,null,isGroup)
-            checkVersion().then(res=>{
+            checkVersion(context['raw_message']==='强制更新').then(res=>{
                 if (res.needUpdate){
-                    context['message']='有可用更新版本:'+res.ver+',正在下载更新...'
+                    context['message']='有可用更新版本:'+res.ver.version+',正在下载更新...'
                     update(context['user_id'])
                 }else {
                     context['message']='已是最新版本'
@@ -37,7 +37,8 @@ function match(context) {
     replyMsg(context,null,isGroup)
 }
 
-function checkVersion() {
+function checkVersion(isForced = false) {
+    if (isForced) return new Promise((resolve, reject) => resolve())
     let ver = global['version'].split('.')
     let needUpdate = false
     return new Promise((resolve, reject) => {
