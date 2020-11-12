@@ -15,5 +15,6 @@
   "blackGroup": [],
   "whiteGroup": [],
   "enablePrivate": true,
-  "readyFeedBack": false
+  "readyFeedBack": false,
+  "proxy": "http://127.0.0.1:2802"
 }

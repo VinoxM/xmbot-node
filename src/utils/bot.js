@@ -10,9 +10,9 @@ export function initBot(args){
     bot.connect()
 }
 
-export function restartBot() {
+export function restartBot(user_id) {
     bot.disconnect()
-    initBot(['restart'])
+    initBot(['restart',user_id])
 }
 
 const msgType = {
@@ -45,10 +45,12 @@ function addListener(args){
             let isUpdate = args&&args.length>0&&args[0]==='update'
             if (isUpdate){
                 replyPrivate({user_id:args[1],self_id:'system',message:'更新完成,当前版本:'+global['version']})
+            } else if (isRestart){
+                replyPrivate({user_id:args[1],self_id:'system',message:'xmBot已重启'})
             } else {
                 if (global['config'].default['readyFeedBack']) {
                     for (const m of global['config'].default['master']){
-                        replyPrivate({user_id:m,self_id:'system',message:isRestart?'xmBot已重启':'xmBot已启动'})
+                        replyPrivate({user_id:m,self_id:'system',message:'xmBot已启动'})
                     }
                 }
             }

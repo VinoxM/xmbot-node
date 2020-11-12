@@ -2,6 +2,7 @@ import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
 import {resolve} from 'path'
 import {loadRepeatJson} from "./repeat";
 export const globalConf = {}
+import path from 'path'
 
 // 加载配置信息
 function initialConf(path, name) {
@@ -33,6 +34,17 @@ export function loadPlugins(pluginPath) {
 function initSettingByName(pluginName) {
     try{
         globalConf[pluginName]=readJsonSync(resolve(__dirname,"./plugins/"+pluginName+"/setting.json"))
+        let path = __dirname+"/plugins/"+pluginName
+        let files = fs['readdirSync'](path)
+        files = files.filter(o=>{
+            return o.split('.').pop()==='json'&&o!=='setting.json'&&o.startsWith('setting-')
+        })
+        if (files.length>0){
+            for (let f of files){
+                let name = f.substring(8).split('.')[0]
+                globalConf[pluginName][name]=readJsonSync(resolve(__dirname,"./plugins/"+pluginName+'/'+f))
+            }
+        }
         global['LOG'](`已加载模块配置: ${pluginName}/setting.json`)
     }catch (e) {
         global['ERR'](`${pluginName}/setting.json文件解析失败,请检查文件配置`)
@@ -71,7 +83,7 @@ export function saveAndReloadSettingByName(json,pluginName,reloadPlugin = false)
         else
             return initSettingByName(pluginName)
     }
-    let file = path.join("./plugins/",pluginName,"setting.json")
+    let file = path.join(global['source']['plugins'],pluginName,"setting.json")
     let j = JSON.stringify(json,null,4)
     fs["writeFileSync"](file,j,"utf8",function (err) {
         if (err)

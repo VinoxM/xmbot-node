@@ -10,7 +10,7 @@ export function post(url,listener){
     app['post'](url,listener)
 }
 
-app.listen(9221,'127.0.0.1')
+app.listen(9221)
 // 跨域
 app.use(cors())
 

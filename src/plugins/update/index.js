@@ -65,11 +65,9 @@ function checkVersion(isForced = false) {
 
 function update(user_id) {
     let dir = global['source'].main
-    let pid = process.pid
     let ppid = process.ppid
     let script =
         'cd '+dir+' \n' +
-        'taskkill /pid '+pid+' /f\n' +
         'taskkill /pid '+ppid+' /f\n' +
         'git pull\n' +
         'ping 127.0.0.1 -n 3\n' +
@@ -87,6 +85,7 @@ function update(user_id) {
 }
 
 export default {
+    initSetting,
     match,
     noNeedPrefix: true
 }

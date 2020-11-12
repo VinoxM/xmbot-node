@@ -56,9 +56,9 @@ loadPlugins('./src/plugins')
 // 设置本地资源
 http.useStatic(path.join(source.web,'static'))
 
-function restart() {
+function restart(user_id) {
     global['LOG']('重启xmBot...')
     saveAndReloadConfig(null)
     loadPlugins('./src/plugins')
-    restartBot()
+    restartBot(user_id)
 }
