@@ -81,7 +81,7 @@ function addListener(args){
                 let prefix = conf.prefix;
                 for (let p of prefix){
                     if (record["message"].startsWith(p)) {
-                        record["raw_message"]=record["message"].substring(p.length);
+                        record["raw_message"]=record["message"].substring(p.length).trim();
                         through = true;
                         break;
                     }
@@ -108,10 +108,11 @@ function addListener(args){
 }
 
 export function replyMsg(context, message, at = false){
+    context = checkContextError(context)
     let replyType = msgType[context["message_type"]]["reply"];//通过消息类型确定回复目标(群组->group_id,私聊->private_id)
     let replyId = context[replyType];//获取回复目标号码
     message = message ? message : context["message"]
-    if (at){//是否@发送人
+    if (context['message_type']!=='private'&&at){//是否@发送人
         message = CQ.at(context["user_id"])+'\n'+message
     }
     let params = {[replyType]:replyId,message}//回复消息体(例:{group_id:123456}或{user_id:123456})
@@ -123,6 +124,7 @@ export function replyMsg(context, message, at = false){
 }
 
 export function replyPrivate(context) {
+    context = checkContextError(context)
     onSendLog('private',context["user_id"],context["self_id"],context["message"]);
     bot.send.private({user_id: context["user_id"], message: context["message"]}).then(r=>{
 
@@ -130,13 +132,30 @@ export function replyPrivate(context) {
 }
 
 export function replyGroup(context,at = false) {
+    context = checkContextError(context)
     if (at) {
-        context["message"]=CQ.at(context["user_id"])+context["message"]
+        context["message"]=CQ.at(context["user_id"])+'\n'+context["message"]
     }
     onSendLog('group',context["group_id"],context["self_id"],context["message"]);
     bot.send.group({group_id: context["group_id"], message: context["message"]}).then(r=>{
         global['repeat']['handleRepeat'](context)// 发送群组信息,处理复读
     })
+}
+
+function checkContextError(context) {
+    if (context.err){
+        switch (context.err) {
+            case 'isNotAdmin':
+            case 0:
+                context['message']='只有主人可以这么命令我'
+                break;
+            case 'isNotPrivate':
+            case 1:
+                context['message']='请私聊使用该指令'
+                break;
+        }
+    }
+    return context
 }
 
 // 收到信息日志

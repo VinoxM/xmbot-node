@@ -1,6 +1,12 @@
 const request = require('request')
 const fs = require('fs')
 
+export function checkMatchRules(rules,context) {
+    if (rules.indexOf('admin')>-1&&!checkIsAdmin(context)) return 0
+    if (rules.indexOf('private')>-1&&!checkIsPrivate(context)) return 1
+    return -1
+}
+
 export function checkIsAdmin(context){
     return global["config"].default["master"].some((o)=>o===context['user_id'])
 }

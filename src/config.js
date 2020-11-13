@@ -68,6 +68,7 @@ function initPluginsByName(pluginName){
                     break
                 default:
                     global['ERR'](`${e.code}:${pluginName}模块加载失败`)
+                    console.log(e)
                     break
             }
             return false

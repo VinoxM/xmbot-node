@@ -24,8 +24,8 @@ export function reloadPlugins(context){
                 }
                 context['message']=suc?`重载模块${msg}完成`:`重载模块${msg}失败`
             }else context['message']='未找到该模块'
-        }else context['message']='请私聊使用该指令~'
-    }else context['message']='只有主人可以这么命令我~'
+        }else context['err']=1
+    }else context['err']=0
     global.replyMsg(context,null,global['func']['checkIsGroup'](context))
 }
 
@@ -34,7 +34,7 @@ export function restart(context){
         if (context['message_type']==='private'){
             global['restartBot'](context['user_id'])
             return
-        }else context['message']='请私聊使用该指令~'
-    }else context['message']='只有主人可以这么命令我~'
+        }else context['err']=1
+    }else context['err']=0
     global.replyMsg(context,null,global['func']['checkIsGroup'](context))
 }
