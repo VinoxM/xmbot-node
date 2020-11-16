@@ -50,7 +50,6 @@ class ObjRequest{
 }
 
 export function getPcrPng(fileName,filePath) {
-    console.log(fileName)
     return global['func']['downloadWebFile']('https://redive.estertion.win/icon/unit/'+fileName+'.webp',filePath,true)
 }
 
