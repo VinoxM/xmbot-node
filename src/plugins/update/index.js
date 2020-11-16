@@ -65,7 +65,7 @@ function checkVersion(isForced = false) {
 
 function update(user_id) {
     let dir = global['source'].main
-    let pid = process.ppid
+    let pid = process.pid
     let script =
         'cd '+dir+' \n' +
         'taskkill /pid '+pid+' /f\n' +
@@ -79,7 +79,7 @@ function update(user_id) {
             exec('powershell.exe -Command Start-Process -FilePath "' + filePath + '"', function (err, stdout, stderr) {
                 global['LOG'](stdout)
             }).stdin.end();
-            // process.exit(0)
+            process.exit(0)
         }
     })
 }
