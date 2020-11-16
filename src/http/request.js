@@ -50,7 +50,8 @@ class ObjRequest{
 }
 
 export function getPcrPng(fileName,filePath) {
-    return global['func']['downloadWebFile']('http://redive.estertion.win/icon/unit/'+fileName+'.webp',filePath,true)
+    console.log(fileName)
+    return global['func']['downloadWebFile']('https://redive.estertion.win/icon/unit/'+fileName+'.webp',filePath,true)
 }
 
 const listener = {
@@ -98,11 +99,23 @@ const listener = {
                     if (!err){
                         res.sendFile(fullPath)
                     } else {
-                        fs['mkdir'](filePath,(e)=>{
+                        fs['mkdir'](filePath,{ recursive: true },(e)=>{
                             getPcrPng(fileName.split('.')[0],fullPath).then(r=>{
                                 res.sendFile(fullPath)
                             }).catch(e=>{
-                                res.sendFile(path.join(filePath,'000001.jpg'))
+                                let defaultFile = path.join(filePath,'000001.jpg')
+                                fs.access(defaultFile,fs.constants.F_OK,(err1)=>{
+                                    if (!err1){
+                                        res.sendFile(defaultFile)
+                                    }else{
+                                        getPcrPng('000001',defaultFile).then(r=>{
+                                            res.sendFile(defaultFile)
+                                        }).catch(e1=> {
+                                                res.send('error!')
+                                            }
+                                        )
+                                    }
+                                })
                             })
                         })
                     }
