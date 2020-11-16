@@ -79,7 +79,7 @@ function update(user_id) {
             exec('powershell.exe -Command Start-Process -FilePath "' + filePath + '"', function (err, stdout, stderr) {
                 global['LOG'](stdout)
             }).stdin.end();
-            process.exit(0)
+            // process.exit(0)
         }
     })
 }
