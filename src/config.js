@@ -68,7 +68,6 @@ function initPluginsByName(pluginName){
                     break
                 default:
                     global['ERR'](`${e.code}:${pluginName}模块加载失败`)
-                    console.log(e)
                     break
             }
             return false
@@ -77,7 +76,7 @@ function initPluginsByName(pluginName){
 }
 
 // 通过名称保存并重载配置
-export function saveAndReloadSettingByName(json,pluginName,reloadPlugin = false) {// json:配置,pluginPath:插件路径,pluginName:插件名称
+export function saveAndReloadSettingByName(json,pluginName,reloadPlugin = false) {// json:配置,pluginName:插件名称,reloadPlugin:重载插件
     if (!json){
         if (reloadPlugin)
             return initPluginsByName(pluginName)
@@ -86,7 +85,7 @@ export function saveAndReloadSettingByName(json,pluginName,reloadPlugin = false)
     }
     let file = path.join(global['source']['plugins'],pluginName,"setting.json")
     let j = JSON.stringify(json,null,4)
-    fs["writeFileSync"](file,j,"utf8",function (err) {
+    fs["writeFile"](file,j,"utf8",function (err) {
         if (err)
             global["LOG"](err)
         else {
@@ -103,7 +102,7 @@ export function saveAndReloadSettingForRepeat(json) {
     if (!json) return global['repeat']['loadRepeatJson']()
     let file = path.join(global['source'].repeat,'setting.json')
     let j = JSON.stringify(json,null,4)
-    fs["writeFileSync"](file,j,"utf8",function (err) {
+    fs["writeFile"](file,j,"utf8",function (err) {
         if (err) {
             global["LOG"](err)
             return false
@@ -117,7 +116,7 @@ export function saveAndReloadConfig(json) {
     if (!json) return initialConf("./config.json","default")
     let file = path.join(__dirname,'config.json')
     let j = JSON.stringify(json,null,4)
-    fs["writeFileSync"](file,j,"utf8",function (err) {
+    fs["writeFile"](file,j,"utf8",function (err) {
         if (err) {
             global["LOG"](err)
             return false

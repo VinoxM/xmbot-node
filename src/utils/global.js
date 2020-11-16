@@ -31,7 +31,7 @@ function getCallerFileNameAndLine(logType){
     }
     if (callerLogIndex !== 0){
         const callerStackLine = stackArr[callerLogIndex];
-        return `[${callerStackLine.substring(callerStackLine.lastIndexOf('/src') + 5, callerStackLine.lastIndexOf(':'))}]`
+        return `[${callerStackLine.substring(callerStackLine.lastIndexOf('\\src') +1, callerStackLine.lastIndexOf(':'))}]`
     }else return ''
 
 }

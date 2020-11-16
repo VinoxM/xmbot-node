@@ -5,3 +5,5 @@
 .idea/modules.xml
 .idea/xmbot-node.iml
 .idea/vcs.xml
+*.json
+/resource/

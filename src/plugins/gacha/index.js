@@ -10,11 +10,12 @@ function initSetting() {
 initSetting()
 
 const matchDict = [
-    {match:['添加角色'],startWith:true,needReplace:true,rules:[],func:pcr.addCharacter},
+    {match:['添加角色'],startWith:true,needReplace:true,rules:['admin','private'],func:pcr.addCharacter},
     {match:['删除角色'],startWith:true,needReplace:true,rules:[],func:pcr.delCharacter},
     {match:['删除序号角色'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.delCharacter(context,true)},
     {match:['查看角色序号'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.viewCharacter(context,true)},
     {match:['查看角色'],startWith:true,needReplace:true,rules:[],func:pcr.viewCharacter},
+    {match:['重载角色昵称'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.initNickName(context,true)},
 ]
 
 function match(context) {
@@ -49,15 +50,9 @@ function checkRules(m,context) {
     }
 }
 
-function getPng() {
-    global['func']['downloadWebFile']('http://redive.estertion.win/icon/unit/100231.webp',global['source'].resource+'/123.png',true)
-        .then(res=>{
-            console.log(res)
-        })
-}
-
 export default {
     initSetting,
     match,
-    noNeedPrefix:false
+    noNeedPrefix:false,
+    pcr
 }
