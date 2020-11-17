@@ -275,6 +275,8 @@ export function saveSetting(json, fileName = 'setting-pcr-pools.json') {
                 reject(err)
             } else {
                 global['reloadPlugin'](null, 'gacha', true)
+                initPcrSetting()
+                initNickName()
                 resolve()
             }
         })

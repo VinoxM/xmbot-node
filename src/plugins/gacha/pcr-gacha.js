@@ -14,13 +14,13 @@ export class PcrGacha {
         this.setting = setting
         this.pools = pool
         this.nickName = nick
-        // this.db = new SqliteDb('gacha')
+        this.db = new SqliteDb('gacha')
     }
 
     thirty = (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
-        // let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
+        let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
         let count = {
             star1: 0, star2: 0, star3: 0, pick_up: 0, free_stone: 0
         }
@@ -46,7 +46,7 @@ export class PcrGacha {
             if (res.isPickUp || res.star === '3') result.push(res)
         }
         let reply_info = this.setting['reply_info']
-        let reply = `> ${this.pools['pool_' + prefix]['info']['name']}\n素敵な仲間が増えますよ！\n`
+        let reply = `> ${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
         let replyEnd = ''
         replyEnd += `★★★x${count.star3}，★★x${count.star2}，★x${count.star1}\n`
         let p_keys = Object.keys(pick_up)
@@ -101,6 +101,8 @@ export class PcrGacha {
             global.replyMsg(context, null, true)
         })
     }
+
+    close = () => this.db.close()
 }
 
 function simple(pool, prop, nickName) { // 单抽

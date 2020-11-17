@@ -44,7 +44,7 @@ export class SqliteDb {
         })
     }
 
-    close = () => this.db.close()
+    close = () => this.database['close']()
 
 }
 
