@@ -1,5 +1,6 @@
 import {SqliteDb} from '../../db/index'
 import {getPcrPng} from "../../http/request";
+import {handleRepeat} from "../../repeat";
 
 const sharp = require('sharp')
 const fs = require('fs')
@@ -9,7 +10,8 @@ const gachaUnitPath = path.join(global.source.resource, 'gacha', 'unit')
 const starPath = path.join(global.source.resource, 'gacha', 'utils', 'star.png')
 
 export class PcrGacha {
-    constructor(pool, nick) {
+    constructor(setting, pool, nick) {
+        this.setting = setting
         this.pools = pool
         this.nickName = nick
         // this.db = new SqliteDb('gacha')
@@ -18,9 +20,60 @@ export class PcrGacha {
     thirty = (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
+        // let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
+        let count = {
+            star1: 0, star2: 0, star3: 0, pick_up: 0, free_stone: 0
+        }
+        let first_pick_up = 0
+        let pick_up = {}
         for (let i = 1; i <= 300; i++) {
             let res = simple(pool, i % 10 === 0 ? 'prop_last' : 'prop', this.nickName)
+            if (res.isPickUp) {
+                count.pick_up += 1
+                if (first_pick_up === 0) first_pick_up = i
+                if (!pick_up.hasOwnProperty(res.id)) {
+                    let name = ''
+                    for (let j = 0; j < Number(res.star); j++) {
+                        name += '★'
+                    }
+                    pick_up[res.id] = {name: name + res.name, count: 1}
+                } else {
+                    pick_up[res.id].count++
+                }
+                if (res.isFreeStone) count.free_stone++
+            }
+            count['star' + res.star]++
+            if (res.isPickUp || res.star === '3') result.push(res)
         }
+        let reply_info = this.setting['reply_info']
+        let reply = `> ${this.pools['pool_' + prefix]['info']['name']}\n素敵な仲間が増えますよ！\n`
+        let replyEnd = ''
+        replyEnd += `★★★x${count.star3}，★★x${count.star2}，★x${count.star1}\n`
+        let p_keys = Object.keys(pick_up)
+        if (p_keys.length > 0) {
+            replyEnd += 'Pick Up: '
+            let arr = []
+            for (const key of p_keys) {
+                arr.push(pick_up[key].name + 'x' + pick_up[key].count)
+            }
+            replyEnd += arr.join(',')+'\n'
+        }
+        replyEnd += `获得${count.free_stone === 0 ? '' : '记忆碎片x' + count.free_stone * 100 + '与'}女神秘石x${count.star1 + count.star2 * 10 + count.star3 * 100}!\n`
+        replyEnd += `${first_pick_up === 0 ? '' : '第' + first_pick_up + '抽首出Up角色\n'}`
+        let len = count.star3
+        if (first_pick_up === 0) len = -1
+        if (count.star3 < 5 && count.free_stone >= 2) len = -2
+        for (const info of Object.values(reply_info)) {
+            if (len>=info['range'][0]&&len<=info['range'][1]){
+                replyEnd+=getRandomFromArray(info['reply'])
+                break
+            }
+        }
+        handleImage(result).then(res => {
+            reply += global.CQ.img(res)
+            context['message'] = reply+replyEnd
+            global.replyMsg(context, null, true)
+        })
     }
 
     gacha = (context, prefix) => {
@@ -34,7 +87,7 @@ export class PcrGacha {
             let reply = ''
             reply += global.CQ.img(res)
             context['message'] = reply
-            global.replyMsg(context,null,true)
+            global.replyMsg(context, null, true)
         })
     }
 
@@ -45,7 +98,7 @@ export class PcrGacha {
             let reply = ''
             reply += global.CQ.img(res)
             context['message'] = reply
-            global.replyMsg(context,null,true)
+            global.replyMsg(context, null, true)
         })
     }
 }
@@ -69,7 +122,10 @@ function simple(pool, prop, nickName) { // 单抽
     }
     let pool_sel = pools[index]['pool']
     let id = getRandomFromArray(pool_sel)
-    return getNickNameAndStar(id, nickName)
+    let result = getNickNameAndStar(id, nickName)
+    result.isPickUp = pools[index]['name'] === 'Pick Up'
+    result.isFreeStone = pools[index]['free_stone']&&pools[index]['free_stone'].indexOf(id) > -1
+    return result
 }
 
 function getRandomFromArray(arr) { // 从数组中随机获取一个元素
@@ -174,4 +230,18 @@ async function handleImageStar(full_id, star) { // 拼接角色星级图片
                 })
         })
     })
+}
+
+function getPoolPickUp(pool, nickName) {
+    let result = []
+    let keys = Object.keys(pool)
+    for (const key of keys) {
+        if (key.startsWith('pick_up')) {
+            let res = pool[key]['pool'].map(o => {
+                return pool[key].prefix + nickName[o][4]
+            })
+            result = [...result, ...res]
+        }
+    }
+    return result
 }

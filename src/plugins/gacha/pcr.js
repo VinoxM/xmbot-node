@@ -54,7 +54,7 @@ export function initNickName(context, isReload = false) { // 加载角色
                     global.replyMsg(context, null, true)
                 }
                 if (pcrGacha) pcrGacha['close']()
-                pcrGacha = new PcrGacha(pools,nickNames)
+                pcrGacha = new PcrGacha(setting,pools,nickNames)
                 resolve(data)
             })
         })
@@ -308,4 +308,8 @@ export function gacha(context, prefix) {
 
 export function simple(context, prefix) {
     pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
+}
+
+export function thirty(context,prefix) {
+    pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
 }

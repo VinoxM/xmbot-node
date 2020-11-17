@@ -24,6 +24,10 @@ const matchDict = [
     {match:['国服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'cn')},
     {match:['日服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'jp')},
     {match:['台服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'tw')},
+    {match:['来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context)},
+    {match:['国服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'cn')},
+    {match:['日服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'jp')},
+    {match:['台服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'tw')},
 ]
 
 function match(context) {
