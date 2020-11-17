@@ -3,6 +3,7 @@ import path from 'path'
 import fs_ from 'fs'
 import * as request_ from '../../http/request'
 import {CQ} from '../../utils/CQCode'
+import {PcrGacha} from './pcr-gacha'
 
 let setting = null;
 let pools = null;
@@ -21,6 +22,7 @@ const charRules = { // 角色规范
         star3: ['star3', '3星', '三星', '3']
     }
 }
+let pcrGacha = null
 
 function initPcrSetting() { // 加载配置
     setting = global['config'][__dirname.split("\\").pop()]['pcr']
@@ -51,6 +53,8 @@ export function initNickName(context, isReload = false) { // 加载角色
                     context['message'] = '完成角色昵称加载'
                     global.replyMsg(context, null, true)
                 }
+                if (pcrGacha) pcrGacha['close']()
+                pcrGacha = new PcrGacha(pools,nickNames)
                 resolve(data)
             })
         })
@@ -93,6 +97,12 @@ export function addCharacter(context) { // 添加角色
         global.replyMsg(context)
         return
     }
+    let checkName = checkName(c.slice(2))
+    if (checkName.length > 0) {
+        context['message'] = '已存在相同的昵称:' + checkName.join(',')
+        global.replyMsg(context)
+        return
+    }
     nickNames[Number(c[2])] = [...[check.type, check.star], ...c.slice(2)]
     saveNickNames().then(res => {
         context['message'] = '保存成功'
@@ -101,6 +111,21 @@ export function addCharacter(context) { // 添加角色
         context['message'] = '保存失败'
         global.replyMsg(context)
     })
+}
+
+function checkName(names) { // 检查名称
+    let res = []
+    for (const name of names) {
+        Object.values(nickNames).some((o, i) => {
+            if (i < 2) return false
+            if (o.indexOf(name) > -1) {
+                res.push(name)
+                return true
+            }
+            return false
+        })
+    }
+    return res
 }
 
 function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
@@ -171,12 +196,12 @@ export function delCharacter(context, byIndex = false) { // 删除角色
 
 export function viewCharacter(context, isIndex = false) { // 查看角色
     let raw_message = context['raw_message']
-    if (raw_message === '') return global.replyMsg(context, '请输入要删除的角色', true)
+    if (raw_message === '') return global.replyMsg(context, '请输入要查看的角色', true)
     let chars = raw_message.split('|')
     let result = {
         characters: [],
         notFound: [],
-        id:[]
+        id: []
     }
     for (const char of chars) {
         let res = Object.values(nickNames).filter(o => {
@@ -265,14 +290,22 @@ function getCharImg(id) {
             if (!err) {
                 resolve(fullPath)
             } else {
-                fs['mkdir'](filePath,(e)=>{
-                    request_.getPcrPng(fileName.split('.')[0],fullPath).then(r=>{
+                fs['mkdir'](filePath, (e) => {
+                    request_.getPcrPng(fileName.split('.')[0], fullPath).then(r => {
                         resolve(fullPath)
-                    }).catch(e=>{
+                    }).catch(e => {
                         reject(e)
                     })
                 })
             }
         })
     })
+}
+
+export function gacha(context, prefix) {
+    pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
+}
+
+export function simple(context, prefix) {
+    pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
 }

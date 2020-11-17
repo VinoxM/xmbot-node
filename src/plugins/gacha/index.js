@@ -16,6 +16,14 @@ const matchDict = [
     {match:['查看角色序号'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.viewCharacter(context,true)},
     {match:['查看角色'],startWith:true,needReplace:true,rules:[],func:pcr.viewCharacter},
     {match:['重载角色昵称'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.initNickName(context,true)},
+    {match:['十连'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.gacha(context)},
+    {match:['国服十连'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.gacha(context,'cn')},
+    {match:['日服十连'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.gacha(context,'jp')},
+    {match:['台服十连'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.gacha(context,'tw')},
+    {match:['单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context)},
+    {match:['国服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'cn')},
+    {match:['日服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'jp')},
+    {match:['台服单抽'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.simple(context,'tw')},
 ]
 
 function match(context) {

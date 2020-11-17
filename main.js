@@ -3,10 +3,11 @@ import {globalConf,loadPlugins,saveAndReloadSettingByName,saveAndReloadSettingFo
 import * as repeat from "./src/repeat"
 import * as http from './src/http'
 import path from 'path'
-import {db,lite} from './src/db/index'
+import {SqliteDb} from './src/db/index'
 import {initBot,restartBot,replyMsg,replyPrivate,replyGroup} from "./src/utils/bot";
 import * as func from './src/utils/funcs'
 import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
+import {CQ} from './src/utils/CQCode'
 
 const source = {// 路径
     main:__dirname,
@@ -36,12 +37,13 @@ globalReg({
     config:globalConf,// 配置信息
     plugins,// 插件
     repeat,// 复读
+    CQ,
     reloadPlugin:(json,name,reloadPlugin)=>{return saveAndReloadSettingByName(json,name,reloadPlugin)},// 通过名称重载配置信息(json:配置,path:路径,name:名称)
     reloadRepeat:(json)=>{return saveAndReloadSettingForRepeat(json)},// 重载复读信息
     reloadConfig:(json)=>{return saveAndReloadConfig(json)},
     source:source,// 路径
     http,// http连接
-    liteDb:db,// 数据库连接
+    SqliteDb,// 数据库连接
     func
 })
 
