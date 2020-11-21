@@ -236,7 +236,10 @@ export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文
                 global['ERR'](err)
                 reject(err)
             } else {
-                saveCharacters().then(res => resolve()).catch(err => reject(err))
+                saveCharacters().then(res => {
+                    reloadGacha()
+                    resolve()
+                }).catch(err => reject(err))
             }
         })
     })
@@ -274,13 +277,17 @@ export function saveSetting(json, fileName = 'setting-pcr-pools.json') {
                 global['ERR'](err)
                 reject(err)
             } else {
-                global['reloadPlugin'](null, 'gacha', true)
-                initPcrSetting()
-                initNickName()
+                reloadGacha()
                 resolve()
             }
         })
     })
+}
+
+function reloadGacha() {
+    global['reloadPlugin'](null, 'gacha', true)
+    initPcrSetting()
+    initNickName()
 }
 
 function getCharImg(id) {
