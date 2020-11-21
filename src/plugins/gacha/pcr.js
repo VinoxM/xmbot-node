@@ -97,9 +97,9 @@ export function addCharacter(context) { // 添加角色
         global.replyMsg(context)
         return
     }
-    let checkName = checkName(c.slice(2))
-    if (checkName.length > 0) {
-        context['message'] = '已存在相同的昵称:' + checkName.join(',')
+    let checkNames = checkName(c.slice(2))
+    if (checkNames.length > 0) {
+        context['message'] = '已存在相同的昵称:' + checkNames.join(',')
         global.replyMsg(context)
         return
     }

@@ -67,7 +67,7 @@ function initPluginsByName(pluginName){
                     global['ERR'](`${e.code}:${pluginName}模块未找到,请检查文件配置`)
                     break
                 default:
-                    global['ERR'](`${e.code}:${pluginName}模块加载失败`)
+                    global['ERR'](`${pluginName}模块加载失败:${e.message}`)
                     break
             }
             return false

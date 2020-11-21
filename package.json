@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "cors": "^2.8.5",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "x2js": "^3.4.0"
   }
 }
