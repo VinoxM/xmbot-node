@@ -59,7 +59,7 @@ export class PcrGacha {
             replyEnd += arr.join(',')+'\n'
         }
         replyEnd += `获得${count.free_stone === 0 ? '' : '记忆碎片x' + count.free_stone * 100 + '与'}女神秘石x${count.star1 + count.star2 * 10 + count.star3 * 100}!\n`
-        replyEnd += `${first_pick_up === 0 ? '' : '第' + first_pick_up + '抽首出Up角色\n'}`
+        replyEnd += `${first_pick_up === 0 ? '' : '第' + first_pick_up + '抽首出UP角色\n'}`
         let len = count.star3
         if (first_pick_up === 0) len = -1
         if (count.star3 < 5 && count.free_stone >= 2) len = -2

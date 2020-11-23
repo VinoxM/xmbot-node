@@ -11,7 +11,7 @@ const timeUnits = {
     hours: {time: 60 * 60 * 1000, title: '小时'}
 }
 
-function initMatchSetting() {
+function initMatchSetting() { // 初始化设置
     return new Promise((resolve, reject) => {
         setting = global["config"][__dirname.split("\\").pop()]
         if (!setting) reject('setting is null')
@@ -28,7 +28,7 @@ initMatchSetting().then(() => {
     global['ERR'](e)
 })
 
-async function getRss(rss) {
+async function getRss(rss) { // 获取RSS源
     global['LOG'](`正在获取RSS源:${rss.title}`)
     let proxy = global['config']['default'].proxy
     return new Promise((resolve, reject) => {
@@ -65,7 +65,7 @@ async function getRss(rss) {
     })
 }
 
-async function loadAllRss() {
+async function loadAllRss() { // 加载所有RSS订阅
     global['LOG']('RSS订阅信息加载开始---')
     for (const s of rss) {
         if (!s.on) continue
@@ -76,7 +76,7 @@ async function loadAllRss() {
     handleRssText()
 }
 
-function handleRssText() {
+function handleRssText() { // 处理Rss信息
     let replyMsg = []
     for (const key of Object.keys(Rss)) {
         let r = Rss[key]
@@ -86,7 +86,8 @@ function handleRssText() {
             let id = Number(String(item.link).replace(r.replace, ""))
             if (index === 0) last_id = id
             if (id > r.last_id) {
-                let message = `===>${r.title}:\n${item.title}`
+                let pub_date = item['pubDate']?new Date(item['pubDate']).toLocaleString():''
+                let message = `===>${r.title}(${pub_date}):\n${item.title}`
                 let images = checkImg(item.description)
                 if (images.length > 0) {
                     message += images.join("\n")
@@ -119,7 +120,7 @@ function handleRssText() {
     }
 }
 
-function checkImg(description) {
+function checkImg(description) { // 检查是否有图片
     let des = String(description)
     let images = []
     let index_s = des.indexOf('<img')
@@ -136,7 +137,7 @@ function checkImg(description) {
     return images
 }
 
-function startRSSHub() {
+function startRSSHub() { // 开始运行RSS检查
     let init_ = setting['initial_time']
     let init_time = (Number(init_.time) * timeUnits[init_['units']].time).toFixed(0)
     let init_title = timeUnits[init_['units']].title
