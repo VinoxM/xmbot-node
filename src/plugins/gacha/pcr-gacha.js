@@ -1,11 +1,11 @@
 import {SqliteDb} from '../../db/index'
 import {getPcrPng} from "../../http/request";
-import {handleRepeat} from "../../repeat";
-
 const sharp = require('sharp')
 const fs = require('fs')
 const path = require('path')
+
 const unitPath = path.join(global.source.resource, 'icon', 'unit')
+const gachaPath = path.join(global.source.resource, 'gacha')
 const gachaUnitPath = path.join(global.source.resource, 'gacha', 'unit')
 const starPath = path.join(global.source.resource, 'gacha', 'utils', 'star.png')
 
@@ -103,6 +103,28 @@ export class PcrGacha {
     }
 
     close = () => this.db.close()
+
+    emptyGachaResource = (context) => {
+        emptyGachaResource().then(()=>{
+            context['message']='清空完成'
+            global.replyMsg(context)
+        }).catch(e=>{
+            global['err'](e)
+            context['message']='清空失败'
+            global.replyMsg(context)
+        })
+    }
+
+    emptyGachaUnitResource = (context) => {
+        emptyGachaUnitResource().then(()=>{
+            context['message']='清空完成'
+            global.replyMsg(context)
+        }).catch(e=>{
+            global['err'](e)
+            context['message']='清空失败'
+            global.replyMsg(context)
+        })
+    }
 }
 
 function simple(pool, prop, nickName) { // 单抽
@@ -214,12 +236,12 @@ async function handleImageStar(full_id, star) { // 拼接角色星级图片
         top: 15,
         width: 72,
         height: 72
-    }).resize(24, 24).toBuffer().then(data => {
+    }).resize(20, 20).toBuffer().then(data => {
         buffer = Buffer.from(data)
     })
     let arr = []
     for (let i = 0; i < star; i++) {
-        arr.push({input: buffer, left: 24 * i.toFixed(0) + 8, top: 100})
+        arr.push({input: buffer, left: 18 * i.toFixed(0) + 4, top: 104})
     }
     return new Promise((resolve, reject) => {
         fs['mkdir'](gachaUnitPath, {recursive: true}, (e) => {
@@ -246,4 +268,36 @@ function getPoolPickUp(pool, nickName) {
         }
     }
     return result
+}
+
+function emptyGachaResource() {
+    return new Promise((resolve, reject) => {
+        let files = fs.readdirSync(gachaPath)
+        for (const file of files){
+            if (file.endsWith('.jpg')){
+                try{
+                    fs.unlinkSync(path.join(gachaPath,file))
+                }catch (e) {
+                    reject(e)
+                }
+            }
+        }
+        resolve()
+    })
+}
+
+function emptyGachaUnitResource() {
+    return new Promise((resolve, reject) => {
+        let files = fs.readdirSync(gachaUnitPath)
+        for (const file of files){
+            if (file.endsWith('.jpg')){
+                try{
+                    fs.unlinkSync(path.join(gachaUnitPath,file))
+                }catch (e) {
+                    reject(e)
+                }
+            }
+        }
+        resolve()
+    })
 }

@@ -175,6 +175,6 @@ function onSendLog(msgType,replyId,selfId,message) {
     if (msgType==='group'){
         receiver += `[${replyId}] `;
     }
-    receiver += `${selfId}: <- `;
+    receiver += `${selfId?selfId:'system'}: <- `;
     global['LOG'](receiver + message);
 }

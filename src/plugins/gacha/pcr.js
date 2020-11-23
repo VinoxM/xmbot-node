@@ -322,3 +322,11 @@ export function simple(context, prefix) {
 export function thirty(context,prefix) {
     pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
 }
+
+export function emptyGachaResource(context) {
+    pcrGacha.emptyGachaResource(context)
+}
+
+export function emptyGachaUnitResource(context) {
+    pcrGacha.emptyGachaUnitResource(context)
+}

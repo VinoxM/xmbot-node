@@ -4,5 +4,8 @@ export const CQ = {
     },
     img:(path)=>{
         return `[CQ:image,file=file:///${path}]`
+    },
+    img_web:(path,proxy=false)=>{
+        return `[CQ:image,url=${path}${proxy?',proxy=1':''}]`
     }
 }
