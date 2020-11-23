@@ -1,0 +1,42 @@
+{
+    "initial_time": {
+        "time": 1,
+        "units": "minutes"
+    },
+    "interval": {
+        "time": 25,
+        "units": "minutes"
+    },
+    "push_list": {
+        "group": [
+            902987930
+        ],
+        "user": [
+            760254674
+        ]
+    },
+    "rss": [
+        {
+            "on": true,
+            "source": "https://rsshub.app/twitter/user/priconne_redive",
+            "proxy": true,
+            "name": "pcr_jp_twitter",
+            "title": "PCR-日服推特",
+            "link_replace": "https://twitter.com/priconne_redive/status/",
+            "last_id": 1330345288179957800,
+            "push_group": "all",
+            "push_user": "all"
+        },
+        {
+            "on": true,
+            "source": "https://rsshub.app/bilibili/user/dynamic/353840826",
+            "proxy": true,
+            "name": "pcr_cn_bili",
+            "title": "PCR-国服bili动态",
+            "link_replace": "https://t.bilibili.com/",
+            "last_id": 460317964679136000,
+            "push_group": "all",
+            "push_user": "all"
+        }
+    ]
+}
