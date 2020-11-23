@@ -17,7 +17,7 @@ function match(context) {
     let isGroup = global['func']['checkIsGroup'](context)
     if (isAdmin){
         if (isPrivate){
-            context['message']='正在检查更新...'
+            context['message']='正在检查更新...当前版本:'+global.version
             replyMsg(context,null,isGroup)
             checkVersion(context['raw_message']==='强制更新').then(res=>{
                 if (res.needUpdate){
