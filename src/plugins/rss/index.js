@@ -83,11 +83,14 @@ function handleRssText() { // 处理Rss信息
         let items = r.rss.channel.item
         let last_id = r.last_id
         for (const [index, item] of items.entries()) {
-            let id = Number(String(item.link).replace(r.replace, ""))
+            let str = String(item.link).replace(r.replace, "")
+            let id = 0
+            if (str.length>14) str = str.substring(0,14)+'.'+str.substring(14)
+            id = Number(str)
             if (index === 0) last_id = id
             if (id > r.last_id) {
-                let pub_date = item['pubDate']?new Date(item['pubDate']).toLocaleString():''
-                let message = `===>${r.title}(${pub_date}):\n${item.title}`
+                let pub_date = item['pubDate']?global['func']['toCCTDateString'](item['pubDate']):''
+                let message = `${r.title}(${pub_date}):\n${item.title}`
                 let images = checkImg(item.description)
                 if (images.length > 0) {
                     message += images.join("\n")

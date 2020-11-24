@@ -1,4 +1,3 @@
-import path from 'path'
 import * as pcr from './pcr'
 
 let setting = null;
@@ -33,35 +32,7 @@ const matchDict = [
 ]
 
 function match(context) {
-    let raw_msg = context["raw_message"];
-    for (let m of matchDict){
-        if (!m.startWith){
-            let index = m.match.indexOf(raw_msg)
-            if (index > -1) {
-                if (m.needReplace)
-                    context['raw_message']=context['raw_message'].replace(m.match[index],'').trim()
-                return checkRules(m,context)
-            }
-        }else{
-            for (let s of m.match){
-                if (raw_msg.startsWith(s)){
-                    if (m.needReplace)
-                        context['raw_message']=context['raw_message'].replace(s,'').trim()
-                    return checkRules(m,context)
-                }
-            }
-        }
-    }
-}
-
-function checkRules(m,context) {
-    let check = m.rules&&m.rules.length>0?global['func']['checkMatchRules'](m.rules,context):-1
-    if (check===-1)
-        return m.func(context)
-    else {
-        context['err']=check
-        global.replyMsg(context)
-    }
+    return global['func']['generalMatch'](context,matchDict)
 }
 
 export default {

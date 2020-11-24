@@ -16,5 +16,6 @@
   "whiteGroup": [],
   "enablePrivate": true,
   "readyFeedBack": false,
-  "proxy": "http://127.0.0.1:2802"
+  "proxy": "http://127.0.0.1:2802",
+  "base_url": "http://121.41.225.90:9221//xmBot#/"
 }

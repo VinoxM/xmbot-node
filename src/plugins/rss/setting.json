@@ -1,7 +1,7 @@
 {
     "initial_time": {
-        "time": 1,
-        "units": "minutes"
+        "time": 30,
+        "units": "seconds"
     },
     "interval": {
         "time": 25,
@@ -23,7 +23,7 @@
             "name": "pcr_jp_twitter",
             "title": "PCR-日服推特",
             "link_replace": "https://twitter.com/priconne_redive/status/",
-            "last_id": 1330345288179957800,
+            "last_id": 13311153582168.064,
             "push_group": "all",
             "push_user": "all"
         },
@@ -34,7 +34,7 @@
             "name": "pcr_cn_bili",
             "title": "PCR-国服bili动态",
             "link_replace": "https://t.bilibili.com/",
-            "last_id": 460317964679136000,
+            "last_id": 46107334204656.73,
             "push_group": "all",
             "push_user": "all"
         }
