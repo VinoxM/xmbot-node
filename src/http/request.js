@@ -30,9 +30,9 @@ function checkAuthor(req, res) {
     return new Promise((resolve, reject) => {
         let salt = req.headers.salt
         let token = req.headers.token
-        jwtVerify(token,salt).then(re=>{
+        jwtVerify(token, salt).then(re => {
             resolve()
-        }).catch(e=>{
+        }).catch(e => {
             res.send(new BaseRequest('登录过期', 501))
         })
     })
@@ -89,9 +89,9 @@ const listener = {
                         let check = await global['plugins']['login']['checkUserPassword'](params)
                         if (check === 0) {
                             res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
-                        }else if(check===-1){
+                        } else if (check === -1) {
                             res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
-                        }else {
+                        } else {
                             global['plugins']['login']['userLoginCountUp'](params.user_id)
                             check.salt = uuid.v4()
                             if (check['login_count'] === 0) {
@@ -111,7 +111,7 @@ const listener = {
         },
         '/login.salt': {
             needAuth: false,
-            func:(req,res)=>{
+            func: (req, res) => {
                 let user_info = req.query
                 let check = global['plugins']['login']['checkSalt'](user_info)
                 let reply = null
@@ -130,9 +130,9 @@ const listener = {
                         global['plugins']['login']['checkUserExists'](user_info.user).then(async (r) => {
                             if (r === 1) {
                                 let check = await global['plugins']['login']['selUserLoginCount'](user_info.user)
-                                if (check===0){
+                                if (check === 0) {
                                     res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
-                                } else if(check===-1){
+                                } else if (check === -1) {
                                     res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
                                 } else {
                                     global['plugins']['login']['userLoginCountUp'](user_info.user)
@@ -237,6 +237,22 @@ const listener = {
                 }).catch(e => {
                     res.send(new BaseRequest('修改失败', 500))
                 })
+            }
+        },
+        '/token.valid': {
+            needAuth: false,
+            func: (req, res) => {
+                let token = req.query.token
+                let salt = req.query.salt
+                if (token&&salt){
+                    jwtVerify(token,salt).then(r=>{
+                        res.send(new BaseRequest())
+                    }).catch(e=>{
+                        res.send(new BaseRequest('登录信息错误',501))
+                    })
+                }else{
+                    res.send(new BaseRequest('登录信息错误',501))
+                }
             }
         }
     },

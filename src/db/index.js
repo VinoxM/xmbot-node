@@ -87,7 +87,7 @@ function checkParams(sql, params) {
     else {
         let i = params.length
         while (i--) {
-            sql.replace('?', params[i - pLen])
+            sql = sql.replace('?', params[i - pLen])
         }
         global['LOG'](`Sql execute: ${sql}`)
         return sql
