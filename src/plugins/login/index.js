@@ -7,8 +7,7 @@ user_db.tableExists().then(res => {
     if (res.count === 0) {
         user_db.tableCreate()
     }
-}).catch(err => {
-})
+}).catch(err => {global['ERR'](err)})
 
 let setting = {}
 

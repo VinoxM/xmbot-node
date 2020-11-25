@@ -13,8 +13,8 @@ export class SqliteDb {
             checkParams(sql, [])
             this.database.run(sql, (err) => {
                 if (err) {
-                    global['ERR'](`Table create failed: ${err}`)
-                    reject('表创建出错')
+                    global['ERR'](`Creat ${tableName} table failed: ${err}`)
+                    reject(`${tableName}表创建出错`)
                 } else resolve()
             })
         })
@@ -26,8 +26,8 @@ export class SqliteDb {
             checkParams(sql, [])
             this.database.get(sql, (err, rows) => {
                 if (err) {
-                    global['ERR'](`Table exists failed: ${err}`)
-                    reject('检测出错')
+                    global['ERR'](`Check '${tableName}' table exists failed: ${err}`)
+                    reject(`检测${tableName}表存在失败`)
                 } else resolve(rows)
             })
         })
@@ -42,7 +42,7 @@ export class SqliteDb {
     sel = (sql, params) => {
         return new Promise((resolve, reject) => {
             let SQL = checkParams(sql, params)
-            if (SQL) global['LOG'](`Execute Sql: ${SQL}`)
+            if (SQL) global['LOG'](`Sql execute: ${SQL}`)
             else {
                 global['ERR'](`Sql error: Sql参数不正确`)
                 reject('Sql参数不正确')
@@ -63,7 +63,7 @@ export class SqliteDb {
 function update(sql, params, database) {
     return new Promise((resolve, reject) => {
         let SQL = checkParams(sql, params)
-        if (SQL) global['LOG'](`Execute Sql: ${SQL}`)
+        if (SQL) global['LOG'](`Sql execute: ${SQL}`)
         else {
             global['ERR'](`Sql error: Sql参数不正确`)
             reject('Sql参数不正确')
@@ -78,18 +78,18 @@ function update(sql, params, database) {
 }
 
 function checkParams(sql, params) {
+    global['LOG'](`Sql prepared: ${sql}`)
+    global['LOG'](`Sql params: ${params.join(',')}`)
     let pLen = sql.split('?').length - 1
     if (pLen === 0) {
-        global['LOG'](`Sql execute: ${sql}`)
         return sql
     }
     if (pLen !== params.length) return false
     else {
         let i = params.length
-        while (i--) {
-            sql = sql.replace('?', params[i - pLen])
+        while (pLen--) {
+            sql = sql.replace('?', params[i - pLen - 1])
         }
-        global['LOG'](`Sql execute: ${sql}`)
         return sql
     }
 }

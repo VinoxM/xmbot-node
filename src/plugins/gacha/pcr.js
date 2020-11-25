@@ -55,6 +55,11 @@ export function initNickName(context, isReload = false) { // 加载角色
                 }
                 if (pcrGacha) pcrGacha['close']()
                 pcrGacha = new PcrGacha(setting,pools,nickNames)
+                pcrGacha.tableExists().then(res=>{
+                    if (res.count===0){
+                        pcrGacha.tableCreate()
+                    }
+                }).catch(err=>{global['ERR'](err)})
                 resolve(data)
             })
         })
@@ -311,16 +316,43 @@ function getCharImg(id) {
     })
 }
 
-export function gacha(context, prefix) {
-    pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
+export async function gacha(context, prefix) {
+    const times = 10
+    const user_id = context['user_id']
+    if (!await checkGachaTimes(user_id, times)) {
+        context['message'] = `您今天剩余抽卡次数不足${times}次`
+        global.replyMsg(context,null,true)
+        return
+    }
+    let json = await pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
+    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export function simple(context, prefix) {
-    pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
+export async function simple(context, prefix) {
+    const times = 1
+    const user_id = context['user_id']
+    if (!await checkGachaTimes(user_id, times)) {
+        context['message'] = `您今天剩余抽卡次数不足${times}次`
+        global.replyMsg(context,null,true)
+        return
+    }
+    let json = await pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
+    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export function thirty(context,prefix) {
-    pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
+export async function thirty(context,prefix) {
+    const times = 300
+    const user_id = context['user_id']
+    if (!await checkGachaTimes(user_id, times)) {
+        context['message'] = `您今天剩余抽卡次数不足${times}次`
+        global.replyMsg(context,null,true)
+        return
+    }
+    let json = await pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
+    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
 export function emptyGachaResource(context) {
@@ -329,4 +361,10 @@ export function emptyGachaResource(context) {
 
 export function emptyGachaUnitResource(context) {
     pcrGacha.emptyGachaUnitResource(context)
+}
+
+async function checkGachaTimes(user_id,times) {
+    let count = await pcrGacha.getGachaCountByUserId(user_id)
+    let limit = setting['day_limit']
+    return limit>=count+times
 }

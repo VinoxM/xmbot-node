@@ -1,5 +1,6 @@
 import {SqliteDb} from '../../db/index'
 import {getPcrPng} from "../../http/request";
+
 const sharp = require('sharp')
 const fs = require('fs')
 const path = require('path')
@@ -17,9 +18,10 @@ export class PcrGacha {
         this.db = new SqliteDb('gacha')
     }
 
-    thirty = (context, prefix) => {
+    thirty = async (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
+        let lib = {}
         let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
         let count = {
             star1: 0, star2: 0, star3: 0, pick_up: 0, free_stone: 0
@@ -28,6 +30,15 @@ export class PcrGacha {
         let pick_up = {}
         for (let i = 1; i <= 300; i++) {
             let res = simple(pool, i % 10 === 0 ? 'prop_last' : 'prop', this.nickName)
+            if (lib.hasOwnProperty(res.id)){
+                lib[res.id].count++
+            }else{
+                lib[res.id]={
+                    nickName:res.name,
+                    count:1,
+                    star:res.star
+                }
+            }
             if (res.isPickUp) {
                 count.pick_up += 1
                 if (first_pick_up === 0) first_pick_up = i
@@ -56,7 +67,7 @@ export class PcrGacha {
             for (const key of p_keys) {
                 arr.push(pick_up[key].name + 'x' + pick_up[key].count)
             }
-            replyEnd += arr.join(',')+'\n'
+            replyEnd += arr.join(',') + '\n'
         }
         replyEnd += `获得${count.free_stone === 0 ? '' : '记忆碎片x' + count.free_stone * 100 + '与'}女神秘石x${count.star1 + count.star2 * 10 + count.star3 * 100}!\n`
         replyEnd += `${first_pick_up === 0 ? '' : '第' + first_pick_up + '抽首出UP角色\n'}`
@@ -64,67 +75,181 @@ export class PcrGacha {
         if (first_pick_up === 0) len = -1
         if (count.star3 < 5 && count.free_stone >= 2) len = -2
         for (const info of Object.values(reply_info)) {
-            if (len>=info['range'][0]&&len<=info['range'][1]){
-                replyEnd+=getRandomFromArray(info['reply'])
+            if (len >= info['range'][0] && len <= info['range'][1]) {
+                replyEnd += getRandomFromArray(info['reply'])
                 break
             }
         }
-        handleImage(result).then(res => {
+        await handleImage(result).then(res => {
             reply += global.CQ.img(res)
-            context['message'] = reply+replyEnd
+            context['message'] = reply + replyEnd
             global.replyMsg(context, null, true)
         })
+        return lib
     }
 
-    gacha = (context, prefix) => {
+    gacha = async (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
+        let lib = {}
         for (let i = 0; i < 10; i++) {
             let res = simple(pool, i === 9 ? 'prop_last' : 'prop', this.nickName)
+            if (lib.hasOwnProperty(res.id)){
+                lib[res.id].count++
+            }else{
+                lib[res.id]={
+                    nickName:res.name,
+                    count:1,
+                    star:res.star
+                }
+            }
             result.push(res)
         }
-        handleImage(result).then(res => {
+        await handleImage(result).then(res => {
             let reply = ''
             reply += global.CQ.img(res)
             context['message'] = reply
             global.replyMsg(context, null, true)
         })
+        return lib
     }
 
-    simple = (context, prefix) => {
+    simple = async (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = simple(pool, 'prop', this.nickName)
-        handleImage([result]).then(res => {
+        let lib = {}
+        lib[result.id]={
+            nickName:result.name,
+            count:1,
+            star:result.star
+        }
+        await handleImage([result]).then(res => {
             let reply = ''
             reply += global.CQ.img(res)
             context['message'] = reply
             global.replyMsg(context, null, true)
         })
+        return lib
     }
 
     close = () => this.db.close()
 
     emptyGachaResource = (context) => {
-        emptyGachaResource().then(()=>{
-            context['message']='清空完成'
+        emptyGachaResource().then(() => {
+            context['message'] = '清空完成'
             global.replyMsg(context)
-        }).catch(e=>{
+        }).catch(e => {
             global['err'](e)
-            context['message']='清空失败'
+            context['message'] = '清空失败'
             global.replyMsg(context)
         })
     }
 
     emptyGachaUnitResource = (context) => {
-        emptyGachaUnitResource().then(()=>{
-            context['message']='清空完成'
+        emptyGachaUnitResource().then(() => {
+            context['message'] = '清空完成'
             global.replyMsg(context)
-        }).catch(e=>{
+        }).catch(e => {
             global['err'](e)
-            context['message']='清空失败'
+            context['message'] = '清空失败'
             global.replyMsg(context)
         })
     }
+
+    tableExists = () => {
+        return this.db.exists('gacha')
+    }
+
+    tableCreate = () => {
+        return this.db.create('gacha', ['user_id TEXT PRIMARY KEY NOT NULL', 'last_time TEXT', 'today_times INT DEFAULT 0', 'all_times INT DEFAULT 0','libraries TEXT'])
+    }
+
+    userExists = async (user_id) => userExists(user_id,this.db)
+
+    userCreate = (map) => userCreate(map,this.db)
+
+    getGachaCountByUserId = async (user_id) => {
+        const sql = 'select today_times from gacha where user_id=? and last_time=?'
+        let count = 0
+        await this.db.sel(sql,[user_id,getTodayNum()]).then(rows=>{
+            if (rows.length>0){
+                count = rows[0].today_times
+            }
+        })
+        return count
+    }
+
+    updateGachaCount = async (user_id, count) => {
+        let check = await userExists(user_id,this.db)
+        if (!check){
+            await userCreate({user_id:user_id,last_time:getTodayNum(),today_times:count,all_times:count},this.db)
+        }else{
+            const sql = 'select last_time from gacha where user_id = ?'
+            this.db.sel(sql,[user_id]).then(rows=>{
+                let last_time = rows[0].last_time
+                if (checkIsToday(last_time)){
+                    const sql1 = 'update gacha set today_times=today_times+?,all_times=all_times+? where user_id = ?'
+                    this.db.update(sql1,[count,count,user_id])
+                }else{
+                    const sql2 = 'update gacha set today_times=today_times+?,all_times=all_times+?,last_time=? where user_id = ?'
+                    this.db.update(sql2,[count,count,getTodayNum(),user_id])
+                }
+            })
+        }
+    }
+
+    updateUserLibraries = async (user_id, json) => {
+        const sql = 'select libraries from gacha where user_id = ?'
+        await this.db.sel(sql,[user_id]).then(rows=>{
+            if (rows.length>0){
+                let lib = rows[0].libraries
+                let data = {}
+                if (lib&&lib!==''){
+                    data = JSON.parse(lib)
+                    let keys = Object.keys(json)
+                    for (const key of keys) {
+                        if (data.hasOwnProperty(key)){
+                            data[key].count += json[key].count
+                        }else{
+                            data[key] = {
+                                nick_name:json[key].nickName,
+                                star:json[key].star,
+                                count:json[key].count
+                            }
+                        }
+                    }
+                }else data = json
+                const sql1 = 'update gacha set libraries = ? where user_id = ?'
+                this.db.update(sql1,[JSON.stringify(data),user_id])
+            }
+        })
+    }
+}
+
+async function userExists(user_id,db){
+    let flag = false
+    const sql = 'select count(1) as count from gacha where user_id = ?'
+    await db.sel(sql,[user_id]).then((rows)=>{
+        flag = rows.length&&rows[0].count>0
+    })
+    return flag
+}
+
+function userCreate(map,db) {
+    let params = Object.values(map)
+    const sql = `insert into gacha(${Object.keys(map).join(',')}) values(${params.map(o=>'?').join(',')})`
+    return db.add(sql,params)
+}
+
+function checkIsToday(last) {
+    if (!last) return false
+    let today = getTodayNum()
+    return today-Number(last)===0
+}
+
+function getTodayNum() {
+    let date = new Date()
+    return date.getFullYear()*10000+date.getMonth()*100+date.getDate()
 }
 
 function simple(pool, prop, nickName) { // 单抽
@@ -148,7 +273,7 @@ function simple(pool, prop, nickName) { // 单抽
     let id = getRandomFromArray(pool_sel)
     let result = getNickNameAndStar(id, nickName)
     result.isPickUp = pools[index]['name'] === 'Pick Up'
-    result.isFreeStone = pools[index]['free_stone']&&pools[index]['free_stone'].indexOf(id) > -1
+    result.isFreeStone = pools[index]['free_stone'] && pools[index]['free_stone'].indexOf(id) > -1
     return result
 }
 
@@ -273,11 +398,11 @@ function getPoolPickUp(pool, nickName) {
 function emptyGachaResource() {
     return new Promise((resolve, reject) => {
         let files = fs.readdirSync(gachaPath)
-        for (const file of files){
-            if (file.endsWith('.jpg')){
-                try{
-                    fs.unlinkSync(path.join(gachaPath,file))
-                }catch (e) {
+        for (const file of files) {
+            if (file.endsWith('.jpg')) {
+                try {
+                    fs.unlinkSync(path.join(gachaPath, file))
+                } catch (e) {
                     reject(e)
                 }
             }
@@ -289,11 +414,11 @@ function emptyGachaResource() {
 function emptyGachaUnitResource() {
     return new Promise((resolve, reject) => {
         let files = fs.readdirSync(gachaUnitPath)
-        for (const file of files){
-            if (file.endsWith('.jpg')){
-                try{
-                    fs.unlinkSync(path.join(gachaUnitPath,file))
-                }catch (e) {
+        for (const file of files) {
+            if (file.endsWith('.jpg')) {
+                try {
+                    fs.unlinkSync(path.join(gachaUnitPath, file))
+                } catch (e) {
                     reject(e)
                 }
             }
