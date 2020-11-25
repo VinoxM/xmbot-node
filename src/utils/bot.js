@@ -154,6 +154,10 @@ function checkContextError(context) {
             case 1:
                 context['message']='请私聊使用该指令'
                 break;
+            case 'isNotGroup':
+            case 2:
+                context['message']='请在群聊中使用该指令'
+                break;
         }
     }
     return context

@@ -27,12 +27,13 @@ const matchDict = [
     {match:['国服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'cn')},
     {match:['日服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'jp')},
     {match:['台服来一井'],startWith:false,needReplace:true,rules:[],func:(context)=>pcr.thirty(context,'tw')},
-    {match:['清空抽卡缓存'],startWith:false,needReplace:true,rules:['admin'],func:(context)=>pcr.emptyGachaResource(context)},
-    {match:['清空抽卡角色缓存'],startWith:false,needReplace:true,rules:['admin'],func:(context)=>pcr.emptyGachaUnitResource(context)},
+    {match:['清空抽卡缓存'],startWith:false,needReplace:false,rules:['admin'],func:(context)=>pcr.emptyGachaResource(context)},
+    {match:['清空抽卡角色缓存'],startWith:false,needReplace:false,rules:['admin'],func:(context)=>pcr.emptyGachaUnitResource(context)},
+    {match:['切换卡池','卡池切换'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.selectDefaultPool(context)},
 ]
 
 function match(context) {
-    return global['func']['generalMatch'](context,matchDict)
+    global['func']['generalMatch'](context,matchDict)
 }
 
 export default {

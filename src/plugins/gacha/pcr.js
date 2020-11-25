@@ -250,6 +250,39 @@ export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文
     })
 }
 
+export async function selectDefaultPool(context) {
+    const message = context['raw_message']
+    if (message==='') return global.replyMsg(context,'请输入要切换的卡池',true)
+    let reply = ''
+    switch (message) {
+        case '国服':
+        case '国服卡池':
+        case 'cn':
+            setting['default_pool']='cn'
+            reply = '切换国服卡池成功'
+            break
+        case '日服':
+        case '日服卡池':
+        case 'jp':
+            setting['default_pool']='jp'
+            reply = '切换日服卡池成功'
+            break
+        case '台服':
+        case '台服卡池':
+        case 'tw':
+            setting['default_pool']='tw'
+            reply = '切换台服卡池成功'
+            break
+    }
+    if (reply===''){
+        reply = '没有您输入的卡池'
+    }else{
+        await saveSetting(setting,'setting-pcr.json')
+        await reloadGacha()
+    }
+    global.replyMsg(context,reply,true)
+}
+
 function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角色
     let char = {
         hidden: {
@@ -277,22 +310,22 @@ function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角�
 
 export function saveSetting(json, fileName = 'setting-pcr-pools.json') {
     return new Promise((resolve, reject) => {
-        fs['writeFile'](path.join(__dirname, fileName), JSON.stringify(json, null, 2), "utf8", (err) => {
+        fs['writeFile'](path.join(__dirname, fileName), JSON.stringify(json, null, 2), "utf8", async (err) => {
             if (err) {
                 global['ERR'](err)
                 reject(err)
             } else {
-                reloadGacha()
+                await reloadGacha()
                 resolve()
             }
         })
     })
 }
 
-function reloadGacha() {
+async function reloadGacha() {
     global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
     initPcrSetting()
-    initNickName()
+    await initNickName()
 }
 
 function getCharImg(id) {
