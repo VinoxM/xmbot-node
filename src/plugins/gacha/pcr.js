@@ -69,7 +69,7 @@ export function initNickName(context, isReload = false) { // 加载角色
 
 initNickName()
 
-export function addCharacter(context) { // 添加角色
+export function addCharacter(context) { // 新增角色
     let raw_message = context['raw_message']
     let c = raw_message.split('|')
     if (c.length < 5) {
@@ -214,7 +214,7 @@ export function viewCharacter(context, isIndex = false) { // 查看角色
     global.replyMsg(context,null,true)
 }
 
-function characterFilter(raw_message, isIndex) {
+function characterFilter(raw_message, isIndex) { // 筛选角色
     let chars = raw_message.split('|')
     let result = {
         characters: [],
@@ -263,7 +263,7 @@ export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文
     })
 }
 
-export async function selectDefaultPool(context, pool) {
+export async function changeDefaultPool(context, pool) { // 修改默认卡池
     const message = pool ? pool : context['raw_message']
     if (message === '') {
         global.replyMsg(context, '请输入要切换的卡池', true)
@@ -298,7 +298,7 @@ export async function selectDefaultPool(context, pool) {
     global.replyMsg(context, reply, true)
 }
 
-export function changePoolPickUp(context) {
+export function changePoolPickUp(context) { // 切换当前卡池up角色
     let message = context['raw_message']
     if (message === '') {
         context['message'] = '请输入要切换的up角色'
@@ -397,7 +397,7 @@ function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角�
     })
 }
 
-export function saveSetting(json, fileName = 'setting-pcr-pools.json') {
+export function saveSetting(json, fileName = 'setting-pcr-pools.json') { // 保存配置文件
     return new Promise((resolve, reject) => {
         fs['writeFile'](path.join(__dirname, fileName), JSON.stringify(json, null, 2), "utf8", async (err) => {
             if (err) {
@@ -411,7 +411,7 @@ export function saveSetting(json, fileName = 'setting-pcr-pools.json') {
     })
 }
 
-async function reloadGacha() {
+async function reloadGacha() { // 重载模块
     global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
     initPcrSetting()
     await initNickName()
@@ -438,7 +438,7 @@ async function reloadGacha() {
 //     })
 // }
 
-export async function gacha(context, prefix) {
+export async function gacha(context, prefix) { // 十连
     const times = 10
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
@@ -451,7 +451,7 @@ export async function gacha(context, prefix) {
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export async function simple(context, prefix) {
+export async function simple(context, prefix) { // 单抽
     const times = 1
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
@@ -464,7 +464,7 @@ export async function simple(context, prefix) {
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export async function thirty(context, prefix) {
+export async function thirty(context, prefix) { // 一井
     const times = 300
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
@@ -477,15 +477,15 @@ export async function thirty(context, prefix) {
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export function emptyGachaResource(context) {
+export function emptyGachaResource(context) { // 清空抽卡缓存
     pcrGacha.emptyGachaResource(context)
 }
 
-export function emptyGachaUnitResource(context) {
+export function emptyGachaUnitResource(context) { // 清空抽卡角色缓存
     pcrGacha.emptyGachaUnitResource(context)
 }
 
-async function checkGachaTimes(user_id, times) {
+async function checkGachaTimes(user_id, times) { // 检查抽卡次数
     let count = await pcrGacha.getGachaCountByUserId(user_id)
     let limit = setting['day_limit']
     return limit >= count + times

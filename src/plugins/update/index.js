@@ -1,6 +1,5 @@
-import {replyMsg} from "../../utils/bot";
 const exec = require('child_process').exec;
-import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
+import fs from 'fs-extra'
 
 let setting = null;
 
@@ -8,33 +7,32 @@ function initSetting() {
     setting = global["config"][__dirname.split("\\").pop()]
 }
 
+const matchDict = [
+    {match:['更新'],startWith:false,needReplace:false,rules:['admin','private'],func:update},
+    {match:['强制更新'],startWith:false,needReplace:false,rules:['admin','private'],func:(context)=>update(context,true)},
+]
+
 initSetting()
 
 function match(context) {
-    if (context['raw_message']!=='更新'&&context['raw_message']!=='强制更新')return
-    let isAdmin = global['func']['checkIsAdmin'](context)
-    let isPrivate = global['func']['checkIsPrivate'](context)
-    let isGroup = global['func']['checkIsGroup'](context)
-    if (isAdmin){
-        if (isPrivate){
-            context['message']='正在检查更新...当前版本:'+global.version
-            replyMsg(context,null,isGroup)
-            checkVersion(context['raw_message']==='强制更新').then(res=>{
-                if (res.needUpdate){
-                    context['message']='有可用更新版本:'+res.ver.version+',正在下载更新...'
-                    update(context['user_id'])
-                }else {
-                    context['message']='已是最新版本'
-                }
-                replyMsg(context,null,isGroup)
-            }).catch(err=>{
-                context['message']='更新出错'
-                replyMsg(context,null,isGroup)
-            })
-            return
-        }else context['message']='请私聊使用该指令~'
-    }else context['message']='只有主人可以这么命令我~'
-    replyMsg(context,null,isGroup)
+    global['func']['generalMatch'](context,matchDict)
+}
+
+function update(context,isForce = false) {
+    context['message']='正在检查更新...当前版本:'+global.version
+    global.replyPrivate(context)
+    checkVersion(isForce).then(res=>{
+        if (res.needUpdate){
+            context['message']='有可用更新版本:'+res.ver.version+',正在下载更新...'
+            doUpdate(context['user_id'])
+        }else {
+            context['message']='已是最新版本'
+        }
+        global.replyPrivate(context)
+    }).catch(()=>{
+        context['message']='更新出错'
+        global.replyPrivate(context)
+    })
 }
 
 function checkVersion(isForced = false) {
@@ -63,7 +61,7 @@ function checkVersion(isForced = false) {
     })
 }
 
-function update(user_id) {
+function doUpdate(user_id) {
     let dir = global['source'].main
     let pid = process.ppid
     let script =
@@ -87,5 +85,5 @@ function update(user_id) {
 export default {
     initSetting,
     match,
-    noNeedPrefix: true
+    noNeedPrefix: false
 }

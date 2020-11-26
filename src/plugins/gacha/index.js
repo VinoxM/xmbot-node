@@ -9,7 +9,7 @@ function initSetting() {
 initSetting()
 
 const matchDict = [
-    {match:['添加角色'],startWith:true,needReplace:true,rules:['admin','private'],func:pcr.addCharacter},
+    {match:['新增角色'],startWith:true,needReplace:true,rules:['admin','private'],func:pcr.addCharacter},
     {match:['删除角色'],startWith:true,needReplace:true,rules:[],func:pcr.delCharacter},
     {match:['删除序号角色'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.delCharacter(context,true)},
     {match:['查看角色序号'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.viewCharacter(context,true)},
@@ -29,10 +29,10 @@ const matchDict = [
     {match:['台服来一井'],startWith:false,needReplace:false,rules:[],func:(context)=>pcr.thirty(context,'tw')},
     {match:['清空抽卡缓存'],startWith:false,needReplace:false,rules:['admin'],func:(context)=>pcr.emptyGachaResource(context)},
     {match:['清空抽卡角色缓存'],startWith:false,needReplace:false,rules:['admin'],func:(context)=>pcr.emptyGachaUnitResource(context)},
-    {match:['切换卡池','卡池切换'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.selectDefaultPool(context)},
-    {match:['切换日服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.selectDefaultPool(context,'jp')},
-    {match:['切换台服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.selectDefaultPool(context,'tw')},
-    {match:['切换国服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.selectDefaultPool(context,'cn')},
+    {match:['切换卡池','卡池切换'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changeDefaultPool(context)},
+    {match:['切换日服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'jp')},
+    {match:['切换台服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'tw')},
+    {match:['切换国服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'cn')},
     {match:['切换up角色','切换UP角色','切换up','切换UP'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context)},
 ]
 

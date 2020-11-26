@@ -29,7 +29,7 @@ function checkMatchRules(m,context) {
         return m.func(context)
     else {
         context['err']=check
-        global.replyMsg(context)
+        global.replyMsg(context,null,true)
     }
 }
 

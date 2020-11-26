@@ -95,6 +95,7 @@ function handleRssText() { // 处理Rss信息
                 if (images.length > 0) {
                     message += images.join("\n")
                 }
+                message+=`\nlink:${r.link}`
                 replyMsg.push({message: message, push_group: r.push_list.group, push_user: r.push_list.user})
             }
         }

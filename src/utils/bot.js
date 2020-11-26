@@ -115,7 +115,7 @@ export function replyMsg(context, message, at = false){
     if (message) context['message'] = message
     // message = message ? message : context["message"]
     if (context['message_type']!=='private'&&at){//是否@发送人
-        context['message'] = CQ.at(context["user_id"])+'\n'+context['message']
+        context['message'] = CQ.at(context["user_id"])+context['message']
     }
     let params = {[replyType]:replyId,message:context['message']}//回复消息体(例:{group_id:123456}或{user_id:123456})
     let func = msgType[context["message_type"]]["type"]//获取发送api的方法名称(private()或group())
@@ -136,7 +136,7 @@ export function replyPrivate(context) {
 export function replyGroup(context,at = false) {
     context = checkContextError(context)
     if (at) {
-        context["message"]=CQ.at(context["user_id"])+'\n'+context["message"]
+        context["message"]=CQ.at(context["user_id"])+context["message"]
     }
     onSendLog('group',context["group_id"],context["self_id"],context["message"]);
     bot.send.group({group_id: context["group_id"], message: context["message"]}).then(r=>{
