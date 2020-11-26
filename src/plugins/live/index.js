@@ -21,9 +21,11 @@ const matchDict = [
     {match: ["关闭直播","下播"], startWith: false, needReplace: false, rules: ['admin'], func: stopLive},
     {match: ["修改直播间标题:","修改直播间标题"], startWith: true, needReplace: true, rules: ['admin'], func: changeTitle},
     {match: ["修改直播分区:","修改直播分区"], startWith: true, needReplace: true, rules: ['admin'], func: changeArea},
-    {match: ["查看直播信息"], startWith: false, needReplace: false, rules: [], func: getRoomInfo},
     {match: ["更新直播cookie:","更新直播cookie"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateCookie},
     {match: ["更新直播token:","更新直播token"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateToken},
+    {match: ["直播信息"], startWith: false, needReplace: false, rules: [], func: getRoomInfo},
+    {match: ["查看用户直播信息:","查看用户直播信息"], startWith: true, needReplace: true, rules: [], func: (context)=>getRoomInfo(context,true)},
+    {match: ["查看直播间信息:","查看直播间信息"], startWith: true, needReplace: true, rules: [], func: (context)=>getRoomInfo(context,true,true)},
 ]
 
 function match(context) {
@@ -60,10 +62,16 @@ getAreaList().then(res => {
     global['ERR'](`获取直播区域失败:${err}`)
 })
 
-function getRoomBaseInfo() {
+function getRoomBaseInfo(id,isByRoomId = true) {
+    let params = ''
+    if (id){
+        params = isByRoomId?`room_ids=${id}`:`uids=${id}`
+    } else {
+        params = `room_ids=${setting['room_id']}`
+    }
     return new Promise((resolve, reject) => {
         request({
-            url: `https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?room_ids=${setting['room_id']}&req_biz=link-center`,
+            url: `https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?req_biz=link-center&`+params,
             method: 'GET',
             headers: {cookie: setting.cookie}
         }, (err, res, body) => {
@@ -261,18 +269,46 @@ function updateArea(area_id) {
     })
 }
 
-function getRoomInfo(context) {
-    flushRoomInfo(false).then(()=>{
-        global.replyMsg(context,getLiveStr(),false)
-    })
+function getRoomInfo(context,byId = false,byRoomIds = false) {
+    if (byId){
+        let id = context['raw_message']
+        if (id===''){
+            global.replyMsg(context,`请输入要查询的${byRoomIds?'直播间':'用户'}直播信息的id`)
+            return
+        }
+        getRoomBaseInfo(id,byRoomIds).then(res=>{
+            if (res.code===0){
+                if (res.data&&res.data.length>0){
+                    let key = byRoomIds?'by_room_ids':'by_uids'
+                    global.replyMsg(context,getLiveStr(res.data[key][id],true,true))
+                }else{
+                    global.replyMsg(context,`未找到${byRoomIds?'直播间':'用户'}${id}的信息`,false)
+                }
+            }else{
+                global.replyMsg(context,`获取${byRoomIds?'直播间':'用户'}${id}直播信息失败:${res.msg}`,false)
+            }
+        }).catch(err=>{
+            global['ERR'](`获取直播信息失败:${err}`)
+            global.replyMsg(context,`获取${byRoomIds?'直播间':'用户'}${id}直播信息出错`,false)
+        })
+    }else{
+        flushRoomInfo(false).then(()=>{
+            global.replyMsg(context,getLiveStr(null,true,true),false)
+        })
+    }
 }
 
 function getRtmpStr(rtmp) {
     return `您的rtmp地址:${rtmp.addr}\n直播码:${rtmp.code}\n`
 }
 
-function getLiveStr() {
-    return `直播间地址:${roomInfo['live_url']}\n直播间标题:${roomInfo.title}-分区[${roomInfo['area_name']}]\n`
+function getLiveStr(info,needLiveStatus = false,needUserInfo = false) {
+    let room_info = {}
+    if (info) room_info = info
+    else room_info = roomInfo
+    return (needUserInfo?`${room_info['uname']}(${room_info['uid']})\n`:'')
+        +`直播间地址:${room_info['live_url']}\n直播间标题:${room_info.title}-分区[${room_info['area_name']}]\n`
+        +(needLiveStatus?(room_info['live_status']===1?'直播中':'未开播'):'')
 }
 
 function updateCookie(context) {
