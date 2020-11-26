@@ -79,7 +79,7 @@ function update(sql, params, database) {
 
 function checkParams(sql, params) {
     global['LOG'](`Sql prepared: ${sql}`)
-    global['LOG'](`Sql params: ${params.join(',')}`)
+    if (params.length>0) global['LOG'](`Sql params: ${params.join(',')}`)
     let pLen = sql.split('?').length - 1
     if (pLen === 0) {
         return sql
