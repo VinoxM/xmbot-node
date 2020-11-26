@@ -24,7 +24,7 @@ const matchDict = [
     {match: ["更新直播cookie:","更新直播cookie"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateCookie},
     {match: ["更新直播token:","更新直播token"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateToken},
     {match: ["直播信息"], startWith: false, needReplace: false, rules: [], func: getRoomInfo},
-    {match: ["查看用户直播信息:","查看用户直播信息"], startWith: true, needReplace: true, rules: [], func: (context)=>getRoomInfo(context,true)},
+    // {match: ["查看用户直播信息:","查看用户直播信息"], startWith: true, needReplace: true, rules: [], func: (context)=>getRoomInfo(context,true)},
     {match: ["查看直播间信息:","查看直播间信息"], startWith: true, needReplace: true, rules: [], func: (context)=>getRoomInfo(context,true,true)},
 ]
 
