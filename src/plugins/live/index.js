@@ -278,8 +278,8 @@ function getRoomInfo(context,byId = false,byRoomIds = false) {
         }
         getRoomBaseInfo(id,byRoomIds).then(res=>{
             if (res.code===0){
-                if (res.data&&res.data.length>0){
-                    let key = byRoomIds?'by_room_ids':'by_uids'
+                let key = byRoomIds?'by_room_ids':'by_uids'
+                if (res.data[key][id]){
                     global.replyMsg(context,getLiveStr(res.data[key][id],true,true))
                 }else{
                     global.replyMsg(context,`未找到${byRoomIds?'直播间':'用户'}${id}的信息`,false)
