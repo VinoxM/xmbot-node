@@ -112,13 +112,14 @@ export function replyMsg(context, message, at = false){
     context = checkContextError(context)
     let replyType = msgType[context["message_type"]]["reply"];//通过消息类型确定回复目标(群组->group_id,私聊->private_id)
     let replyId = context[replyType];//获取回复目标号码
-    message = message ? message : context["message"]
+    if (message) context['message'] = message
+    // message = message ? message : context["message"]
     if (context['message_type']!=='private'&&at){//是否@发送人
-        message = CQ.at(context["user_id"])+'\n'+message
+        context['message'] = CQ.at(context["user_id"])+'\n'+context['message']
     }
-    let params = {[replyType]:replyId,message}//回复消息体(例:{group_id:123456}或{user_id:123456})
+    let params = {[replyType]:replyId,message:context['message']}//回复消息体(例:{group_id:123456}或{user_id:123456})
     let func = msgType[context["message_type"]]["type"]//获取发送api的方法名称(private()或group())
-    onSendLog(context["message_type"],replyId,context["self_id"],message);
+    onSendLog(context["message_type"],replyId,context["self_id"],context['message']);
     bot.send[func](params).then(r=>{
         if (func==='group') global['repeat']['handleRepeat'](context)// 发送群组信息,处理复读
     })

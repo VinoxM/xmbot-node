@@ -106,7 +106,8 @@ export class PcrGacha {
             result.push(res)
         }
         await handleImage(result).then(res => {
-            let reply = ''
+            let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
+            let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
             reply += global.CQ.img(res)
             context['message'] = reply
             global.replyMsg(context, null, true)

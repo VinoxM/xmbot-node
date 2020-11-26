@@ -1,8 +1,5 @@
-import fs, {readJsonSync, writeJsonSync} from 'fs-extra'
+import fs from 'fs-extra'
 import path from 'path'
-import fs_ from 'fs'
-import * as request_ from '../../http/request'
-import {CQ} from '../../utils/CQCode'
 import {PcrGacha} from './pcr-gacha'
 
 let setting = null;
@@ -54,12 +51,14 @@ export function initNickName(context, isReload = false) { // 加载角色
                     global.replyMsg(context, null, true)
                 }
                 if (pcrGacha) pcrGacha['close']()
-                pcrGacha = new PcrGacha(setting,pools,nickNames)
-                pcrGacha.tableExists().then(res=>{
-                    if (res.count===0){
+                pcrGacha = new PcrGacha(setting, pools, nickNames)
+                pcrGacha.tableExists().then(res => {
+                    if (res.count === 0) {
                         pcrGacha.tableCreate()
                     }
-                }).catch(err=>{global['ERR'](err)})
+                }).catch(err => {
+                    global['ERR'](err)
+                })
                 resolve(data)
             })
         })
@@ -109,10 +108,10 @@ export function addCharacter(context) { // 添加角色
         return
     }
     nickNames[Number(c[2])] = [...[check.type, check.star], ...c.slice(2)]
-    saveNickNames().then(res => {
+    saveNickNames().then(() => {
         context['message'] = '保存成功'
         global.replyMsg(context)
-    }).catch(err => {
+    }).catch(() => {
         context['message'] = '保存失败'
         global.replyMsg(context)
     })
@@ -155,7 +154,10 @@ function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
 export function delCharacter(context, byIndex = false) { // 删除角色
     let keys = Object.keys(nickNames)
     let raw_message = context['raw_message']
-    if (raw_message === '') return global.replyMsg(context, '请输入要删除的角色', true)
+    if (raw_message === '') {
+        global.replyMsg(context, '请输入要删除的角色', true)
+        return
+    }
     let chars = raw_message.split('|')
     let result = {
         deleted: [],
@@ -186,10 +188,10 @@ export function delCharacter(context, byIndex = false) { // 删除角色
     if (result.deleted.length > 0) {
         let deleted = result.deleted.length > 0 ? '角色' + result.deleted.join(',') + '已删除' : ''
         let notFound = result.notFound.length > 0 ? '角色' + result.notFound.join(',') + '未找到' : ''
-        saveNickNames().then(res => {
+        saveNickNames().then(() => {
             context['message'] = deleted + (deleted !== '' && notFound !== '' ? '\n' : '') + notFound
             global.replyMsg(context)
-        }).catch(err => {
+        }).catch(() => {
             context['message'] = '删除失败'
             global.replyMsg(context)
         })
@@ -201,12 +203,23 @@ export function delCharacter(context, byIndex = false) { // 删除角色
 
 export function viewCharacter(context, isIndex = false) { // 查看角色
     let raw_message = context['raw_message']
-    if (raw_message === '') return global.replyMsg(context, '请输入要查看的角色', true)
+    if (raw_message === '') {
+        global.replyMsg(context, '请输入要查看的角色', true)
+        return
+    }
+    let result = characterFilter(raw_message, isIndex)
+    let characters = result.characters.length > 0 ? result.characters.join('\n') : ''
+    let notFound = result.notFound.length > 0 ? '角色' + result.notFound.join(',') + '未找到' : ''
+    context['message'] = characters + (characters !== '' && notFound !== '' ? '\n' : '') + notFound
+    global.replyMsg(context,null,true)
+}
+
+function characterFilter(raw_message, isIndex) {
     let chars = raw_message.split('|')
     let result = {
         characters: [],
         notFound: [],
-        id: []
+        charInfo: []
     }
     for (const char of chars) {
         let res = Object.values(nickNames).filter(o => {
@@ -215,17 +228,17 @@ export function viewCharacter(context, isIndex = false) { // 查看角色
         if (res.length === 0) {
             result.notFound.push(char)
         } else {
+            result.charInfo.push(res.map(o => {
+                return {id: o[2], name: o[4], star: o[1], inputName: char}
+            }))
             if (isIndex)
                 result.characters.push(char + ':' + res.map(o => o[2]).join(','))
             else {
-                result.characters.push(char + ':' + res.map(o => o[4]).join(','))
+                result.characters.push(char + ':' + res.map(o => o.slice(2).join(',')).join(';'))
             }
         }
     }
-    let characters = result.characters.length > 0 ? result.characters.join('\n') : ''
-    let notFound = result.notFound.length > 0 ? '角色' + result.notFound.join(',') + '未找到' : ''
-    context['message'] = characters + (characters !== '' && notFound !== '' ? '\n' : '') + notFound
-    global.replyMsg(context)
+    return result
 }
 
 export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文件
@@ -241,8 +254,8 @@ export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文
                 global['ERR'](err)
                 reject(err)
             } else {
-                saveCharacters().then(res => {
-                    reloadGacha()
+                saveCharacters().then(async () => {
+                    await reloadGacha()
                     resolve()
                 }).catch(err => reject(err))
             }
@@ -250,37 +263,113 @@ export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文
     })
 }
 
-export async function selectDefaultPool(context) {
-    const message = context['raw_message']
-    if (message==='') return global.replyMsg(context,'请输入要切换的卡池',true)
+export async function selectDefaultPool(context, pool) {
+    const message = pool ? pool : context['raw_message']
+    if (message === '') {
+        global.replyMsg(context, '请输入要切换的卡池', true)
+        return
+    }
     let reply = ''
     switch (message) {
         case '国服':
         case '国服卡池':
         case 'cn':
-            setting['default_pool']='cn'
+            setting['default_pool'] = 'cn'
             reply = '切换国服卡池成功'
             break
         case '日服':
         case '日服卡池':
         case 'jp':
-            setting['default_pool']='jp'
+            setting['default_pool'] = 'jp'
             reply = '切换日服卡池成功'
             break
         case '台服':
         case '台服卡池':
         case 'tw':
-            setting['default_pool']='tw'
+            setting['default_pool'] = 'tw'
             reply = '切换台服卡池成功'
             break
     }
-    if (reply===''){
+    if (reply === '') {
         reply = '没有您输入的卡池'
-    }else{
-        await saveSetting(setting,'setting-pcr.json')
-        await reloadGacha()
+    } else {
+        await saveSetting(setting, 'setting-pcr.json')
     }
-    global.replyMsg(context,reply,true)
+    global.replyMsg(context, reply, true)
+}
+
+export function changePoolPickUp(context) {
+    let message = context['raw_message']
+    if (message === '') {
+        context['message'] = '请输入要切换的up角色'
+        global.replyMsg(context, null, true)
+        return
+    }
+    let result = characterFilter(message, true)
+    if (result.notFound.length > 0) {
+        context['message'] = `角色:${result.notFound.join(',')}未找到`
+        global.replyMsg(context, null, true)
+        return
+    }
+    let chars = result.charInfo.map(o => o[0])
+    let cantSetChar = chars.filter(o => o.star === 'star1')
+    if (cantSetChar.length > 0) {
+        context['message'] = `角色:${cantSetChar.map(o => o.inputName).join(',')}无法配置为up角色`
+        global.replyMsg(context, null, true)
+        return
+    }
+    let pool_name = setting.default_pool
+    let pool = pools['pool_' + pool_name]
+    let stars = {
+        star3: [],
+        star2: []
+    }
+    for (const char of chars) {
+        stars[char.star].push(char.id)
+        let star_pool = pool.pools[char.star].pool
+        let index = star_pool.indexOf(String(char.id))
+        if (index > -1) star_pool.splice(index, 1)
+    }
+    for (const key of Object.keys(pool.pools)) {
+        if (key.startsWith('pick_up')) {
+            let s = pool.pools[key].prefix.split('★').length - 1
+            let p = pool.pools['star' + s].pool
+            p = [...p, ...pool.pools[key].pool]
+            pool.pools['star' + s].pool = p
+            delete pool.pools[key]
+        }
+    }
+    if (stars.star3.length > 0) {
+        pool.pools.pick_up = {
+            pool: stars.star3,
+            prop: 7,
+            prop_last: 7,
+            name: "Pick Up",
+            prefix: "★★★",
+            free_stone: []
+        }
+        pool.pools.star3.prop = 18
+        pool.pools.star3.prop_last = 18
+    }
+    if (stars.star2.length > 0) {
+        pool.pools.pick_up1 = {
+            pool: stars.star2,
+            prop: 25,
+            prop_last: 135,
+            name: "Pick Up",
+            prefix: "★★",
+            free_stone: []
+        }
+        pool.pools.star2.prop = 130
+        pool.pools.star2.prop_last = 705
+    }
+    let version = global['func']['getNowNum']()
+    pool.info.version = version
+    pools.info.version = version
+    saveSetting(pools).then(() => {
+        context['message'] = '切换UP角色成功'
+        global.replyMsg(context, null, true)
+    })
 }
 
 function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角色
@@ -328,38 +417,38 @@ async function reloadGacha() {
     await initNickName()
 }
 
-function getCharImg(id) {
-    let fileName = id + '.jpg'
-    let filePath = path.join(global['source']['resource'], 'icon', 'unit')
-    let fullPath = path.join(filePath, fileName)
-    return new Promise((resolve, reject) => {
-        fs_.access(fullPath, fs_.constants.F_OK, (err) => {
-            if (!err) {
-                resolve(fullPath)
-            } else {
-                fs['mkdir'](filePath, (e) => {
-                    request_.getPcrPng(fileName.split('.')[0], fullPath).then(r => {
-                        resolve(fullPath)
-                    }).catch(e => {
-                        reject(e)
-                    })
-                })
-            }
-        })
-    })
-}
+// function getCharImg(id) {
+//     let fileName = id + '.jpg'
+//     let filePath = path.join(global['source']['resource'], 'icon', 'unit')
+//     let fullPath = path.join(filePath, fileName)
+//     return new Promise((resolve, reject) => {
+//         fs_.access(fullPath, fs_.constants.F_OK, (err) => {
+//             if (!err) {
+//                 resolve(fullPath)
+//             } else {
+//                 fs['mkdir'](filePath, (e) => {
+//                     request_.getPcrPng(fileName.split('.')[0], fullPath).then(r => {
+//                         resolve(fullPath)
+//                     }).catch(e => {
+//                         reject(e)
+//                     })
+//                 })
+//             }
+//         })
+//     })
+// }
 
 export async function gacha(context, prefix) {
     const times = 10
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
-        global.replyMsg(context,null,true)
+        global.replyMsg(context, null, true)
         return
     }
     let json = await pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
 export async function simple(context, prefix) {
@@ -367,25 +456,25 @@ export async function simple(context, prefix) {
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
-        global.replyMsg(context,null,true)
+        global.replyMsg(context, null, true)
         return
     }
     let json = await pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
-export async function thirty(context,prefix) {
+export async function thirty(context, prefix) {
     const times = 300
     const user_id = context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
-        global.replyMsg(context,null,true)
+        global.replyMsg(context, null, true)
         return
     }
     let json = await pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(r => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id,json).then(r => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
 }
 
 export function emptyGachaResource(context) {
@@ -396,8 +485,8 @@ export function emptyGachaUnitResource(context) {
     pcrGacha.emptyGachaUnitResource(context)
 }
 
-async function checkGachaTimes(user_id,times) {
+async function checkGachaTimes(user_id, times) {
     let count = await pcrGacha.getGachaCountByUserId(user_id)
     let limit = setting['day_limit']
-    return limit>=count+times
+    return limit >= count + times
 }

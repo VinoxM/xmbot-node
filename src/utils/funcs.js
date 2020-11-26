@@ -105,3 +105,8 @@ export function toCCTDateString(date) {
     }
     return `${d.getFullYear()}/${String(d.getMonth()).padStart(2,'0')}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
 }
+
+export function getNowNum(){
+    let date = new Date()
+    return (date.getFullYear()) * 100000000 + (date.getMonth() + 1) * 1000000 + (date.getDate() * 10000 + date.getHours() * 100 + date.getMinutes())
+}
