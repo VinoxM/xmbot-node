@@ -85,7 +85,7 @@ function handleRssText() { // 处理Rss信息
         for (const [index, item] of items.entries()) {
             let str = String(item.link).replace(r.replace, "")
             let id = 0
-            if (str.length>14) str = str.substring(0,14)+'.'+str.substring(14)
+            if (str.length>10) str = str.substring(0,10)+'.'+str.substring(10)
             id = Number(str)
             if (index === 0) last_id = id
             if (id > r.last_id) {
@@ -95,7 +95,7 @@ function handleRssText() { // 处理Rss信息
                 if (images.length > 0) {
                     message += images.join("\n")
                 }
-                message+=`\nlink:${r.link}`
+                message+=`\n链接:${item.link}`
                 replyMsg.push({message: message, push_group: r.push_list.group, push_user: r.push_list.user})
             }
         }
