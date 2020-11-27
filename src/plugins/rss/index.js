@@ -11,6 +11,11 @@ const timeUnits = {
     hours: {time: 60 * 60 * 1000, title: '小时'}
 }
 
+const matchDict = [
+    {match: ["屏蔽RSS","屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
+    {match: ["开启RSS","开启推送"], startWith: true, needReplace: true, rules: ['admin'], func: supportRss},
+]
+
 function initMatchSetting() { // 初始化设置
     return new Promise((resolve, reject) => {
         setting = global["config"][__dirname.split("\\").pop()]
@@ -157,4 +162,59 @@ function startRSSHub() { // 开始运行RSS检查
             }, interval)
         })
     }, init_time)
+}
+
+function shieldRss(context) {
+    let title = context['raw_message']
+    if (title===''){
+        global.replyMsg(context,'请输入要屏蔽的推送',true)
+        return
+    }
+    let isGroup = global['func']['checkIsGroup'](context)
+    setting.rss=rss.map(o => {
+        if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            let key = isGroup ? 'group' : 'user'
+            let reply_id = context[key + '_id']
+            let push_list = setting.push_list[key]
+            push_list.splice(push_list.indexOf(reply_id), 1)
+            o['push_' + key] = push_list
+        }
+        return o
+    })
+    global['reloadPlugin'](setting, __dirname.split("\\").pop())
+    initMatchSetting()
+    global.replyMsg(context,`已屏蔽对${isGroup?'该群':'您'}的${title}推送`)
+}
+
+function supportRss(context) {
+    let title = context['raw_message']
+    if (title===''){
+        global.replyMsg(context,'请输入要开启的推送',true)
+        return
+    }
+    let isGroup = global['func']['checkIsGroup'](context)
+    let changed = false
+    setting.rss=rss.map(o => {
+        if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            changed = true
+            let key = isGroup ? 'group' : 'user'
+            let reply_id = context[key + '_id']
+            let push_list = setting.push_list[key]
+            if (push_list.indexOf(reply_id)===-1){
+                push_list.push(reply_id)
+            }
+            o['push_' + key] = push_list
+        }
+        return o
+    })
+    global['reloadPlugin'](setting, __dirname.split("\\").pop())
+    initMatchSetting()
+    global.replyMsg(context,`已开启对${isGroup?'该群':'您'}的${title}推送`)
+}
+
+export default {
+    match:(context)=>{
+        global['func']['generalMatch'](context,matchDict)
+    },
+    noNeedPrefix:false
 }
