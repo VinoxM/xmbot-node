@@ -87,8 +87,9 @@ export function addCharacter(context) { // 新增角色
         global.replyMsg(context, null, true)
         return
     }
-    let check = checkCharTypeAndStar(c[0],c[1])
-    if (check){
+    let check_ = checkCharTypeAndStar(c[0],c[1])
+    let check = check_.check
+    if (check_.flag){
         global.replyMsg(context,check,true)
         return
     }
@@ -145,16 +146,16 @@ function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
         for (const t of Object.values(charRules.type)) {
             typeRules = [...typeRules, ...t]
         }
-        return `角色类型不规范[${typeRules.join(',')}]`
+        return {check:`角色类型不规范[${typeRules.join(',')}]`,flag:true}
     }
     if (!check.star) {
         let starRules = []
         for (const s of Object.values(charRules.star)) {
             starRules = [...starRules, ...s]
         }
-        return `角色星级不规范[${starRules.join(',')}]`
+        return {check:`角色星级不规范[${starRules.join(',')}]`,flag:true}
     }
-    return false
+    return {flag:false,check}
 }
 
 export function delCharacter(context, byIndex = false) { // 删除角色
@@ -228,7 +229,8 @@ export function updateCharacter(context,isAddNickNames = false) {
         return
     }
     let name = split[0]
-    let info = split[1].split("|")
+    let info_ = String(split[1])
+    let info = info_.split("|")
     let char = []
     let charNum = ''
     let keys = Object.keys(nickNames)
@@ -250,12 +252,13 @@ export function updateCharacter(context,isAddNickNames = false) {
         char = Array.from(new Set([...char,...info]))
     }else{
         char = info
-        let check = checkCharTypeAndStar(char[0], char[1]) // 检查添加信息的角色类型和星级规范
-        if(check){
+        let check_ = checkCharTypeAndStar(char[0], char[1]) // 检查添加信息的角色类型和星级规范
+        let check = check_.check
+        if(check_.flag){
             global.replyMsg(context,check,true)
             return
         }
-        char[0]=check.type;char[1]=check.start
+        char[0]=check.type;char[1]=check.star
     }
     let checkNames = checkName(char.slice(2), char[2])
     if (checkNames.length>0) {
