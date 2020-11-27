@@ -1,6 +1,5 @@
 import * as qAa from './questionAndAnswer'
 import * as sysOrder from './sysOrder'
-import * as pcr_hw from './pcr-homework'
 let setting;
 
 const matchDict=[
@@ -8,9 +7,8 @@ const matchDict=[
     {match: ["查看问答"],func:qAa.queAndAnsView},
     {match: ["删除问答:"],startWith: true,func:qAa.queAndAndDel},
     {match: ["version","ver","版本"],func:sysOrder.version},
-    {match: ['重载模块:'],startWith: true,rules:['admin','private'],func:sysOrder.reloadPlugins},
-    {match: ['重启'],rules:['admin','private'],func:sysOrder.restart},
-    // {match: ['保存PCR作业','保存作业','保存pcr作业'],startWith: true,needReplace:true,func:pcr_hw.saveHomework},
+    {match: ['重载模块:'],needPrefix:true,startWith: true,rules:['admin','private'],func:sysOrder.reloadPlugins},
+    {match: ['重启'],needPrefix:true,rules:['admin','private'],func:sysOrder.restart},
 ]
 
 function initMatchSetting() {
@@ -20,11 +18,41 @@ function initMatchSetting() {
 initMatchSetting()
 
 function match(context) {//返回true则该条信息可以触发复读,返回false或不返回则不能触发
-    global['func']['generalMatch'](context,matchDict)
+    let raw_msg = context["raw_message"];
+    for (let m of matchDict){
+        if (m.needPrefix&&raw_msg===context['message']&&global['func']['checkIsGroup'](context)) continue
+        if (!m.startWith){
+            let index = m.match.indexOf(raw_msg.toLowerCase())
+            if (index > -1) {
+                if (m.needReplace)
+                    context['raw_message']=context['raw_message'].replace(m.match[index],'').trim()
+                global['func']['checkMatchRules'](m,context)
+                return
+            }
+        }else{
+            for (let s of m.match){
+                if (raw_msg.toLowerCase().startsWith(s)){
+                    if (m.needReplace)
+                        context['raw_message']=context['raw_message'].replace(s,'').trim()
+                    global['func']['checkMatchRules'](m,context)
+                    return
+                }
+            }
+        }
+    }
+    let msg = context["message"]
+    for (let qa of setting["Q&A"]) {
+        if (msg === qa.question){
+            context["message"]=qa.answer
+            global.replyMsg(context)
+            return
+        }
+    }
+    return true
 }
 
 export default {
     match,
     initMatchSetting,
-    needPrefix:true
+    needPrefix:false
 }

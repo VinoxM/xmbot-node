@@ -13,7 +13,7 @@ export function generalMatch(context,matchDict) {
             }
         }else{
             for (let s of m.match){
-                if (raw_msg.startsWith(s)){
+                if (raw_msg.toLowerCase().startsWith(s)){
                     if (m.needReplace)
                         context['raw_message']=context['raw_message'].replace(s,'').trim()
                     return checkMatchRules(m,context)
@@ -23,7 +23,7 @@ export function generalMatch(context,matchDict) {
     }
 }
 
-function checkMatchRules(m,context) {
+export function checkMatchRules(m,context) {
     let check = m.rules&&m.rules.length>0?checkRules(m.rules,context):-1
     if (check===-1)
         return m.func(context)
