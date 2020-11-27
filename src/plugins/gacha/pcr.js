@@ -458,7 +458,7 @@ function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角�
             char[n[0]][n[1]][n[2]] = [n[3], n[4]]
         }catch (e) {
             console.error(e)
-            console.error(n)
+            console.error(n[0])
         }
     }
     return new Promise((resolve, reject) => {
