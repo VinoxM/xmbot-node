@@ -1,7 +1,7 @@
 {
     "initial_time": {
-        "time": 30,
-        "units": "seconds"
+        "time": 5,
+        "units": "minutes"
     },
     "interval": {
         "time": 25,
@@ -22,10 +22,16 @@
             "proxy": true,
             "name": "pcr_jp_twitter",
             "title": "PCR-日服推特",
+            "name_filter": [
+                "PCR日服推特",
+                "PCR-日服推特"
+            ],
             "link_replace": "https://twitter.com/priconne_redive/status/",
-            "last_id": 13311153582168.064,
+            "last_id": 1331908321.8596208,
             "push_group": "all",
-            "push_user": "all"
+            "push_user": [
+                760254674
+            ]
         },
         {
             "on": true,
@@ -33,8 +39,14 @@
             "proxy": true,
             "name": "pcr_cn_bili",
             "title": "PCR-国服bili动态",
+            "name_filter": [
+                "PCR国服bili动态",
+                "PCR-国服bili动态",
+                "PCR国服动态",
+                "PCR国服B站动态"
+            ],
             "link_replace": "https://t.bilibili.com/",
-            "last_id": 46107334204656.73,
+            "last_id": 4618625336.976864,
             "push_group": "all",
             "push_user": "all"
         }
