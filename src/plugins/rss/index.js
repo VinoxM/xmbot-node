@@ -12,8 +12,10 @@ const timeUnits = {
 }
 
 const matchDict = [
-    {match: ["屏蔽rss","屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
-    {match: ["开启rss","开启推送"], startWith: true, needReplace: true, rules: ['admin'], func: supportRss},
+    {match: ["屏蔽rss", "屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
+    {match: ["订阅rss", "订阅推送"], startWith: true, needReplace: true, rules: ['admin'], func: subscribeRss},
+    {match: ["启用rss", "启用推送"], startWith: true, needReplace: true, rules: ['admin', 'private'], func: openRss},
+    {match: ["关闭rss", "关闭推送"], startWith: true, needReplace: true, rules: ['admin', 'private'], func: closeRss},
 ]
 
 function initMatchSetting() { // 初始化设置
@@ -29,7 +31,7 @@ function initMatchSetting() { // 初始化设置
 
 initMatchSetting().then(() => {
     startRSSHub()
-}).catch(e=>{
+}).catch(e => {
     global['ERR'](e)
 })
 
@@ -89,19 +91,18 @@ function handleRssText() { // 处理Rss信息
         let last_id = r.last_id
         for (const [index, item] of items.entries()) {
             let str = String(item.link).replace(r.replace, "")
-            let id = 0
-            if (str.length>10) str = str.substring(0,10)+'.'+str.substring(10)
-            id = Number(str)
-            if (index === 0) last_id = id
-            if (id > r.last_id) {
-                let pub_date = item['pubDate']?global['func']['toCCTDateString'](item['pubDate']):''
+            if (index === 0) last_id = str
+            if (strCompareTo(str, r.last_id)) {
+                let pub_date = item['pubDate'] ? global['func']['toCCTDateString'](item['pubDate']) : ''
                 let message = `${r.title}(${pub_date}):\n${item.title}`
                 let images = checkImg(item.description)
                 if (images.length > 0) {
                     message += images.join("\n")
                 }
-                message+=`\n链接:${item.link}`
+                message += `\n链接:${item.link}`
                 replyMsg.push({message: message, push_group: r.push_list.group, push_user: r.push_list.user})
+            } else {
+                break
             }
         }
         let index = rss.findIndex((e) => e.name === key)
@@ -113,14 +114,14 @@ function handleRssText() { // 处理Rss信息
     if (replyMsg.length > 0) {
         global['LOG'](`RSS源共有${replyMsg.length}条新信息`)
         for (const msg of replyMsg) {
-            if (msg.push_user.length>0){
-                for (const user of msg.push_user){
-                    global.replyPrivate({message:msg.message,user_id:user})
+            if (msg.push_user.length > 0) {
+                for (const user of msg.push_user) {
+                    global.replyPrivate({message: msg.message, user_id: user})
                 }
             }
-            if (msg.push_group.length>0){
-                for(const group of msg.push_group){
-                    global.replyGroup({message:msg.message,group_id:group})
+            if (msg.push_group.length > 0) {
+                for (const group of msg.push_group) {
+                    global.replyGroup({message: msg.message, group_id: group})
                 }
             }
         }
@@ -166,16 +167,21 @@ function startRSSHub() { // 开始运行RSS检查
 
 function shieldRss(context) {
     let title = context['raw_message']
-    if (title===''){
-        global.replyMsg(context,'请输入要屏蔽的推送',true)
+    if (title === '') {
+        global.replyMsg(context, '请输入要屏蔽的推送', true)
         return
     }
     let isGroup = global['func']['checkIsGroup'](context)
-    setting.rss=rss.map(o => {
+    setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
-            let push_list = setting.push_list[key]
+            let push_list = []
+            if (o['push_' + key] === 'all') {
+                push_list = setting.push_list[key]
+            } else {
+                push_list = o['push_' + key]
+            }
             push_list.splice(push_list.indexOf(reply_id), 1)
             o['push_' + key] = push_list
         }
@@ -183,24 +189,27 @@ function shieldRss(context) {
     })
     global['reloadPlugin'](setting, __dirname.split("\\").pop())
     initMatchSetting()
-    global.replyMsg(context,`已屏蔽对${isGroup?'该群':'您'}的${title}推送`)
+    global.replyMsg(context, `已屏蔽对${isGroup ? '该群' : '您'}的${title}推送`)
 }
 
-function supportRss(context) {
+function subscribeRss(context) {
     let title = context['raw_message']
-    if (title===''){
-        global.replyMsg(context,'请输入要开启的推送',true)
+    if (title === '') {
+        global.replyMsg(context, '请输入要订阅的推送', true)
         return
     }
     let isGroup = global['func']['checkIsGroup'](context)
-    let changed = false
-    setting.rss=rss.map(o => {
+    setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
-            changed = true
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
-            let push_list = setting.push_list[key]
-            if (push_list.indexOf(reply_id)===-1){
+            let push_list = []
+            if (o['push_' + key] === 'all') {
+                push_list = setting.push_list[key]
+            } else {
+                push_list = o['push_' + key]
+            }
+            if (push_list.indexOf(reply_id) === -1) {
                 push_list.push(reply_id)
             }
             o['push_' + key] = push_list
@@ -209,12 +218,59 @@ function supportRss(context) {
     })
     global['reloadPlugin'](setting, __dirname.split("\\").pop())
     initMatchSetting()
-    global.replyMsg(context,`已开启对${isGroup?'该群':'您'}的${title}推送`)
+    global.replyMsg(context, `已订阅对${isGroup ? '该群' : '您'}的${title}推送`)
+}
+
+function openRss(context) {
+    let title = context['raw_message']
+    if (title === '') {
+        global.replyMsg(context, '请输入要启用的推送', true)
+        return
+    }
+    setting.rss = rss.map(o => {
+        if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            o.on = true
+        }
+        return o
+    })
+    global['reloadPlugin'](setting, __dirname.split("\\").pop())
+    initMatchSetting()
+    global.replyMsg(context,`已启用推送${title}`)
+}
+
+function closeRss(context) {
+    let title = context['raw_message']
+    if (title === '') {
+        global.replyMsg(context, '请输入要关闭的推送', true)
+        return
+    }
+    setting.rss = rss.map(o => {
+        if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            o.on = false
+        }
+        return o
+    })
+    global['reloadPlugin'](setting, __dirname.split("\\").pop())
+    initMatchSetting()
+    global.replyMsg(context,`已关闭推送${title}`)
 }
 
 export default {
-    match:(context)=>{
-        global['func']['generalMatch'](context,matchDict)
+    match: (context) => {
+        global['func']['generalMatch'](context, matchDict)
     },
-    needPrefix:true
+    needPrefix: true
+}
+
+function strCompareTo(a, b) { // a>b return true; a<=b return false
+    if (a.length !== b.length)
+        return a.length > b.length
+    for (let i = 0; i < a.length; i += 4) {
+        let end = (i + 4 < a.length) ? (i + 4) : a.length
+        let x = Number(a.substring(i, end))
+        let y = Number(b.substring(i, end))
+        if (x !== y)
+            return x > y
+    }
+    return false
 }
