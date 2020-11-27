@@ -37,6 +37,8 @@ const matchDict = [
     {match:['切换国服up角色','切换国服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'cn')},
     {match:['切换日服up角色','切换日服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'jp')},
     {match:['切换台服up角色','切换台服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'tw')},
+    {match:['修改角色','更新角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.updateCharacter(context)},
+    {match:['添加角色昵称'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.updateCharacter(context,true)},
 ]
 
 function match(context) {

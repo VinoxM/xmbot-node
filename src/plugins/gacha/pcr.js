@@ -87,23 +87,9 @@ export function addCharacter(context) { // 新增角色
         global.replyMsg(context, null, true)
         return
     }
-    let check = checkCharTypeAndStar(c[0], c[1]) // 检查添加信息的角色类型和星级规范
-    if (!check.type) {
-        let typeRules = []
-        for (const t of Object.values(charRules.type)) {
-            typeRules = [...typeRules, ...t]
-        }
-        context['message'] = `角色类型不规范[${typeRules.join(',')}]`
-        global.replyMsg(context)
-        return
-    }
-    if (!check.star) {
-        let starRules = []
-        for (const s of Object.values(charRules.star)) {
-            starRules = [...starRules, ...s]
-        }
-        context['message'] = `角色星级不规范[${starRules.join(',')}]`
-        global.replyMsg(context)
+    let check = checkCharTypeAndStar(c[0],c[1])
+    if (check){
+        global.replyMsg(context,check,true)
         return
     }
     let checkNames = checkName(c.slice(2))
@@ -122,10 +108,11 @@ export function addCharacter(context) { // 新增角色
     })
 }
 
-function checkName(names) { // 检查名称
+function checkName(names,id = false) { // 检查名称
     let res = []
     for (const name of names) {
         Object.values(nickNames).some((o, i) => {
+            if (id&&o[2]===id) return false
             if (i < 2) return false
             if (o.indexOf(name) > -1) {
                 res.push(name)
@@ -138,22 +125,36 @@ function checkName(names) { // 检查名称
 }
 
 function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
-    let res = {type: false, star: false}
+    let check = {type: false, star: false}
     let charType = charRules.type
     for (let t in charType) {
         if (charType[t].indexOf(type) > -1) {
-            res.type = t
+            check.type = t
             break;
         }
     }
     let charStar = charRules.star
     for (let s in charStar) {
         if (charStar[s].indexOf(star) > -1) {
-            res.star = s
+            check.star = s
             break;
         }
     }
-    return res
+    if (!check.type) {
+        let typeRules = []
+        for (const t of Object.values(charRules.type)) {
+            typeRules = [...typeRules, ...t]
+        }
+        return `角色类型不规范[${typeRules.join(',')}]`
+    }
+    if (!check.star) {
+        let starRules = []
+        for (const s of Object.values(charRules.star)) {
+            starRules = [...starRules, ...s]
+        }
+        return `角色星级不规范[${starRules.join(',')}]`
+    }
+    return false
 }
 
 export function delCharacter(context, byIndex = false) { // 删除角色
@@ -217,6 +218,58 @@ export function viewCharacter(context, isIndex = false) { // 查看角色
     let notFound = result.notFound.length > 0 ? '角色' + result.notFound.join(',') + '未找到' : ''
     context['message'] = characters + (characters !== '' && notFound !== '' ? '\n' : '') + notFound
     global.replyMsg(context,null,true)
+}
+
+export function updateCharacter(context,isAddNickNames = false) {
+    let msg = context['raw_message']
+    let split = msg.split(':')
+    if (split.length!==2){
+        global.replyMsg(context,'输入不合规范->[要更新的角色]:[更新内容]',true)
+        return
+    }
+    let name = split[0]
+    let info = split[1].split("|")
+    let char = []
+    let charNum = ''
+    let keys = Object.keys(nickNames)
+    let flag = false
+    for (const key of keys) {
+        let o = nickNames[key]
+        if (o.indexOf(name) > -1) {
+            char = o
+            flag = true
+            charNum = key
+            break
+        }
+    }
+    if (!flag){
+        global.replyMsg(context,`角色${name}未找到`,true)
+        return
+    }
+    if (isAddNickNames){
+        char = Array.from(new Set([...char,...info]))
+    }else{
+        char = info
+        let check = checkCharTypeAndStar(char[0], char[1]) // 检查添加信息的角色类型和星级规范
+        if(check){
+            global.replyMsg(context,check,true)
+            return
+        }
+        char[0]=check.type;char[1]=check.start
+    }
+    let checkNames = checkName(char.slice(2), char[2])
+    if (checkNames.length>0) {
+        global.replyMsg(context,`已有相同的昵称存在:${checkNames.join(',')}`,true)
+        return
+    }
+    nickNames[char[2]]=char
+    saveNickNames().then(() => {
+        context['message'] = '保存成功'
+        global.replyMsg(context)
+    }).catch(() => {
+        context['message'] = '保存失败'
+        global.replyMsg(context)
+    })
 }
 
 function characterFilter(raw_message, isIndex) { // 筛选角色
@@ -335,7 +388,13 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
             let s = pool.pools[key].prefix.split('★').length - 1
             let p = pool.pools['star' + s].pool
             p = [...p, ...pool.pools[key].pool]
-            pool.pools['star' + s].pool = p
+            let set = new Set(p)
+            let new_pool =[]
+            for (const e of set) {
+                if (nickNames[e][0]!=='limited')
+                    new_pool.push(e)
+            }
+            pool.pools['star' + s].pool = new_pool
             delete pool.pools[key]
         }
     }
