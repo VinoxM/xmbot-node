@@ -454,12 +454,7 @@ function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角�
         }
     }
     for (const n of Object.values(nickNames)) {
-        try{
-            char[n[0]][n[1]][n[2]] = [n[3], n[4]]
-        }catch (e) {
-            console.error(e)
-            console.error(n[0])
-        }
+        char[n[0]][n[1]][n[2]] = [n[3], n[4]]
     }
     return new Promise((resolve, reject) => {
         fs['writeFile'](path.join(__dirname, fileName), JSON.stringify(char, null, 4), "utf8", (err) => {
