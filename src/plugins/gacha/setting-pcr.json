@@ -2,7 +2,7 @@
   "auto_update": false,
   "combo": 10,
   "day_limit": 3000,
-  "default_pool": "jp",
+  "default_pool": "cn",
   "shuffle": false,
   "reply_info": {
     "r": {

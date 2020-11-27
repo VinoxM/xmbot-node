@@ -12,8 +12,8 @@ const timeUnits = {
 }
 
 const matchDict = [
-    {match: ["屏蔽RSS","屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
-    {match: ["开启RSS","开启推送"], startWith: true, needReplace: true, rules: ['admin'], func: supportRss},
+    {match: ["屏蔽rss","屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
+    {match: ["开启rss","开启推送"], startWith: true, needReplace: true, rules: ['admin'], func: supportRss},
 ]
 
 function initMatchSetting() { // 初始化设置
@@ -216,5 +216,5 @@ export default {
     match:(context)=>{
         global['func']['generalMatch'](context,matchDict)
     },
-    noNeedPrefix:false
+    needPrefix:true
 }

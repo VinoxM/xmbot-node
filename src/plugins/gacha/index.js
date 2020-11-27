@@ -33,7 +33,10 @@ const matchDict = [
     {match:['切换日服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'jp')},
     {match:['切换台服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'tw')},
     {match:['切换国服卡池'],startWith:false,needReplace:false,rules:['group'],func:(context)=>pcr.changeDefaultPool(context,'cn')},
-    {match:['切换up角色','切换UP角色','切换up','切换UP'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context)},
+    {match:['切换up角色','切换up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context)},
+    {match:['切换国服up角色','切换国服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'cn')},
+    {match:['切换日服up角色','切换日服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'jp')},
+    {match:['切换台服up角色','切换台服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'tw')},
 ]
 
 function match(context) {
@@ -43,6 +46,6 @@ function match(context) {
 export default {
     initSetting,
     match,
-    noNeedPrefix:false,
+    needPrefix:true,
     pcr
 }

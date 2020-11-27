@@ -5,7 +5,7 @@ export function generalMatch(context,matchDict) {
     let raw_msg = context["raw_message"];
     for (let m of matchDict){
         if (!m.startWith){
-            let index = m.match.indexOf(raw_msg)
+            let index = m.match.indexOf(raw_msg.toLowerCase())
             if (index > -1) {
                 if (m.needReplace)
                     context['raw_message']=context['raw_message'].replace(m.match[index],'').trim()

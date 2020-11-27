@@ -19,6 +19,11 @@ const charRules = { // 角色规范
         star3: ['star3', '3星', '三星', '3']
     }
 }
+const pool_suffix = {
+    cn:'国服',
+    tw:'台服',
+    jp:'日服'
+}
 let pcrGacha = null
 
 function initPcrSetting() { // 加载配置
@@ -275,19 +280,19 @@ export async function changeDefaultPool(context, pool) { // 修改默认卡池
         case '国服卡池':
         case 'cn':
             setting['default_pool'] = 'cn'
-            reply = '切换国服卡池成功'
+            reply = `切换至国服卡池\n->Pick Up:${getPoolPickUp('cn')}`
             break
         case '日服':
         case '日服卡池':
         case 'jp':
             setting['default_pool'] = 'jp'
-            reply = '切换日服卡池成功'
+            reply = `切换至日服卡池\n->Pick Up:${getPoolPickUp('jp')}`
             break
         case '台服':
         case '台服卡池':
         case 'tw':
             setting['default_pool'] = 'tw'
-            reply = '切换台服卡池成功'
+            reply = `切换至台服卡池\n->Pick Up:${getPoolPickUp('tw')}`
             break
     }
     if (reply === '') {
@@ -295,10 +300,10 @@ export async function changeDefaultPool(context, pool) { // 修改默认卡池
     } else {
         await saveSetting(setting, 'setting-pcr.json')
     }
-    global.replyMsg(context, reply, true)
+    global.replyMsg(context, reply)
 }
 
-export function changePoolPickUp(context) { // 切换当前卡池up角色
+export function changePoolPickUp(context, suffix) { // 切换当前卡池up角色
     let message = context['raw_message']
     if (message === '') {
         context['message'] = '请输入要切换的up角色'
@@ -318,7 +323,7 @@ export function changePoolPickUp(context) { // 切换当前卡池up角色
         global.replyMsg(context, null, true)
         return
     }
-    let pool_name = setting.default_pool
+    let pool_name = suffix?suffix:setting.default_pool
     let pool = pools['pool_' + pool_name]
     let stars = {
         star3: [],
@@ -367,8 +372,8 @@ export function changePoolPickUp(context) { // 切换当前卡池up角色
     pool.info.version = version
     pools.info.version = version
     saveSetting(pools).then(() => {
-        context['message'] = '切换UP角色成功'
-        global.replyMsg(context, null, true)
+        context['message'] = `已切换${pool_suffix[pool_name]}UP角色\n->Pick up:${getPoolPickUp(pool_name)}`
+        global.replyMsg(context, null)
     })
 }
 
@@ -415,6 +420,22 @@ async function reloadGacha() { // 重载模块
     global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
     initPcrSetting()
     await initNickName()
+}
+
+function getPoolPickUp(suffix) {
+    let pool_ = pools['pool_'+suffix].pools
+    let key = Object.keys(pool_)
+    let pick_up = []
+    for (const k of key) {
+        if (k.startsWith('pick_up')){
+            let p = pool_[k].pool
+            for (const e of p) {
+                let charName = nickNames[e][4]
+                pick_up.push(pool_[k].prefix+charName)
+            }
+        }
+    }
+    return pick_up
 }
 
 // function getCharImg(id) {

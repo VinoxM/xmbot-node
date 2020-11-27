@@ -85,5 +85,5 @@ function doUpdate(user_id) {
 export default {
     initSetting,
     match,
-    noNeedPrefix: false
+    needPrefix: true
 }

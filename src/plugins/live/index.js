@@ -363,5 +363,5 @@ async function reloadLive() {
 export default {
     initSetting,
     match,
-    noNeedPrefix: false,
+    needPrefix: true,
 }
