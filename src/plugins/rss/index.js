@@ -172,8 +172,10 @@ function shieldRss(context) {
         return
     }
     let isGroup = global['func']['checkIsGroup'](context)
+    let changed = false
     setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            changed = true
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
             let push_list = []
@@ -187,9 +189,13 @@ function shieldRss(context) {
         }
         return o
     })
-    global['reloadPlugin'](setting, __dirname.split("\\").pop())
-    initMatchSetting()
-    global.replyMsg(context, `已屏蔽对${isGroup ? '该群' : '您'}的${title}推送`)
+    if (changed){
+        global['reloadPlugin'](setting, __dirname.split("\\").pop())
+        initMatchSetting()
+        global.replyMsg(context, `已屏蔽对${isGroup ? '该群' : '您'}的${title}推送`)
+    }else{
+        global.replyMsg(context, `未找到${title}推送`)
+    }
 }
 
 function subscribeRss(context) {
@@ -199,8 +205,10 @@ function subscribeRss(context) {
         return
     }
     let isGroup = global['func']['checkIsGroup'](context)
+    let changed = false
     setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            changed = true
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
             let push_list = []
@@ -216,9 +224,13 @@ function subscribeRss(context) {
         }
         return o
     })
-    global['reloadPlugin'](setting, __dirname.split("\\").pop())
-    initMatchSetting()
-    global.replyMsg(context, `已订阅对${isGroup ? '该群' : '您'}的${title}推送`)
+    if (changed){
+        global['reloadPlugin'](setting, __dirname.split("\\").pop())
+        initMatchSetting()
+        global.replyMsg(context, `已订阅对${isGroup ? '该群' : '您'}的${title}推送`)
+    }else{
+        global.replyMsg(context, `未找到${title}推送`)
+    }
 }
 
 function openRss(context) {
@@ -227,15 +239,21 @@ function openRss(context) {
         global.replyMsg(context, '请输入要启用的推送', true)
         return
     }
+    let changed = false
     setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            changed=true
             o.on = true
         }
         return o
     })
-    global['reloadPlugin'](setting, __dirname.split("\\").pop())
-    initMatchSetting()
-    global.replyMsg(context,`已启用推送${title}`)
+    if (changed){
+        global['reloadPlugin'](setting, __dirname.split("\\").pop())
+        initMatchSetting()
+        global.replyMsg(context,`已启用推送${title}`)
+    }else{
+        global.replyMsg(context,`未找到推送${title}`)
+    }
 }
 
 function closeRss(context) {
@@ -244,15 +262,21 @@ function closeRss(context) {
         global.replyMsg(context, '请输入要关闭的推送', true)
         return
     }
+    let changed = false
     setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
+            changed = true
             o.on = false
         }
         return o
     })
-    global['reloadPlugin'](setting, __dirname.split("\\").pop())
-    initMatchSetting()
-    global.replyMsg(context,`已关闭推送${title}`)
+    if (changed){
+        global['reloadPlugin'](setting, __dirname.split("\\").pop())
+        initMatchSetting()
+        global.replyMsg(context,`已关闭推送${title}`)
+    }else{
+        global.replyMsg(context,`未找到推送${title}`)
+    }
 }
 
 export default {
