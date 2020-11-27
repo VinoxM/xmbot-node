@@ -329,13 +329,8 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
         star3: [],
         star2: []
     }
-    for (const char of chars) {
-        stars[char.star].push(char.id)
-        let star_pool = pool.pools[char.star].pool
-        let index = star_pool.indexOf(String(char.id))
-        if (index > -1) star_pool.splice(index, 1)
-    }
-    for (const key of Object.keys(pool.pools)) {
+    let keys_ = Object.keys(pool.pools)
+    for (const key of keys_) {
         if (key.startsWith('pick_up')) {
             let s = pool.pools[key].prefix.split('★').length - 1
             let p = pool.pools['star' + s].pool
@@ -343,6 +338,13 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
             pool.pools['star' + s].pool = p
             delete pool.pools[key]
         }
+    }
+    for (const char of chars) {
+        stars[char.star].push(char.id)
+        let star_pool = pool.pools[char.star].pool
+        let index = star_pool.indexOf(String(char.id))
+        if (index > -1) star_pool.splice(index, 1)
+        pool.pools[char.star].pool = star_pool
     }
     if (stars.star3.length > 0) {
         pool.pools.pick_up = {
