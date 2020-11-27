@@ -95,7 +95,7 @@ function addListener(args){
             for (let i of Object.keys(global.plugins)) {
                 let p = global.plugins[i]
                 if (typeof p == 'undefined') continue // 过滤空plugins
-                if (p.needPrefix||(!p.needPrefix&&through)){ // 不需要前缀||需要前缀
+                if (!p.needPrefix||(p.needPrefix&&through)){ // 不需要前缀||需要前缀
                     if ("match" in p){
                         canRepeat = p["match"](record) //返回true则该条信息可以触发复读,返回false或不返回则不能触发
                         if (canRepeat&&!repeated) {
