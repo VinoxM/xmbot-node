@@ -222,7 +222,6 @@ export function viewCharacter(context, isIndex = false) { // 查看角色
 }
 
 export function updateCharacter(context,isAddNickNames = false) {
-    console.log(nickNames)
     let msg = context['raw_message']
     let split = msg.split(':')
     if (split.length!==2){
