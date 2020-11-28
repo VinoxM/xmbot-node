@@ -24,8 +24,8 @@ export function generalMatch(context,matchDict) {
 }
 
 export function checkMatchRules(m,context) {
-    let check = m.rules&&m.rules.length>0?checkRules(m.rules,context):-1
-    if (check===-1)
+    let check = m.rules&&m.rules.length>0?checkRules(m.rules,context):'-1'
+    if (check==='-1')
         return m.func(context)
     else {
         context['err']=check
@@ -34,10 +34,10 @@ export function checkMatchRules(m,context) {
 }
 
 function checkRules(rules,context) {
-    if (rules.indexOf('admin')>-1&&!checkIsAdmin(context)) return 0
-    if (rules.indexOf('private')>-1&&!checkIsPrivate(context)) return 1
-    if (rules.indexOf('group')>-1&&!checkIsGroup(context)) return 2
-    return -1
+    if (rules.indexOf('admin')>-1&&!checkIsAdmin(context)) return '0'
+    if (rules.indexOf('private')>-1&&!checkIsPrivate(context)) return '1'
+    if (rules.indexOf('group')>-1&&!checkIsGroup(context)) return '2'
+    return '-1'
 }
 
 export function checkIsAdmin(context){
