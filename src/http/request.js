@@ -10,7 +10,9 @@ export function addListener(app) {
                 app[key](l, (req, res) => {
                     if (!req.url.startsWith('/xmbot')) global['LOG'](`user access[${req.method}:${req.url}]`)
                     if (listener[key][l].needAuth)
-                        checkAuthor(req, res).then(listener[key][l].func(req, res))
+                        checkAuthor(req, res).then(listener[key][l].func(req, res)).catch(err=> {
+                            res.send(err)
+                        })
                     else
                         listener[key][l].func(req, res)
                 })
@@ -33,7 +35,7 @@ function checkAuthor(req, res) {
         jwtVerify(token, salt).then(re => {
             resolve()
         }).catch(e => {
-            res.send(new BaseRequest('登录过期', 501))
+            reject(new BaseRequest('登录过期', 501))
         })
     })
 }
