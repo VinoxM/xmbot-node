@@ -34,6 +34,12 @@ function initPcrSetting() { // 加载配置
 
 initPcrSetting()
 
+export function currentPool(context) {
+    let suffix = setting.default_pool
+    let poolPickUp = getPoolPickUp(suffix);
+    global.replyMsg(context,`${pool_suffix[suffix]}\n->Pick Up:${poolPickUp.join(',')}`)
+}
+
 export function initNickName(context, isReload = false) { // 加载角色
     try {
         return new Promise((resolve, reject) => {
@@ -439,6 +445,54 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
         context['message'] = `已切换${pool_suffix[pool_name]}UP角色\n->Pick up:${getPoolPickUp(pool_name)}`
         global.replyMsg(context, null)
     })
+}
+
+export function removeCharFromPool(context,suffix = false) {
+    let msg = context['raw_message']
+    if (msg === '') {
+        global.replyMsg(context,'请输入要移除的角色名',true)
+    }
+    let pool_name = setting.default_pool
+    if (suffix) pool_name = 'pool_'+suffix
+    let pool  = pools[pool_name]
+    let filter = characterFilter(msg,true)
+    if (filter.notFound.length>0){
+        global.replyMsg(context,`角色${filter.notFound.join(',')}未找到`,true)
+        return
+    }
+    let keys = Object.keys(pool.pools)
+    let isPickUp = []
+    for (const key of keys) {
+        if (key.startsWith('pick_up')){
+            filter.charInfo.some(obj => {
+                let o = obj[0]
+                if (pool.pools[key].pool.indexOf(String(o.id)) > -1) {
+                    isPickUp.push(o.inputName)
+                    return true
+                }
+                return false
+            })
+        }
+    }
+    if (isPickUp.length>0){
+        global.replyMsg(context,`角色${isPickUp.join(',')}正UP中`,true)
+        return
+    }
+    let notInPool = []
+    let spliced = []
+    filter.charInfo.forEach(obj=>{
+        let o = obj[0]
+        let p = pool.pools[o.star].pool
+        let index = p.indexOf(String(o.id))
+        if (index>-1) {
+            p.splice(index, 1)
+            spliced.push(o.inputName)
+        }
+        else notInPool.push(o.inputName)
+    })
+    let reply_spliced = spliced.length>0?('角色'+spliced.join(',')+'已移除'):''
+    let reply_notInPool = notInPool.length>0?('角色'+notInPool.join(',')+'不在卡池中'):''
+    global.replyMsg(context,`${reply_spliced}${reply_spliced===''||reply_notInPool===''?'':','}${reply_notInPool}`,true)
 }
 
 function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角色

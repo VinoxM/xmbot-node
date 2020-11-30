@@ -9,6 +9,7 @@ function initSetting() {
 initSetting()
 
 const matchDict = [
+    {match:['当前卡池'],startWith:false,needReplace:false,rules:[],func:pcr.currentPool},
     {match:['新增角色'],startWith:true,needReplace:true,rules:['admin','private'],func:pcr.addCharacter},
     {match:['删除角色'],startWith:true,needReplace:true,rules:[],func:pcr.delCharacter},
     {match:['删除序号角色'],startWith:true,needReplace:true,rules:[],func:(context)=>pcr.delCharacter(context,true)},
@@ -39,6 +40,10 @@ const matchDict = [
     {match:['切换台服up角色','切换台服up'],startWith:true,needReplace:true,rules:['group'],func:(context)=>pcr.changePoolPickUp(context,'tw')},
     {match:['修改角色','更新角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.updateCharacter(context)},
     {match:['添加角色昵称'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.updateCharacter(context,true)},
+    {match:['移除卡池角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.removeCharFromPool(context)},
+    {match:['移除日服角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.removeCharFromPool(context,'jp')},
+    {match:['移除国服角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.removeCharFromPool(context,'cn')},
+    {match:['移除台服角色'],startWith:true,needReplace:true,rules:['admin'],func:(context)=>pcr.removeCharFromPool(context,'tw')},
 ]
 
 function match(context) {

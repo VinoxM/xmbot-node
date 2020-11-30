@@ -89,6 +89,7 @@ function handleRssText() { // 处理Rss信息
         let r = Rss[key]
         let items = r.rss.channel.item
         let last_id = r.last_id
+        console.log('Last Id :' + last_id)
         for (const [index, item] of items.entries()) {
             let str = String(item.link).replace(r.replace, "")
             if (index === 0) last_id = str
@@ -287,6 +288,7 @@ export default {
 }
 
 function strCompareTo(a, b) { // a>b return true; a<=b return false
+    console.log(`Compare :a[${a}] b[${b}]`)
     if (a.length !== b.length)
         return a.length > b.length
     for (let i = 0; i < a.length; i += 4) {

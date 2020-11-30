@@ -103,7 +103,7 @@ export function toCCTDateString(date) {
         time_zone -= 8
         d.setHours(tmpHours-time_zone)
     }
-    return `${d.getFullYear()}/${String(d.getMonth()).padStart(2,'0')}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
 }
 
 export function getNowNum(){
