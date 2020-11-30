@@ -54,5 +54,6 @@ function match(context) {//返回true则该条信息可以触发复读,返回fal
 export default {
     match,
     initMatchSetting,
-    needPrefix:false
+    needPrefix:false,
+    matchDict
 }

@@ -83,7 +83,7 @@ async function loadAllRss() { // 加载所有RSS订阅
     handleRssText()
 }
 
-function handleRssText() { // 处理Rss信息
+async function handleRssText() { // 处理Rss信息
     let replyMsg = []
     for (const key of Object.keys(Rss)) {
         let r = Rss[key]
@@ -110,8 +110,7 @@ function handleRssText() { // 处理Rss信息
         rss[index].last_id = last_id
     }
     setting.rss = rss
-    global['reloadPlugin'](setting, __dirname.split("\\").pop())
-    initMatchSetting()
+    await reloadRssPlugins()
     if (replyMsg.length > 0) {
         global['LOG'](`RSS源共有${replyMsg.length}条新信息`)
         for (const msg of replyMsg) {
@@ -166,7 +165,7 @@ function startRSSHub() { // 开始运行RSS检查
     }, init_time)
 }
 
-function shieldRss(context) {
+async function shieldRss(context) {
     let title = context['raw_message']
     if (title === '') {
         global.replyMsg(context, '请输入要屏蔽的推送', true)
@@ -190,16 +189,15 @@ function shieldRss(context) {
         }
         return o
     })
-    if (changed){
-        global['reloadPlugin'](setting, __dirname.split("\\").pop())
-        initMatchSetting()
+    if (changed) {
+        await reloadRssPlugins()
         global.replyMsg(context, `已屏蔽对${isGroup ? '该群' : '您'}的${title}推送`)
-    }else{
+    } else {
         global.replyMsg(context, `未找到${title}推送`)
     }
 }
 
-function subscribeRss(context) {
+async function subscribeRss(context) {
     let title = context['raw_message']
     if (title === '') {
         global.replyMsg(context, '请输入要订阅的推送', true)
@@ -225,16 +223,15 @@ function subscribeRss(context) {
         }
         return o
     })
-    if (changed){
-        global['reloadPlugin'](setting, __dirname.split("\\").pop())
-        initMatchSetting()
+    if (changed) {
+        await reloadRssPlugins()
         global.replyMsg(context, `已订阅对${isGroup ? '该群' : '您'}的${title}推送`)
-    }else{
+    } else {
         global.replyMsg(context, `未找到${title}推送`)
     }
 }
 
-function openRss(context) {
+async function openRss(context) {
     let title = context['raw_message']
     if (title === '') {
         global.replyMsg(context, '请输入要启用的推送', true)
@@ -243,21 +240,20 @@ function openRss(context) {
     let changed = false
     setting.rss = rss.map(o => {
         if (o['name_filter'].indexOf(title.toUpperCase()) > -1) {
-            changed=true
+            changed = true
             o.on = true
         }
         return o
     })
-    if (changed){
-        global['reloadPlugin'](setting, __dirname.split("\\").pop())
-        initMatchSetting()
-        global.replyMsg(context,`已启用推送${title}`)
-    }else{
-        global.replyMsg(context,`未找到推送${title}`)
+    if (changed) {
+        await reloadRssPlugins()
+        global.replyMsg(context, `已启用推送${title}`)
+    } else {
+        global.replyMsg(context, `未找到推送${title}`)
     }
 }
 
-function closeRss(context) {
+async function closeRss(context) {
     let title = context['raw_message']
     if (title === '') {
         global.replyMsg(context, '请输入要关闭的推送', true)
@@ -271,22 +267,13 @@ function closeRss(context) {
         }
         return o
     })
-    if (changed){
-        global['reloadPlugin'](setting, __dirname.split("\\").pop())
-        initMatchSetting()
-        global.replyMsg(context,`已关闭推送${title}`)
-    }else{
-        global.replyMsg(context,`未找到推送${title}`)
+    if (changed) {
+        await reloadRssPlugins()
+        global.replyMsg(context, `已关闭推送${title}`)
+    } else {
+        global.replyMsg(context, `未找到推送${title}`)
     }
 }
-
-export default {
-    match: (context) => {
-        global['func']['generalMatch'](context, matchDict)
-    },
-    needPrefix: true
-}
-
 function strCompareTo(a, b) { // a>b return true; a<=b return false
     console.log(`Compare :a[${a}] b[${b}]`)
     if (a.length !== b.length)
@@ -299,4 +286,17 @@ function strCompareTo(a, b) { // a>b return true; a<=b return false
             return x > y
     }
     return false
+}
+
+async function reloadRssPlugins() {
+    await global['reloadPlugin'](setting, __dirname.split("\\").pop())
+    await initMatchSetting()
+}
+
+export default {
+    match: (context) => {
+        global['func']['generalMatch'](context, matchDict)
+    },
+    needPrefix: true,
+    matchDict
 }

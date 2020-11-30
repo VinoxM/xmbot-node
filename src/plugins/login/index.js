@@ -134,7 +134,7 @@ async function selUserLoginCount(user_id) {
     return res
 }
 
-function newUserSaltAndSave(userId, baseUrl, salt) {
+async function newUserSaltAndSave(userId, baseUrl, salt) {
     let user_info = {
         user_id: String(userId),
         salt: salt?salt:uuid.v4(),
@@ -146,7 +146,7 @@ function newUserSaltAndSave(userId, baseUrl, salt) {
     })
     if (index === -1) setting['reset_dict'].push(user_info)
     else setting['reset_dict'].splice(index, 1, user_info)
-    global['reloadPlugin'](setting, __dirname.split("\\").pop(), true)
+    await global['reloadPlugin'](setting, __dirname.split("\\").pop(), true)
     return baseUrl?`${baseUrl}user=${user_info.user_id}&salt=${user_info.salt}`:''
 }
 
@@ -168,5 +168,6 @@ export default {
     checkUserExists,
     checkSalt,
     newUserSaltAndSave,
-    selUserLoginCount
+    selUserLoginCount,
+    matchDict
 }

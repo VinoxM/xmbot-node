@@ -447,6 +447,10 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
     })
 }
 
+export function addCharIntoPool(context,suffix = false) {
+
+}
+
 export function removeCharFromPool(context,suffix = false) {
     let msg = context['raw_message']
     if (msg === '') {

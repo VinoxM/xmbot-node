@@ -364,4 +364,5 @@ export default {
     initSetting,
     match,
     needPrefix: true,
+    matchDict
 }

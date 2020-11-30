@@ -54,5 +54,6 @@ export default {
     initSetting,
     match,
     needPrefix:true,
-    pcr
+    pcr,
+    matchDict
 }

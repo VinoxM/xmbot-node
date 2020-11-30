@@ -254,6 +254,27 @@ const listener = {
                     res.send(new BaseRequest('登录信息错误',501))
                 }
             }
+        },
+        '/getMatchDict.json':{
+            needAuth:false,
+            func:(req,res)=>{
+                let plugins = global['plugins']
+                let keys = Object.keys(plugins)
+                let result = {}
+                for (const key of keys) {
+                    result[key] = plugins[key].hasOwnProperty('matchDict')?plugins[key]['matchDict'].map(o=>{
+                        return {
+                            match:o.match,
+                            rules:o.rules?o.rules:[],
+                            startWith:o.startWith,
+                            needReplace:o.needReplace,
+                            describe:o.describe,
+                            needPrefix:o.hasOwnProperty('needPrefix')?o.needPrefix:plugins[key]['needPrefix']
+                        }
+                    }):[]
+                }
+                res.send(new ObjRequest(result))
+            }
         }
     },
     post: {

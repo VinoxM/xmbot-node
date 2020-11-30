@@ -4,6 +4,7 @@ const fs = require('fs')
 export function generalMatch(context,matchDict) {
     let raw_msg = context["raw_message"];
     for (let m of matchDict){
+        if (m.needPrefix&&raw_msg===context['message']&&global['func']['checkIsGroup'](context)) continue
         if (!m.startWith){
             let index = m.match.indexOf(raw_msg.toLowerCase())
             if (index > -1) {
@@ -109,4 +110,18 @@ export function toCCTDateString(date) {
 export function getNowNum(){
     let date = new Date()
     return (date.getFullYear()) * 100000000 + (date.getMonth() + 1) * 1000000 + (date.getDate() * 10000 + date.getHours() * 100 + date.getMinutes())
+}
+
+export function checkMessagePrefix(context) {
+    let prefix = global['config'].default.prefix
+    let through = false
+    let raw_message = ''
+    for (let p of prefix){
+        if (context["message"].startsWith(p)) {
+            raw_message=context["message"].substring(p.length).trim();
+            through = true;
+            break;
+        }
+    }
+    return {through,raw_message}
 }
