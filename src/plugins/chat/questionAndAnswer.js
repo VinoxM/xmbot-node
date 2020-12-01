@@ -54,6 +54,6 @@ export function queAndAndDel(context){
             }
             return false
         }))context["message"] = `未找到问答:${msg}`
-    }else context["err"]=0
+    }else context["err"]='0'
     global.replyMsg(context,null,global['func']['checkIsGroup'](context))
 }

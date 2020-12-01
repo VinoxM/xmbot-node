@@ -42,7 +42,7 @@ function checkRules(rules,context) {
 }
 
 export function checkIsAdmin(context){
-    return global["config"].default["master"].some((o)=>o===context['user_id'])
+    return global["config"].default["master"].some((o)=>String(o)===String(context['user_id']))
 }
 
 export function checkIsGroup(context) {

@@ -23,7 +23,7 @@ function update(context,isForce = false) {
     global.replyPrivate(context)
     checkVersion(isForce).then(res=>{
         if (res.needUpdate){
-            context['message']='有可用更新版本:'+res.ver.version+',正在下载更新...'
+            context['message']='最新版本:'+res.ver.version+',正在下载更新...'
             doUpdate(context['user_id'])
         }else {
             context['message']='已是最新版本'
@@ -85,5 +85,6 @@ function doUpdate(user_id) {
 export default {
     initSetting,
     match,
-    needPrefix: true
+    needPrefix: true,
+    matchDict
 }

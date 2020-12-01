@@ -277,6 +277,14 @@ const listener = {
                 }
                 res.send(new ObjRequest(result))
             }
+        },
+        '/checkIsAdmin.valid':{
+            needAuth:true,
+            func:(req,res)=>{
+                let query = req.query
+                let check = global['func']['checkIsAdmin'](query)
+                res.send(new BaseRequest('',check?0:506))
+            }
         }
     },
     post: {
@@ -323,6 +331,35 @@ const listener = {
                     .catch(e => {
                         res.send(new BaseRequest('Failed!', 500))
                     })
+            }
+        },
+        '/setting/pcr-nickNames.save': {
+            needAuth:true,
+            func: (req,res) =>{
+                let params = req.body
+                let nickNames = global['plugins']['gacha']['pcr']['nickNames']
+                let check = global['plugins']['gacha']['pcr']['checkCharTypeAndStar'](params.type,params.star)
+                if (check.flag){
+                    if (nickNames.hasOwnProperty(params.num)) {
+                        res.send(new BaseRequest('角色代号已存在',500))
+                    }else{
+                        nickNames[params.num]=[params.type,params.star,params.num,params['jp_name'],params['cn_name']]
+                        if (params['nickNames'].length>0){
+                            nickNames[params.num].push.apply(params['nickNames'])
+                        }
+                        if (params.hasOwnProperty('image')){
+                            console.log(params.image)
+                        }
+                        global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
+                            res.send(new BaseRequest('Success!',0))
+                        }).catch(e=>{
+                            global['ERR'](e)
+                            res.send(new BaseRequest('Failed!',500))
+                        })
+                    }
+                }else{
+                    res.send(new BaseRequest(check.check,500))
+                }
             }
         }
     }

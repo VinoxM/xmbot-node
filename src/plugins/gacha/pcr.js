@@ -5,7 +5,7 @@ import {PcrGacha} from './pcr-gacha'
 let setting = null;
 let pools = null;
 let character = null;
-let nickNames = null;
+export let nickNames = null;
 const nickNamePath = path.join(global['source'].main, 'docs', 'pcr');
 const charRules = { // 角色规范
     type: {
@@ -131,7 +131,7 @@ function checkName(names,id = false) { // 检查名称
     return res
 }
 
-function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
+export function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
     let check = {type: false, star: false}
     let charType = charRules.type
     for (let t in charType) {
@@ -161,7 +161,7 @@ function checkCharTypeAndStar(type, star) { // 检查角色类型和星级规范
         }
         return {check:`角色星级不规范[${starRules.join(',')}]`,flag:true}
     }
-    return {flag:false,check}
+    return {flag:true,check}
 }
 
 export function delCharacter(context, byIndex = false) { // 删除角色
@@ -308,15 +308,16 @@ function characterFilter(raw_message, isIndex) { // 筛选角色
     return result
 }
 
-export function saveNickNames(fileName = 'nickname.csv') { // 保存角色到文件
+export function saveNickNames(fileName = 'nickname.csv',json = false) { // 保存角色到文件
+    let nickName = json?json:nickNames
     return new Promise((resolve, reject) => {
-        let values = Object.values(nickNames);
+        let values = Object.values(nickName);
         values.sort((a, b) => Number(a[2]) - Number(b[2]))
         let str = values.map(o => {
             return o.join(',')
         }).join('\n')
         let buffer = Buffer.from(str);
-        fs['writeFile'](path.join(nickNamePath, fileName), buffer, (err) => {
+        fs['writeFile'](path.join(nickNamePath, fileName?fileName:'nickname.csv'), buffer, (err) => {
             if (err) {
                 global['ERR'](err)
                 reject(err)
@@ -499,7 +500,8 @@ export function removeCharFromPool(context,suffix = false) {
     global.replyMsg(context,`${reply_spliced}${reply_spliced===''||reply_notInPool===''?'':','}${reply_notInPool}`,true)
 }
 
-function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角色
+function saveCharacters(fileName = 'setting-pcr-character.json',json = false) { // 保存角色
+    let nickName = json?json:nickNames
     let char = {
         hidden: {
             star1: {}, star2: {}, star3: {}
@@ -511,7 +513,7 @@ function saveCharacters(fileName = 'setting-pcr-character.json') { // 保存角�
             star1: {}, star2: {}, star3: {}
         }
     }
-    for (const n of Object.values(nickNames)) {
+    for (const n of Object.values(nickName)) {
         char[n[0]][n[1]][n[2]] = [n[3], n[4]]
     }
     return new Promise((resolve, reject) => {

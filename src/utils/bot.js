@@ -35,6 +35,7 @@ function addListener(args){
         .on('socket.error', (wsType, err) => {
             global['ERR'](`WebSocket连接错误:${err}`);
         })
+        .on('socket.connect', (wsType, sock, attempts) => global['LOG'](`WebSocket连接成功:${sock.url}`))
         .once('ready',()=>{
             bot.send={
                 private:(params)=>bot("send_private_msg",params),
@@ -55,7 +56,6 @@ function addListener(args){
                 }
             }
         })
-        .on('socket.connect', (wsType, sock, attempts) => global['LOG'](`WebSocket连接成功:${sock.url}`))
         .on('message', (event,record,tags) => {// 监听接收信息处理
             onReceiveLog(record);
 
@@ -98,7 +98,7 @@ function addListener(args){
                 if (!p.needPrefix||(p.needPrefix&&through)){ // 不需要前缀||需要前缀
                     if ("match" in p){
                         canRepeat = p["match"](record) //返回true则该条信息可以触发复读,返回false或不返回则不能触发
-                        if (canRepeat&&!repeated) {
+                        if (typeof canRepeat==='boolean'&&canRepeat&&!repeated) {
                             global['repeat']['handleRepeat'](record)
                             repeated = true
                         }
