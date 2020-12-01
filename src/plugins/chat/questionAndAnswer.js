@@ -40,20 +40,25 @@ export function queAndAnsView(context){
     global.replyMsg(context,null,global['func']['checkIsGroup'](context))
 }
 
-export function queAndAndDel(context){
+export async function queAndAndDel(context) {
     let setting = global['config']['chat']
-    if (global['func']['checkIsAdmin'](context)){
-        let msg = context["raw_message"].replace("删除问答:","")
-        if(!setting["Q&A"].some(async (o,i)=>{
-            if (o.question===msg){
-                setting["Q&A"].splice(i,1)
-                await global['reloadPlugin'](setting,__dirname.split("\\").pop())
-                global['plugins']['chat']['initMatchSetting']()
-                context["message"]=`已删除问答:${msg}`
+    if (global['func']['checkIsAdmin'](context)) {
+        let msg = context["raw_message"].replace("删除问答:", "")
+        let flag = setting["Q&A"].some((o, i) => {
+            if (o.question === msg) {
+                setting["Q&A"].splice(i, 1)
+                context["message"] = `已删除问答:${msg}`
                 return true
             }
             return false
-        }))context["message"] = `未找到问答:${msg}`
-    }else context["err"]='0'
-    global.replyMsg(context,null,global['func']['checkIsGroup'](context))
+        })
+        if (!flag) context["message"] = `未找到问答:${msg}`
+        else{
+            await global['reloadPlugin'](setting, __dirname.split("\\").pop())
+            global['plugins']['chat']['initMatchSetting']()
+        }
+    } else {
+        context["err"] = '0'
+    }
+    global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }
