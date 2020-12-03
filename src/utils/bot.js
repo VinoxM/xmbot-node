@@ -145,18 +145,18 @@ export function replyGroup(context,at = false) {
 }
 
 function checkContextError(context) {
-    if (context.err){
+    if (context.hasOwnProperty('err')){
         switch (context.err) {
             case 'isNotAdmin':
-            case '0':
+            case 0:
                 context['message']='只有主人可以这么命令我'
                 break;
             case 'isNotPrivate':
-            case '1':
+            case 1:
                 context['message']='请私聊使用该指令'
                 break;
             case 'isNotGroup':
-            case '2':
+            case 2:
                 context['message']='请在群聊中使用该指令'
                 break;
         }

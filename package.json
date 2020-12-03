@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "cors": "^2.8.5",
+    "formidable": "^1.2.2",
     "node-uuid": "^1.4.8",
     "request": "^2.88.2",
     "x2js": "^3.4.0"

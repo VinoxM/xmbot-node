@@ -58,7 +58,7 @@ export async function queAndAndDel(context) {
             global['plugins']['chat']['initMatchSetting']()
         }
     } else {
-        context["err"] = '0'
+        context["err"] = 0
     }
     global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }

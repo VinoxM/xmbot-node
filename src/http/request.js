@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import uuid from 'node-uuid'
+import formidable from 'formidable'
 
 export function addListener(app) {
     for (let key in listener) {
@@ -10,7 +11,15 @@ export function addListener(app) {
                 app[key](l, (req, res) => {
                     if (!req.url.startsWith('/xmbot')) global['LOG'](`user access[${req.method}:${req.url}]`)
                     if (listener[key][l].needAuth)
-                        checkAuthor(req, res).then(listener[key][l].func(req, res)).catch(err=> {
+                        checkAuthor(req, res).then(()=> {
+                            if (listener[key][l].needAdmin){
+                                checkRequestAdmin(req,res).then(listener[key][l].func(req, res))
+                                    .catch(err=>{
+                                        res.send(err)
+                                    })
+                            }else
+                                listener[key][l].func(req, res)
+                        }).catch(err=> {
                             res.send(err)
                         })
                     else
@@ -37,6 +46,16 @@ function checkAuthor(req, res) {
         }).catch(e => {
             reject(new BaseRequest('登录过期', 501))
         })
+    })
+}
+
+function checkRequestAdmin(req,res) {
+    return new Promise((resolve, reject) => {
+        let user_id = req.headers.user_id
+        if (user_id&&user_id!==''){
+            if (global['func']['checkIsAdmin']({user_id})) resolve()
+            else reject(new BaseRequest('权限不足',503))
+        }else reject(new BaseRequest('未登录',502))
     })
 }
 
@@ -174,6 +193,22 @@ const listener = {
                 res.send(new ObjRequest(global['config']['gacha']['pcr-character']))
             }
         },
+        '/xmbot/resource/gacha/utils/*': {
+            needAuth: false,
+            func: (req, res) => {
+                res.setHeader('Content-Type', 'image/jpeg')
+                let fileName = req.url.replace('/xmbot/resource/gacha/utils/', '')
+                let filePath = path.join(global['source'].resource, 'gacha', 'utils')
+                let fullPath = path.join(filePath, fileName)
+                fs.access(fullPath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        res.sendFile(fullPath)
+                    } else {
+                        res.send(new BaseRequest('Image Not Found!',500));
+                    }
+                })
+            }
+        },
         '/xmbot/resource/icon/unit/*': {
             needAuth: false,
             func: (req, res) => {
@@ -285,6 +320,13 @@ const listener = {
                 let check = global['func']['checkIsAdmin'](query)
                 res.send(new BaseRequest('',check?0:506))
             }
+        },
+        '/setting/pcr/nickNames.json':{
+            needAuth:true,
+            func:(req,res)=>{
+                let nickNames = global['plugins']['gacha']['pcr']['nickNames']
+                res.send(new ObjRequest(nickNames))
+            }
         }
     },
     post: {
@@ -335,30 +377,58 @@ const listener = {
         },
         '/setting/pcr-nickNames.save': {
             needAuth:true,
+            needAdmin:true,
             func: (req,res) =>{
+                let form = new formidable.IncomingForm()
+                form.parse(req,function (err,fields,files) {
+                    if (err===null){
+                        let params = fields
+                        let nickNames = global['plugins']['gacha']['pcr']['nickNames']
+                        let check = global['plugins']['gacha']['pcr']['checkCharTypeAndStar'](params.type,params.star)
+                        if (check.flag){
+                            if (params['isEdit']==='0'&&nickNames.hasOwnProperty(params.num)) {
+                                res.send(new BaseRequest('角色代号已存在',500))
+                            }else{
+                                nickNames[params.num]=[params.type,params.star,params.num,params['jp_name'],params['cn_name']]
+                                params['nickNames']=params['nickNames'].split(',')
+                                if (params['nickNames'].length>=1&&params['nickNames'][0]!==''){
+                                    nickNames[params.num]=[...nickNames[params.num],...params['nickNames']]
+                                }
+                                if (files.hasOwnProperty('image')){
+                                    let savePath = path.join(global['source']['resource'],'icon','unit',params.num+(params.star.replace('star','')==='3'?'3':'1')+'1.jpg')
+                                    fs.writeFileSync(savePath,fs.readFileSync(files.image.path))
+                                }
+                                global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
+                                    res.send(new BaseRequest('Success!',0))
+                                }).catch(e=>{
+                                    global['ERR'](e)
+                                    res.send(new BaseRequest('Failed!',500))
+                                })
+                            }
+                        }else{
+                            res.send(new BaseRequest(check.check,500))
+                        }
+                    }else
+                        res.send(new BaseRequest('Upload Failed!',500))
+                })
+            }
+        },
+        '/setting/pcr/delCharacter.do':{
+            needAuth:true,
+            needAdmin:true,
+            func:(req,res)=>{
                 let params = req.body
                 let nickNames = global['plugins']['gacha']['pcr']['nickNames']
-                let check = global['plugins']['gacha']['pcr']['checkCharTypeAndStar'](params.type,params.star)
-                if (check.flag){
-                    if (nickNames.hasOwnProperty(params.num)) {
-                        res.send(new BaseRequest('角色代号已存在',500))
-                    }else{
-                        nickNames[params.num]=[params.type,params.star,params.num,params['jp_name'],params['cn_name']]
-                        if (params['nickNames'].length>0){
-                            nickNames[params.num].push.apply(params['nickNames'])
-                        }
-                        if (params.hasOwnProperty('image')){
-                            console.log(params.image)
-                        }
-                        global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
-                            res.send(new BaseRequest('Success!',0))
-                        }).catch(e=>{
-                            global['ERR'](e)
-                            res.send(new BaseRequest('Failed!',500))
-                        })
-                    }
+                if (nickNames.hasOwnProperty(params.num)) {
+                    delete nickNames[params.num]
+                    global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
+                        res.send(new BaseRequest('Success!',0))
+                    }).catch(e=>{
+                        global['ERR'](e)
+                        res.send(new BaseRequest('Failed!',500))
+                    })
                 }else{
-                    res.send(new BaseRequest(check.check,500))
+                    res.send(new BaseRequest('未找到该角色',500))
                 }
             }
         }
