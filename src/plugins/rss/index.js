@@ -180,7 +180,7 @@ async function shieldRss(context) {
             let reply_id = context[key + '_id']
             let push_list = []
             if (o['push_' + key] === 'all') {
-                push_list = setting.push_list[key]
+                push_list = new Array(setting.push_list[key])
             } else {
                 push_list = o['push_' + key]
             }
