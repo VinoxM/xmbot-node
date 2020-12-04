@@ -12,7 +12,7 @@ export function initBot(args){
 
 export function restartBot(user_id) {
     bot.disconnect()
-    initBot(['restart',user_id])
+    initBot(user_id?['restart',user_id]:[])
 }
 
 const msgType = {

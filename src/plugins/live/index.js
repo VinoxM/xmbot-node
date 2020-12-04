@@ -20,7 +20,7 @@ const matchDict = [
     {match: ["开始直播","开播"], startWith: false, needReplace: false, rules: ['admin'], func: startLive},
     {match: ["关闭直播","下播"], startWith: false, needReplace: false, rules: ['admin'], func: stopLive},
     {match: ["修改直播间标题:","修改直播间标题"], startWith: true, needReplace: true, rules: ['admin'], func: changeTitle},
-    {match: ["修改直播分区:","修改直播分区"], startWith: true, needReplace: true, rules: ['admin'], func: changeArea},
+    {match: ["修改直播分区:","修改直播分区","切换直播分区","切换直播分区"], startWith: true, needReplace: true, rules: ['admin'], func: changeArea},
     {match: ["更新直播cookie:","更新直播cookie"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateCookie},
     {match: ["更新直播token:","更新直播token"], startWith: true, needReplace: true, rules: ['admin','private'], func: updateToken},
     {match: ["直播信息"], startWith: false, needReplace: false, rules: [], func: getRoomInfo},
@@ -118,78 +118,91 @@ async function flushRoomInfo(needFlushRtmp = true){
 
 flushRoomInfo().then()
 
-function startLive(context) {
-    if (roomInfo['live_status']===1){
-        global.replyMsg(context,`已开始直播\n${getLiveStr()}`+(global['func']['checkIsGroup']?getRtmpStr(rtmpInfo):''),true)
+async function startLive(context) {
+    await flushRoomInfo(false)
+    if (roomInfo['live_status'] === 1) {
+        global.replyMsg(context, `已开始直播\n${getLiveStr()}` + (global['func']['checkIsGroup'] ? getRtmpStr(rtmpInfo) : ''), true)
         return
     }
-    if (roomInfo['area_id']){
-        area_info= {id:roomInfo['area_id'],name:roomInfo['area_name']}
-    }else{
+    if (roomInfo['area_id']) {
+        area_info = {id: roomInfo['area_id'], name: roomInfo['area_name']}
+    } else {
         let area = context['raw_message']
-        if(area===''){
-            global.replyMsg(context,'请输入直播分区',true)
+        if (area === '') {
+            global.replyMsg(context, '请输入直播分区', true)
             return
         }
-        let flag = areaList.some(o=>{
-            if (String(o.id)===area||String(o.name)===area){
-                area_info= {id:o.id,name:o.name}
+        let flag = areaList.some(o => {
+            if (String(o.id) === area || String(o.name) === area) {
+                area_info = {id: o.id, name: o.name}
                 return true
             }
             return false
         })
-        if (!flag){
-            global.replyMsg(context,`未找到分区:${area}`,true)
+        if (!flag) {
+            global.replyMsg(context, `未找到分区:${area}`, true)
             return
         }
     }
     request.post({
-        url:'https://api.live.bilibili.com/room/v1/Room/startLive',
-        form:{room_id:setting['room_id'],platform:'pc',area_v2:area_info.id,csrf_token:setting['csrf_token'],csrf:setting['csrf_token']},
-        headers:{cookie:setting.cookie}
-    },(err,response,body)=>{
-        if (err){
+        url: 'https://api.live.bilibili.com/room/v1/Room/startLive',
+        form: {
+            room_id: setting['room_id'],
+            platform: 'pc',
+            area_v2: area_info.id,
+            csrf_token: setting['csrf_token'],
+            csrf: setting['csrf_token']
+        },
+        headers: {cookie: setting.cookie}
+    }, (err, response, body) => {
+        if (err) {
             global['ERR'](`开始直播出错:${err}`)
-            global.replyMsg(context,'开始直播出错',true)
-        }else{
+            global.replyMsg(context, '开始直播出错', true)
+        } else {
             let res = JSON.parse(body)
-            if (res.code!==0){
-                global.replyMsg(context,`开始直播失败:${res.msg}`,true)
+            if (res.code !== 0) {
+                global.replyMsg(context, `开始直播失败:${res.msg}`, true)
                 return
             }
             let rtmp = {
-                addr:res.data['rtmp']['addr'],
-                code:res.data['rtmp']['code']
+                addr: res.data['rtmp']['addr'],
+                code: res.data['rtmp']['code']
             }
             rtmpInfo = rtmp
             let live_info = getLiveStr()
             let rtmp_info = getRtmpStr(rtmp)
-            global.replyMsg(context,`开始直播成功\n${live_info}`+(global['func']['checkIsGroup'](context)?'':rtmp_info),true)
+            global.replyMsg(context, `开始直播成功\n${live_info}` + (global['func']['checkIsGroup'](context) ? '' : rtmp_info), true)
             flushRoomInfo(false).then()
         }
     })
 }
 
-function stopLive(context) {
-    if (roomInfo['live_status']===0){
-        global.replyMsg(context,'您未开始直播',true)
+async function stopLive(context) {
+    await flushRoomInfo(false)
+    if (roomInfo['live_status'] === 0) {
+        global.replyMsg(context, '您未开始直播', true)
         return
     }
     request.post({
-        url:'https://api.live.bilibili.com/room/v1/Room/stopLive',
-        form:{room_id:setting['room_id'],platform:'pc',csrf_token:setting['csrf_token'],csrf:setting['csrf_token']},
-        headers:{cookie:setting.cookie}
-    },(err,response,body)=>{
-        if (err){
+        url: 'https://api.live.bilibili.com/room/v1/Room/stopLive',
+        form: {
+            room_id: setting['room_id'],
+            platform: 'pc',
+            csrf_token: setting['csrf_token'],
+            csrf: setting['csrf_token']
+        },
+        headers: {cookie: setting.cookie}
+    }, (err, response, body) => {
+        if (err) {
             global['ERR'](`关闭直播出错:${err}`)
-            global.replyMsg(context,'关闭直播出错',true)
-        }else{
+            global.replyMsg(context, '关闭直播出错', true)
+        } else {
             let res = JSON.parse(body)
-            if (res.code===0){
-                global.replyMsg(context,'关闭直播成功',true)
+            if (res.code === 0) {
+                global.replyMsg(context, '关闭直播成功', true)
                 flushRoomInfo().then()
-            }else{
-                global.replyMsg(context,`关闭直播失败:${res.msg}`,true)
+            } else {
+                global.replyMsg(context, `关闭直播失败:${res.msg}`, true)
             }
         }
     })
@@ -243,6 +256,7 @@ function changeArea(context) {
     updateArea(area_info.id).then(res=>{
         if (res.code===0){
             global.replyMsg(context,`成功切换分区为${area}`,true)
+            flushRoomInfo(false).then()
         }else{
             global.replyMsg(context,`切换分区${area}失败:${res.msg}`,true)
         }
