@@ -1,40 +1,45 @@
-export function version(context){
-    context["message"]=global['version']
+export function dictUrl(context) {
+    let base_url = global['config'].default.base_url
+    global.replyMsg(context,`${base_url}plugins-dict`)
+}
+
+export function version(context) {
+    context["message"] = global['version']
     global.replyMsg(context)
 }
 
-export function reloadPlugins(context){
-    if (global['func']['checkIsAdmin'](context)){
-        if (context['message_type']==='private'){
-            let msg = context['raw_message'].replace('重载模块:','')
+export function reloadPlugins(context) {
+    if (global['func']['checkIsAdmin'](context)) {
+        if (context['message_type'] === 'private') {
+            let msg = context['raw_message'].replace('重载模块:', '')
             let keys = Object.keys(global['plugins'])
             keys.push('repeat')
             if (
-                keys.some(o=> {
-                    if (o==='default')
+                keys.some(o => {
+                    if (o === 'default')
                         return false
                     return o === msg
                 })
-            ){
+            ) {
                 let suc = false
-                if (msg==='repeat'){
+                if (msg === 'repeat') {
                     suc = global['reloadRepeat'](null)
                 } else {
-                    suc = global['reloadPlugin'](null,msg,true)
+                    suc = global['reloadPlugin'](null, msg, true)
                 }
-                context['message']=suc?`重载模块${msg}完成`:`重载模块${msg}失败`
-            }else context['message']='未找到该模块'
-        }else context['err']=1
-    }else context['err']=0
-    global.replyMsg(context,null,global['func']['checkIsGroup'](context))
+                context['message'] = suc ? `重载模块${msg}完成` : `重载模块${msg}失败`
+            } else context['message'] = '未找到该模块'
+        } else context['err'] = 1
+    } else context['err'] = 0
+    global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }
 
-export function restart(context){
-    if (global['func']['checkIsAdmin'](context)){
-        if (context['message_type']==='private'){
+export function restart(context) {
+    if (global['func']['checkIsAdmin'](context)) {
+        if (context['message_type'] === 'private') {
             global['restartBot'](context['user_id'])
             return
-        }else context['err']=1
-    }else context['err']=0
-    global.replyMsg(context,null,global['func']['checkIsGroup'](context))
+        } else context['err'] = 1
+    } else context['err'] = 0
+    global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }

@@ -1,5 +1,5 @@
 {
-  "on": false,
+  "on": true,
   "push_list": {
     "group": [
       902987930
@@ -15,7 +15,8 @@
       "time": {
         "hour": [
           8
-        ]
+        ],
+        "minute": [0]
       },
       "type": "today",
       "name": "today",
@@ -35,8 +36,9 @@
       "on": true,
       "time": {
         "hour": [
-          22
-        ]
+          23
+        ],
+        "minute": [3]
       },
       "type": "tomorrow",
       "name": "tomorrow",

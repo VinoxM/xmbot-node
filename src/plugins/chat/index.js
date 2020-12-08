@@ -9,6 +9,7 @@ const matchDict=[
     {match: ["version","ver","版本"],func:sysOrder.version},
     {match: ['重载模块:'],needPrefix:true,startWith: true,rules:['admin','private'],func:sysOrder.reloadPlugins},
     {match: ['重启'],needPrefix:true,rules:['admin','private'],func:sysOrder.restart},
+    {match: ['帮助手册'],needPrefix:true,rules:[],func:sysOrder.dictUrl},
 ]
 
 function initMatchSetting() {
