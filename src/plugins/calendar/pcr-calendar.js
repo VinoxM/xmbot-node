@@ -41,11 +41,11 @@ export class PcrCalendar {
                 break
             case 'yesterday':
                 reply_prefix = calendar_source[area].title + '昨日活动'
-                range[0].setDate(date.getDate() - 1)
+                range[0].setDate(range[0].getDate() - 1)
                 break
             case 'tomorrow':
                 reply_prefix = calendar_source[area].title + '明日活动'
-                range[0].setDate(date.getDate() + 1)
+                range[0].setDate(range[0].getDate() + 1)
                 break
             case 'thisWeek':
                 reply_prefix = calendar_source[area].title + '本周活动'
