@@ -592,8 +592,8 @@ export async function gacha(context, prefix) { // 十连
         return
     }
     let json = await pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
 }
 
 export async function simple(context, prefix) { // 单抽
@@ -605,8 +605,8 @@ export async function simple(context, prefix) { // 单抽
         return
     }
     let json = await pcrGacha.simple(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
 }
 
 export async function thirty(context, prefix) { // 一井
@@ -618,8 +618,8 @@ export async function thirty(context, prefix) { // 一井
         return
     }
     let json = await pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
-    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`记录用户[${user_id}]抽卡次数`))
-    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`记录用户[${user_id}]抽卡结果`))
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
 }
 
 export function emptyGachaResource(context) { // 清空抽卡缓存

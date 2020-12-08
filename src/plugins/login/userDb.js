@@ -10,7 +10,11 @@ export class userDb {
     }
 
     tableCreate = () => {
-        return this.db.create('user', ['user_id TEXT PRIMARY KEY NOT NULL', 'password TEXT NOT NULL','login_count INTEGER NOT NULL DEFAULT 0'])
+        return this.db.create('user', [
+            'user_id TEXT PRIMARY KEY NOT NULL',
+            'password TEXT NOT NULL',
+            'login_count INTEGER NOT NULL DEFAULT 0'
+        ])
     }
 
     createUser = (user_id) => {

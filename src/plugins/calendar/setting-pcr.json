@@ -1,0 +1,56 @@
+{
+  "on": false,
+  "push_list": {
+    "group": [
+      902987930
+    ],
+    "private": [
+      760254674
+    ]
+  },
+  "default_area": "tw",
+  "rules": [
+    {
+      "on": true,
+      "time": {
+        "hour": [
+          8
+        ]
+      },
+      "type": "today",
+      "name": "today",
+      "filter": [
+        "pcr今日活动推送",
+        "pcr今天活动推送",
+        "pcr今日活动",
+        "pcr今天活动"
+      ],
+      "push_list": {
+        "group": "all",
+        "private": []
+      },
+      "needFlush": true
+    },
+    {
+      "on": true,
+      "time": {
+        "hour": [
+          22
+        ]
+      },
+      "type": "tomorrow",
+      "name": "tomorrow",
+      "filter": [
+        "pcr明日活动推送",
+        "pcr明天活动推送",
+        "pcr明日活动",
+        "pcr明天活动"
+      ],
+      "push_list": {
+        "group": "all",
+        "private": "all"
+      },
+      "needFlush": false
+    }
+  ]
+}
