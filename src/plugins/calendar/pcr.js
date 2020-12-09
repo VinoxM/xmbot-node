@@ -55,7 +55,7 @@ function pushCalendar(push_list, type, all_list) {
 export function toggleSwitch(context, isOn = true) {
     setting.on = isOn
     saveSetting(setting)
-    global.replyMsg(context,`已${isOn?'启用':'禁用'}PCR活动日历`)
+    global.replyMsg(context, `已${isOn ? '启用' : '禁用'}PCR活动日历`)
 }
 
 export function toggleJobSwitch(context, isOn = true) {
@@ -117,6 +117,12 @@ export function toggleJobPush(context, isOn = true) {
     }
     global.replyMsg(context, `已${isOn ? '订阅' : '屏蔽'}对${isGroup ? '该群的' : '您的'}日历推送${msg}`)
     saveSetting(setting)
+}
+
+export function searchCalendar(context, area = false,type = 'today') {
+    let key = area?area:setting['default_area']
+    let isGroup = global['func']['checkIsGroup'](context)
+    pcrCalendar.pushCalendar([context[isGroup?'group_id':'user_id']],type,key,isGroup)
 }
 
 function reloadCalendar() {

@@ -48,17 +48,17 @@ export class PcrCalendar {
                 range[0].setDate(range[0].getDate() + 1)
                 break
             case 'thisWeek':
-                reply_prefix = calendar_source[area].title + '本周活动'
+                reply_prefix = calendar_source[area].title + '本周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](false, false, false)
                 break
             case 'nextWeek':
-                reply_prefix = calendar_source[area].title + '下周活动'
+                reply_prefix = calendar_source[area].title + '下周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](false, true, false).slice(7)
                 break
             case 'lastWeek':
-                reply_prefix = calendar_source[area].title + '上周活动'
+                reply_prefix = calendar_source[area].title + '上周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](true, false, false).slice(0, 8)
                 break
@@ -69,7 +69,7 @@ export class PcrCalendar {
             if (this.calendar[area].hasOwnProperty(num)) {
                 let info = this.calendar[area][num].join('\n')
                 let d = r.getFullYear() + '/' + r.getMonth() + '/' + r.getDate()
-                reply_list.push(`${needDate ? d : ''}->\n${info}`)
+                reply_list.push(`${needDate ? ('['+d+']') : ''}\n${info}`)
             }
         })
         let reply = reply_prefix + reply_list.join('\n')
