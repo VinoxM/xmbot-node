@@ -109,7 +109,7 @@ const listener = {
                     if (r === 1) {
                         let check = await global['plugins']['login']['checkUserPassword'](params)
                         if (check === 0) {
-                            res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
+                            res.send(new BaseRequest('用户密码错误', 501))
                         } else if (check === -1) {
                             res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
                         } else {
@@ -152,7 +152,7 @@ const listener = {
                             if (r === 1) {
                                 let check = await global['plugins']['login']['selUserLoginCount'](user_info.user)
                                 if (check === 0) {
-                                    res.send(new BaseRequest('您输入的密码不正确', 501))
+                                    res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
                                 } else if (check === -1) {
                                     res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
                                 } else {
