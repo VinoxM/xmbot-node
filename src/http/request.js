@@ -299,6 +299,7 @@ const listener = {
                 let keys = Object.keys(plugins)
                 let result = {}
                 for (const key of keys) {
+                    if (!plugins[key]) continue
                     result[key] = plugins[key].hasOwnProperty('matchDict')?plugins[key]['matchDict'].map(o=>{
                         return {
                             match:o.match,
