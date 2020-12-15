@@ -80,7 +80,7 @@ async function loadAllRss() { // 加载所有RSS订阅
             global['ERR'](e)
         })
     }
-    handleRssText()
+    await handleRssText()
 }
 
 async function handleRssText() { // 处理Rss信息
@@ -89,7 +89,7 @@ async function handleRssText() { // 处理Rss信息
         let r = Rss[key]
         let items = r.rss.channel.item
         let last_id = r.last_id
-        console.log('Last Id :' + last_id)
+        // console.log('Last Id :' + last_id)
         for (const [index, item] of items.entries()) {
             let str = String(item.link).replace(r.replace, "")
             if (index === 0) last_id = str
@@ -275,7 +275,7 @@ async function closeRss(context) {
     }
 }
 function strCompareTo(a, b) { // a>b return true; a<=b return false
-    console.log(`Compare :a[${a}] b[${b}]`)
+    // console.log(`Compare :a[${a}] b[${b}]`)
     if (a.length !== b.length)
         return a.length > b.length
     for (let i = 0; i < a.length; i += 4) {
@@ -293,10 +293,25 @@ async function reloadRssPlugins() {
     await initMatchSetting()
 }
 
+function rssSourceTest(source,proxy) {
+    return new Promise((resolve, reject) => {
+        request({
+            url:source,
+            proxy:proxy?global['config']['default'].proxy:null
+        },(err,res,body)=>{
+            if (err) reject(err)
+            let xmlReader = new x2js()
+            let line = xmlReader.xml2js(body)
+            resolve({body:body, line:line})
+        })
+    })
+}
+
 export default {
     match: (context) => {
         global['func']['generalMatch'](context, matchDict)
     },
     needPrefix: true,
-    matchDict
+    matchDict,
+    rssSourceTest
 }

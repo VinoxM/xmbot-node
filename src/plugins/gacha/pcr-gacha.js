@@ -288,6 +288,7 @@ function getNickNameAndStar(id, nickName) { // 获取昵称和星级
 }
 
 async function handleImage(result) { // 拼接图片
+    result = result.filter(o=>o.star==='3')
     let count = result.length
     let height = Math.ceil(count / 5) * 130
     let width = 5 * 130
@@ -301,7 +302,6 @@ async function handleImage(result) { // 拼接图片
     }
 
     let compositeArr = []
-
     for (let i = 0; i < result.length; i++) {
         let current = result[i]
         let row = Math.floor(i / 5)

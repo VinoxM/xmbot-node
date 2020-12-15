@@ -3,6 +3,7 @@ import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import uuid from 'node-uuid'
 import formidable from 'formidable'
+import {BaseRequest,ObjRequest} from "./requestClass";
 
 export function addListener(app) {
     for (let key in listener) {
@@ -11,15 +12,15 @@ export function addListener(app) {
                 app[key](l, (req, res) => {
                     if (!req.url.startsWith('/xmbot')) global['LOG'](`user access[${req.method}:${req.url}]`)
                     if (listener[key][l].needAuth)
-                        checkAuthor(req, res).then(()=> {
-                            if (listener[key][l].needAdmin){
-                                checkRequestAdmin(req,res).then(listener[key][l].func(req, res))
-                                    .catch(err=>{
+                        checkAuthor(req, res).then(() => {
+                            if (listener[key][l].needAdmin) {
+                                checkRequestAdmin(req, res).then(listener[key][l].func(req, res))
+                                    .catch(err => {
                                         res.send(err)
                                     })
-                            }else
+                            } else
                                 listener[key][l].func(req, res)
-                        }).catch(err=> {
+                        }).catch(err => {
                             res.send(err)
                         })
                     else
@@ -41,37 +42,25 @@ function checkAuthor(req, res) {
     return new Promise((resolve, reject) => {
         let salt = req.headers.salt
         let token = req.headers.token
+        if (!salt && !token) {
+            reject(BaseRequest.NOT_LOGIN())
+        }
         jwtVerify(token, salt).then(re => {
             resolve()
         }).catch(e => {
-            reject(new BaseRequest('登录过期', 501))
+            reject(BaseRequest.AUTH_EXPIRED())
         })
     })
 }
 
-function checkRequestAdmin(req,res) {
+function checkRequestAdmin(req, res) {
     return new Promise((resolve, reject) => {
         let user_id = req.headers.user_id
-        if (user_id&&user_id!==''){
+        if (user_id && user_id !== '') {
             if (global['func']['checkIsAdmin']({user_id})) resolve()
-            else reject(new BaseRequest('权限不足',503))
-        }else reject(new BaseRequest('未登录',502))
+            else reject(BaseRequest.USER_LIMITS())
+        } else reject(BaseRequest.NOT_LOGIN())
     })
-}
-
-class BaseRequest {
-    constructor(msg, code) {
-        this.code = code ? code : 0
-        this.msg = msg ? msg : 'Success!'
-    }
-}
-
-class ObjRequest {
-    constructor(data, code, msg) {
-        this.code = code ? code : 0
-        this.msg = msg ? msg : 'Success!'
-        this.data = data
-    }
 }
 
 export function getPcrPng(fileName, filePath) {
@@ -109,9 +98,9 @@ const listener = {
                     if (r === 1) {
                         let check = await global['plugins']['login']['checkUserPassword'](params)
                         if (check === 0) {
-                            res.send(new BaseRequest('用户密码错误', 501))
+                            res.send(BaseRequest.PASSWORD_ERROR())
                         } else if (check === -1) {
-                            res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
+                            res.send(BaseRequest.FAILED('操作出错,请联系机器人管理员'))
                         } else {
                             global['plugins']['login']['userLoginCountUp'](params.user_id)
                             check.salt = uuid.v4()
@@ -122,11 +111,11 @@ const listener = {
                             res.send(new ObjRequest(check))
                         }
                     } else {
-                        res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
+                        res.send(BaseRequest.USER_NOT_EXISTS('用户不存在,请私聊机器人注册'))
                     }
                 }).catch((e) => {
                     global['ERR'](e)
-                    res.send(new BaseRequest('登录失败,请联系机器人管理员', 500))
+                    res.send(BaseRequest.FAILED('登录失败,请联系机器人管理员'))
                 })
             }
         },
@@ -138,12 +127,12 @@ const listener = {
                 let reply = null
                 switch (check) {
                     case -3:
-                        reply = new BaseRequest('链接过期', 502)
+                        reply = BaseRequest.LINK_EXPIRED()
                         res.send(reply)
                         break
                     case -2:
                     case -1:
-                        reply = new BaseRequest('链接不正确', 502)
+                        reply = BaseRequest.LINK_EXPIRED('链接不正确')
                         res.send(reply)
                         break
                     case 0:
@@ -152,9 +141,9 @@ const listener = {
                             if (r === 1) {
                                 let check = await global['plugins']['login']['selUserLoginCount'](user_info.user)
                                 if (check === 0) {
-                                    res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
+                                    res.send(BaseRequest.USER_NOT_EXISTS('用户不存在,请私聊机器人注册'))
                                 } else if (check === -1) {
-                                    res.send(new BaseRequest('操作出错,请联系机器人管理员', 500))
+                                    res.send(BaseRequest.FAILED('操作出错,请联系机器人管理员'))
                                 } else {
                                     global['plugins']['login']['userLoginCountUp'](user_info.user)
                                     check.salt = user_info.salt
@@ -165,30 +154,30 @@ const listener = {
                                     res.send(new ObjRequest(check))
                                 }
                             } else {
-                                res.send(new BaseRequest('用户不存在,请私聊机器人注册', 501))
+                                res.send(BaseRequest.USER_NOT_EXISTS('用户不存在,请私聊机器人注册'))
                             }
                         }).catch((e) => {
                             global['ERR'](e)
-                            res.send(new BaseRequest('登录失败,请联系机器人管理员', 500))
+                            res.send(BaseRequest.FAILED('登录失败,请联系机器人管理员'))
                         })
                         break
                 }
             }
         },
         '/setting/pcr.json': {
-            needAuth: true,
+            needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr']))
             }
         },
         '/setting/pcr/pools.json': {
-            needAuth: true,
+            needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr-pools']))
             }
         },
         '/setting/pcr/character.json': {
-            needAuth: true,
+            needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr-character']))
             }
@@ -204,7 +193,7 @@ const listener = {
                     if (!err) {
                         res.sendFile(fullPath)
                     } else {
-                        res.send(new BaseRequest('Image Not Found!',500));
+                        res.send(BaseRequest.FAILED('Image Not Found!'));
                     }
                 })
             }
@@ -251,15 +240,15 @@ const listener = {
                 let reply = null
                 switch (check) {
                     case -3:
-                        reply = new BaseRequest('链接过期', 500)
+                        reply = BaseRequest.LINK_EXPIRED()
                         break
                     case -2:
                     case -1:
-                        reply = new BaseRequest('链接不正确', 500)
+                        reply = BaseRequest.LINK_EXPIRED('链接不正确')
                         break
                     case 0:
                     default:
-                        reply = new BaseRequest()
+                        reply = BaseRequest.SUCCESS()
                         break
                 }
                 res.send(reply)
@@ -270,9 +259,9 @@ const listener = {
             func: (req, res) => {
                 let params = req.query
                 global['plugins']['login']['savePassword'](params).then(r => {
-                    res.send(new BaseRequest())
+                    res.send(BaseRequest.SUCCESS())
                 }).catch(e => {
-                    res.send(new BaseRequest('修改失败', 500))
+                    res.send(BaseRequest.FAILED('修改失败'))
                 })
             }
         },
@@ -281,52 +270,69 @@ const listener = {
             func: (req, res) => {
                 let token = req.query.token
                 let salt = req.query.salt
-                if (token&&salt){
-                    jwtVerify(token,salt).then(r=>{
-                        res.send(new BaseRequest())
-                    }).catch(e=>{
-                        res.send(new BaseRequest('登录信息错误',501))
+                if (token && salt) {
+                    jwtVerify(token, salt).then(r => {
+                        res.send(BaseRequest.SUCCESS())
+                    }).catch(e => {
+                        res.send(BaseRequest.FAILED('登录信息错误'))
                     })
-                }else{
-                    res.send(new BaseRequest('登录信息错误',501))
+                } else {
+                    res.send(BaseRequest.FAILED('登录信息错误'))
                 }
             }
         },
-        '/getMatchDict.json':{
-            needAuth:false,
-            func:(req,res)=>{
+        '/getMatchDict.json': {
+            needAuth: false,
+            func: (req, res) => {
                 let plugins = global['plugins']
                 let keys = Object.keys(plugins)
                 let result = {}
                 for (const key of keys) {
                     if (!plugins[key]) continue
-                    result[key] = plugins[key].hasOwnProperty('matchDict')?plugins[key]['matchDict'].map(o=>{
+                    result[key] = plugins[key].hasOwnProperty('matchDict') ? plugins[key]['matchDict'].map(o => {
                         return {
-                            match:o.match,
-                            rules:o.rules?o.rules:[],
-                            startWith:o.startWith,
-                            needReplace:o.needReplace,
-                            describe:o.describe,
-                            needPrefix:o.hasOwnProperty('needPrefix')?o.needPrefix:plugins[key]['needPrefix']
+                            match: o.match,
+                            rules: o.rules ? o.rules : [],
+                            startWith: o.startWith,
+                            needReplace: o.needReplace,
+                            describe: o.describe,
+                            needPrefix: o.hasOwnProperty('needPrefix') ? o.needPrefix : plugins[key]['needPrefix']
                         }
-                    }):[]
+                    }) : []
                 }
                 res.send(new ObjRequest(result))
             }
         },
-        '/checkIsAdmin.valid':{
-            needAuth:true,
-            func:(req,res)=>{
+        '/checkIsAdmin.valid': {
+            needAuth: true,
+            func: (req, res) => {
                 let query = req.query
                 let check = global['func']['checkIsAdmin'](query)
-                res.send(new BaseRequest('',check?0:506))
+                res.send(BaseRequest[check ? 'SUCCESS' : 'FAILED']())
             }
         },
-        '/setting/pcr/nickNames.json':{
-            needAuth:true,
-            func:(req,res)=>{
+        '/setting/pcr/nickNames.json': {
+            needAuth: false,
+            func: (req, res) => {
                 let nickNames = global['plugins']['gacha']['pcr']['nickNames']
                 res.send(new ObjRequest(nickNames))
+            }
+        },
+        '/setting/rss.json': {
+            needAuth: false,
+            func: (req, res) => {
+                res.send(new ObjRequest(global['config']['rss']))
+            }
+        },
+        '/rss/source/test.do': {
+            func: (req, res) => {
+                let params = req.query
+                global['plugins']['rss'].rssSourceTest(params.source, !!params.proxy).then(r => {
+                    res.send(new ObjRequest(r))
+                }).catch(e => {
+                    global['ERR'](e)
+                    res.send(BaseRequest.FAILED())
+                })
             }
         }
     },
@@ -339,14 +345,14 @@ const listener = {
                     .then(r => {
                         global['plugins']['gacha']['pcr']['saveSetting'](params['pools'], 'setting-pcr-pools.json')
                             .then(r => {
-                                res.send(new BaseRequest())
+                                res.send(BaseRequest.SUCCESS())
                             })
                             .catch(e => {
-                                res.send(new BaseRequest('Failed!', 500))
+                                res.send(BaseRequest.FAILED())
                             })
                     })
                     .catch(e => {
-                        res.send(new BaseRequest('Failed!', 500))
+                        res.send(BaseRequest.FAILED())
                     })
             }
         },
@@ -356,10 +362,10 @@ const listener = {
                 let params = req.body
                 global['plugins']['gacha']['pcr']['saveSetting'](params, 'setting-pcr.json')
                     .then(r => {
-                        res.send(new BaseRequest())
+                        res.send(BaseRequest.SUCCESS())
                     })
                     .catch(e => {
-                        res.send(new BaseRequest('Failed!', 500))
+                        res.send(BaseRequest.FAILED())
                     })
             }
         },
@@ -369,67 +375,67 @@ const listener = {
                 let params = req.body
                 global['plugins']['gacha']['pcr']['saveSetting'](params, 'setting-pcr-pools.json')
                     .then(r => {
-                        res.send(new BaseRequest())
+                        res.send(BaseRequest.SUCCESS())
                     })
                     .catch(e => {
-                        res.send(new BaseRequest('Failed!', 500))
+                        res.send(BaseRequest.FAILED())
                     })
             }
         },
         '/setting/pcr-nickNames.save': {
-            needAuth:true,
-            needAdmin:true,
-            func: (req,res) =>{
+            needAuth: true,
+            needAdmin: true,
+            func: (req, res) => {
                 let form = new formidable.IncomingForm()
-                form.parse(req,function (err,fields,files) {
-                    if (err===null){
+                form.parse(req, function (err, fields, files) {
+                    if (err === null) {
                         let params = fields
                         let nickNames = global['plugins']['gacha']['pcr']['nickNames']
-                        let check = global['plugins']['gacha']['pcr']['checkCharTypeAndStar'](params.type,params.star)
-                        if (check.flag){
-                            if (params['isEdit']==='0'&&nickNames.hasOwnProperty(params.num)) {
-                                res.send(new BaseRequest('角色代号已存在',500))
-                            }else{
-                                nickNames[params.num]=[params.type,params.star,params.num,params['jp_name'],params['cn_name']]
-                                params['nickNames']=params['nickNames'].split(',')
-                                if (params['nickNames'].length>=1&&params['nickNames'][0]!==''){
-                                    nickNames[params.num]=[...nickNames[params.num],...params['nickNames']]
+                        let check = global['plugins']['gacha']['pcr']['checkCharTypeAndStar'](params.type, params.star)
+                        if (check.flag) {
+                            if (params['isEdit'] === '0' && nickNames.hasOwnProperty(params.num)) {
+                                res.send(BaseRequest.FAILED('角色代号已存在'))
+                            } else {
+                                nickNames[params.num] = [params.type, params.star, params.num, params['jp_name'], params['cn_name']]
+                                params['nickNames'] = params['nickNames'].split(',')
+                                if (params['nickNames'].length >= 1 && params['nickNames'][0] !== '') {
+                                    nickNames[params.num] = [...nickNames[params.num], ...params['nickNames']]
                                 }
-                                if (files.hasOwnProperty('image')){
-                                    let savePath = path.join(global['source']['resource'],'icon','unit',params.num+(params.star.replace('star','')==='3'?'3':'1')+'1.jpg')
-                                    fs.writeFileSync(savePath,fs.readFileSync(files.image.path))
+                                if (files.hasOwnProperty('image')) {
+                                    let savePath = path.join(global['source']['resource'], 'icon', 'unit', params.num + (params.star.replace('star', '') === '3' ? '3' : '1') + '1.jpg')
+                                    fs.writeFileSync(savePath, fs.readFileSync(files.image.path))
                                 }
-                                global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
-                                    res.send(new BaseRequest('Success!',0))
-                                }).catch(e=>{
+                                global['plugins']['gacha']['pcr']['saveNickNames'](false, nickNames).then(() => {
+                                    res.send(BaseRequest.SUCCESS())
+                                }).catch(e => {
                                     global['ERR'](e)
-                                    res.send(new BaseRequest('Failed!',500))
+                                    res.send(BaseRequest.FAILED())
                                 })
                             }
-                        }else{
-                            res.send(new BaseRequest(check.check,500))
+                        } else {
+                            res.send(new BaseRequest(check.check, 500))
                         }
-                    }else
-                        res.send(new BaseRequest('Upload Failed!',500))
+                    } else
+                        res.send(BaseRequest.FAILED('Upload Failed!'))
                 })
             }
         },
-        '/setting/pcr/delCharacter.do':{
-            needAuth:true,
-            needAdmin:true,
-            func:(req,res)=>{
+        '/setting/pcr/delCharacter.do': {
+            needAuth: true,
+            needAdmin: true,
+            func: (req, res) => {
                 let params = req.body
                 let nickNames = global['plugins']['gacha']['pcr']['nickNames']
                 if (nickNames.hasOwnProperty(params.num)) {
                     delete nickNames[params.num]
-                    global['plugins']['gacha']['pcr']['saveNickNames'](false,nickNames).then(()=>{
-                        res.send(new BaseRequest('Success!',0))
-                    }).catch(e=>{
+                    global['plugins']['gacha']['pcr']['saveNickNames'](false, nickNames).then(() => {
+                        res.send(BaseRequest.SUCCESS())
+                    }).catch(e => {
                         global['ERR'](e)
-                        res.send(new BaseRequest('Failed!',500))
+                        res.send(BaseRequest.FAILED())
                     })
-                }else{
-                    res.send(new BaseRequest('未找到该角色',500))
+                } else {
+                    res.send(BaseRequest.FAILED('未找到该角色'))
                 }
             }
         }
