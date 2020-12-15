@@ -288,8 +288,8 @@ function strCompareTo(a, b) { // a>b return true; a<=b return false
     return false
 }
 
-async function reloadRssPlugins() {
-    await global['reloadPlugin'](setting, __dirname.split("\\").pop())
+async function reloadRssPlugins(json = false) {
+    await global['reloadPlugin'](json?json:setting, __dirname.split("\\").pop())
     await initMatchSetting()
 }
 
@@ -313,5 +313,6 @@ export default {
     },
     needPrefix: true,
     matchDict,
-    rssSourceTest
+    rssSourceTest,
+    reloadRssPlugins
 }

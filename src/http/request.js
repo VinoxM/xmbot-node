@@ -438,6 +438,25 @@ const listener = {
                     res.send(BaseRequest.FAILED('未找到该角色'))
                 }
             }
+        },
+        '/setting/rss.save':{
+            needAuth:true,
+            needAdmin:true,
+            func: async (req, res) => {
+                let params = req.body
+                let rss = global['config']['rss'].rss
+                params.rss.map(o => {
+                    rss.some(obj => {
+                        if (obj.name === o.name) {
+                            o.last_id = obj.last_id
+                            return true
+                        }
+                        return false
+                    })
+                })
+                await global['plugins']['rss']['reloadRssPlugins'](params)
+                res.send(BaseRequest.SUCCESS())
+            }
         }
     }
 }
