@@ -324,6 +324,24 @@ const listener = {
                 res.send(new ObjRequest(global['config']['rss']))
             }
         },
+        '/setting/live.json': {
+            needAuth: false,
+            func: (req, res) => {
+                res.send(new ObjRequest(global['config']['live']))
+            }
+        },
+        '/setting/chat.json': {
+            needAuth: false,
+            func: (req, res) => {
+                res.send(new ObjRequest(global['config']['chat']))
+            }
+        },
+        '/setting/repeat.json': {
+            needAuth: false,
+            func: (req, res) => {
+                res.send(new ObjRequest(global['repeat']['setting']))
+            }
+        },
         '/rss/source/test.do': {
             func: (req, res) => {
                 let params = req.query
@@ -455,6 +473,34 @@ const listener = {
                     })
                 })
                 await global['plugins']['rss']['reloadRssPlugins'](params)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/setting/live.save':{
+            needAuth:true,
+            needAdmin:true,
+            func: async (req, res) => {
+                let params = req.body
+                await global['plugins']['live']['saveSetting'](params)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/setting/chat.save':{
+            needAuth:true,
+            needAdmin:true,
+            func: async (req, res) => {
+                let params = req.body
+                await global['reloadPlugin'](params, 'chat')
+                await global['plugins']['chat']['initMatchSetting']()
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/setting/repeat.save':{
+            needAuth:true,
+            needAdmin:true,
+            func: async (req, res) => {
+                let params = req.body
+                await global['reloadRepeat'](params)
                 res.send(BaseRequest.SUCCESS())
             }
         }

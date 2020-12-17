@@ -1,6 +1,6 @@
 import {globalReg} from "./src/utils/global";
 import {globalConf,loadPlugins,saveAndReloadSettingByName,saveAndReloadSettingForRepeat,saveAndReloadConfig,plugins} from "./src/config"
-import * as repeat from "./src/repeat"
+import repeat from "./src/repeat"
 import * as http from './src/http'
 import path from 'path'
 import {SqliteDb} from './src/db/index'
@@ -39,8 +39,8 @@ globalReg({
     repeat,// 复读
     CQ,
     reloadPlugin:(json,name,reloadPlugin)=>{return saveAndReloadSettingByName(json,name,reloadPlugin)},// 通过名称重载配置信息(json:配置,path:路径,name:名称)
-    reloadRepeat:(json)=>{return saveAndReloadSettingForRepeat(json)},// 重载复读信息
-    reloadConfig:(json)=>{return saveAndReloadConfig(json)},
+    reloadRepeat:(json)=>{saveAndReloadSettingForRepeat(json)},// 重载复读信息
+    reloadConfig:(json)=>{saveAndReloadConfig(json)},
     source:source,// 路径
     http,// http连接
     SqliteDb,// 数据库连接

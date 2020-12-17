@@ -378,5 +378,6 @@ export default {
     initSetting,
     match,
     needPrefix: true,
-    matchDict
+    matchDict,
+    saveSetting
 }

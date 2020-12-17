@@ -1,9 +1,10 @@
 import fs, {readJsonSync, writeJsonSync} from 'fs-extra'
 import {resolve} from 'path'
-import {loadRepeatJson} from "./repeat";
+import repeat from "./repeat";
 
 export const globalConf = {}
 import path from 'path'
+import {globalReg} from "./utils/global";
 
 // 加载配置信息
 function initialConf(path, name) {
@@ -111,8 +112,10 @@ export function saveAndReloadSettingForRepeat(json) {
         if (err) {
             global["LOG"](err)
             return false
-        } else
-            return global['repeat']['loadRepeatJson']()
+        } else {
+            global['repeat']['loadRepeatJson']()
+            global['repeat']['setting']=json
+        }
     })
 }
 

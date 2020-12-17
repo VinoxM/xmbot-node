@@ -2,7 +2,7 @@ import request from 'request'
 import {CalendarDb} from './calendarDb'
 
 export class PcrCalendar {
-    constructor() {
+    constructor(calendar_source) {
         this.cal_db = new CalendarDb('calendar')
         this.calendar = {
             jp: {},
@@ -10,6 +10,7 @@ export class PcrCalendar {
             cn: {}
         }
         this.onInit = false
+        this.calendar_source = calendar_source
     }
 
     initDb = () => {
@@ -20,7 +21,7 @@ export class PcrCalendar {
         return new Promise((resolve, reject) => {
             if (this.onInit) reject({err: 0, reason: '正在初始化中'})
             this.onInit = true
-            initCalendar(this.cal_db, this.calendar)
+            initCalendar(this.cal_db, this.calendar,this.calendar_source)
                 .then(() => {
                     this.onInit = false
                     resolve()
@@ -37,28 +38,28 @@ export class PcrCalendar {
         let needDate = false
         switch (type) {
             case 'today':
-                reply_prefix = calendar_source[area].title + '今日活动'
+                reply_prefix = this.calendar_source[area].title + '今日活动'
                 break
             case 'yesterday':
-                reply_prefix = calendar_source[area].title + '昨日活动'
+                reply_prefix = this.calendar_source[area].title + '昨日活动'
                 range[0].setDate(range[0].getDate() - 1)
                 break
             case 'tomorrow':
-                reply_prefix = calendar_source[area].title + '明日活动'
+                reply_prefix = this.calendar_source[area].title + '明日活动'
                 range[0].setDate(range[0].getDate() + 1)
                 break
             case 'thisWeek':
-                reply_prefix = calendar_source[area].title + '本周活动=>\n'
+                reply_prefix = this.calendar_source[area].title + '本周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](false, false, false)
                 break
             case 'nextWeek':
-                reply_prefix = calendar_source[area].title + '下周活动=>\n'
+                reply_prefix = this.calendar_source[area].title + '下周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](false, true, false).slice(7)
                 break
             case 'lastWeek':
-                reply_prefix = calendar_source[area].title + '上周活动=>\n'
+                reply_prefix = this.calendar_source[area].title + '上周活动=>\n'
                 needDate = true
                 range = global['func']['getWeekTimeRange'](true, false, false).slice(0, 8)
                 break
@@ -100,40 +101,7 @@ function initDb(db) {
     })
 }
 
-const calendar_source = {
-    tw: {
-        title: '台服',
-        url: 'https://pcredivewiki.tw/static/data/event.json',
-        props: {
-            name: 'campaign_name',
-            start_time: 'start_time',
-            end_time: 'end_time'
-        },
-        needProxy: true
-    },
-    jp: {
-        title: '日服',
-        url: 'https://pcr.satroki.tech/api/Manage/GetEvents?s=jp',
-        props: {
-            name: 'title',
-            start_time: 'startTime',
-            end_time: 'endTime'
-        },
-        needProxy: false
-    },
-    cn: {
-        title: '国服',
-        url: 'https://pcr.satroki.tech/api/Manage/GetEvents?s=cn',
-        props: {
-            name: 'title',
-            start_time: 'startTime',
-            end_time: 'endTime'
-        },
-        needProxy: false
-    }
-}
-
-async function initCalendar(cal_db, calendar) {
+async function initCalendar(cal_db, calendar,calendar_source) {
     global['LOG']('开始加载活动日历')
     for (const key of Object.keys(calendar_source)) {
         let source = calendar_source[key]

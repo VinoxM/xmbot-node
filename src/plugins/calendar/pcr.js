@@ -22,7 +22,7 @@ export function initPcr() {
             job.cancel()
         }
     }
-    pcrCalendar = new PcrCalendar()
+    pcrCalendar = new PcrCalendar(setting['calendar_source'])
     pcrCalendar.initDb().then(() => {
         pcrCalendar.initCalendar().then(() => {
             if (!setting.on) return

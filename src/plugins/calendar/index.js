@@ -37,5 +37,6 @@ export default {
     matchDict,
     initSetting,
     match: (context) => global['func']['generalMatch'](context, matchDict),
-    needPrefix:true
+    needPrefix:true,
+    savePcrSetting:(json)=>pcr.saveSetting(json)
 }

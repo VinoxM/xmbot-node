@@ -3,9 +3,9 @@ import {resolve} from 'path'
 
 let setting = {}
 
-export function loadRepeatJson(){
+function loadRepeatJson(){
     try{
-        setting = readJsonSync(resolve(__dirname,"./setting.json"));
+        setting = readJsonSync(resolve(__dirname,"./setting.json"))
         global['LOG'](`已加载配置: repeat/setting.json`)
         return true
     }catch (e) {
@@ -33,7 +33,7 @@ function getRepeatCount(groupId) {
     return repeatCount;
 }
 
-export function handleRepeat(context) {
+function handleRepeat(context) {
     if (!setting["repeatOn"]) return;
     if (context["message_type"]==='group'){
         let groupId = context["group_id"]
@@ -84,5 +84,7 @@ function removeCQCodeImgUrl(msg) {//去除复读信息中的url信息,此项可�
 
 export default {
     setting,
-    dict:repeat
+    dict:repeat,
+    handleRepeat,
+    loadRepeatJson
 }
