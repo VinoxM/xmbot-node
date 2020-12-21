@@ -123,7 +123,7 @@ async function initCalendar(cal_db, calendar,calendar_source) {
                             cal_db.addCalendar(params)
                             updateCount++
                         }
-                    })
+                    }).catch(err=>global['ERR'](err))
             }
             if (updateCount === 0) global['LOG'](`${source.title}活动未发现更新`)
             else global['LOG'](`${source.title}活动共 ${updateCount} 个更新`)
