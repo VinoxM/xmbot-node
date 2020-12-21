@@ -3,7 +3,7 @@ import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import uuid from 'node-uuid'
 import formidable from 'formidable'
-import {BaseRequest,ObjRequest} from "./requestClass";
+import {BaseRequest, ObjRequest} from "./requestClass";
 
 export function addListener(app) {
     for (let key in listener) {
@@ -164,19 +164,19 @@ const listener = {
                 }
             }
         },
-        '/setting/pcr.json': {
+        '/setting/gacha/pcr.json': {
             needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr']))
             }
         },
-        '/setting/pcr/pools.json': {
+        '/setting/gacha/pcr/pools.json': {
             needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr-pools']))
             }
         },
-        '/setting/pcr/character.json': {
+        '/setting/gacha/pcr/character.json': {
             needAuth: false,
             func: (req, res) => {
                 res.send(new ObjRequest(global['config']['gacha']['pcr-character']))
@@ -311,7 +311,7 @@ const listener = {
                 res.send(BaseRequest[check ? 'SUCCESS' : 'FAILED']())
             }
         },
-        '/setting/pcr/nickNames.json': {
+        '/setting/gacha/pcr/nickNames.json': {
             needAuth: false,
             func: (req, res) => {
                 let nickNames = global['plugins']['gacha']['pcr']['nickNames']
@@ -342,6 +342,12 @@ const listener = {
                 res.send(new ObjRequest(global['repeat']['setting']))
             }
         },
+        '/setting/calendar/pcr.json': {
+            needAuth: false,
+            func: (req, res) => {
+                res.send(new ObjRequest(global['config']['calendar']['pcr']))
+            }
+        },
         '/rss/source/test.do': {
             func: (req, res) => {
                 let params = req.query
@@ -352,10 +358,21 @@ const listener = {
                     res.send(BaseRequest.FAILED())
                 })
             }
+        },
+        '/calendar/url/test.do':{
+            func:(req,res)=>{
+                let params = req.query
+                global['plugins']['calendar'].calendarTest(params.url, !!params.needProxy).then(r => {
+                    res.send(new ObjRequest(r))
+                }).catch(e => {
+                    global['ERR'](e)
+                    res.send(BaseRequest.FAILED())
+                })
+            }
         }
     },
     post: {
-        '/setting/pcr-all.save': {
+        '/setting/gacha/pcr-all.save': {
             needAuth: true,
             func: (req, res) => {
                 let params = req.body
@@ -374,7 +391,7 @@ const listener = {
                     })
             }
         },
-        '/setting/pcr-setting.save': {
+        '/setting/gacha/pcr-setting.save': {
             needAuth: true,
             func: (req, res) => {
                 let params = req.body
@@ -387,7 +404,7 @@ const listener = {
                     })
             }
         },
-        '/setting/pcr-pools.save': {
+        '/setting/gacha/pcr-pools.save': {
             needAuth: true,
             func: (req, res) => {
                 let params = req.body
@@ -400,7 +417,7 @@ const listener = {
                     })
             }
         },
-        '/setting/pcr-nickNames.save': {
+        '/setting/gacha/pcr-nickNames.save': {
             needAuth: true,
             needAdmin: true,
             func: (req, res) => {
@@ -438,7 +455,7 @@ const listener = {
                 })
             }
         },
-        '/setting/pcr/delCharacter.do': {
+        '/setting/gacha/pcr/delCharacter.do': {
             needAuth: true,
             needAdmin: true,
             func: (req, res) => {
@@ -457,9 +474,9 @@ const listener = {
                 }
             }
         },
-        '/setting/rss.save':{
-            needAuth:true,
-            needAdmin:true,
+        '/setting/rss.save': {
+            needAuth: true,
+            needAdmin: true,
             func: async (req, res) => {
                 let params = req.body
                 let rss = global['config']['rss'].rss
@@ -476,18 +493,18 @@ const listener = {
                 res.send(BaseRequest.SUCCESS())
             }
         },
-        '/setting/live.save':{
-            needAuth:true,
-            needAdmin:true,
+        '/setting/live.save': {
+            needAuth: true,
+            needAdmin: true,
             func: async (req, res) => {
                 let params = req.body
                 await global['plugins']['live']['saveSetting'](params)
                 res.send(BaseRequest.SUCCESS())
             }
         },
-        '/setting/chat.save':{
-            needAuth:true,
-            needAdmin:true,
+        '/setting/chat.save': {
+            needAuth: true,
+            needAdmin: true,
             func: async (req, res) => {
                 let params = req.body
                 await global['reloadPlugin'](params, 'chat')
@@ -495,12 +512,21 @@ const listener = {
                 res.send(BaseRequest.SUCCESS())
             }
         },
-        '/setting/repeat.save':{
-            needAuth:true,
-            needAdmin:true,
+        '/setting/repeat.save': {
+            needAuth: true,
+            needAdmin: true,
             func: async (req, res) => {
                 let params = req.body
                 await global['reloadRepeat'](params)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/setting/calendar/pcr.save':{
+            needAuth: true,
+            needAdmin: true,
+            func: async (req, res) => {
+                let params = req.body
+                await global['plugins']['calendar']['savePcrSetting'](params)
                 res.send(BaseRequest.SUCCESS())
             }
         }

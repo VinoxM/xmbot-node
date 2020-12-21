@@ -38,5 +38,6 @@ export default {
     initSetting,
     match: (context) => global['func']['generalMatch'](context, matchDict),
     needPrefix:true,
-    savePcrSetting:(json)=>pcr.saveSetting(json)
+    savePcrSetting:(json)=>pcr.saveSetting(json),
+    calendarTest:pcr.calendarTest
 }

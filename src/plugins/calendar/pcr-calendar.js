@@ -133,14 +133,14 @@ async function initCalendar(cal_db, calendar,calendar_source) {
     global['LOG']('活动日历加载完成')
 }
 
-function getCalendar(source) {
+export function getCalendar(source) {
     let proxy = global['config']['default'].proxy
     return new Promise((resolve, reject) => {
         request({
             url: source.url,
             timeout: 2000,
             method: 'GET',
-            proxy: source.needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null
+            proxy: source['needProxy'] ? (proxy ? proxy : 'http://127.0.0.1:2802') : null
         }, (err, res, body) => {
             if (!err) {
                 resolve(JSON.parse(body))

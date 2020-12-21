@@ -1,4 +1,4 @@
-import {PcrCalendar} from './pcr-calendar'
+import {PcrCalendar,getCalendar} from './pcr-calendar'
 import schedule from 'node-schedule'
 import fs from "fs-extra";
 import path from "path";
@@ -14,6 +14,8 @@ function initSetting() {
 initSetting()
 
 initPcr()
+
+export const calendarTest = (url,needProxy) => getCalendar({url,needProxy})
 
 export function initPcr() {
     for (const key of Object.keys(jobs)) {
