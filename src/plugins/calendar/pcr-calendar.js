@@ -188,7 +188,7 @@ async function initCampaign(area, cal_db, calendar) {
             }
         }
         calendar[area] = cal
-    })
+    }).catch(err=>global['ERR'](err))
 }
 
 function getDateTime(date) {
