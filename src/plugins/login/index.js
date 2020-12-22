@@ -92,8 +92,10 @@ function resetPwd(context) {
     checkUserExists(user_id).then((r) => {
         if (r === 1) {
             let base_url = global['config'].default['base_url'] + 'reset-pwd?'
-            context['message'] = newUserSaltAndSave(user_id, base_url)
-            global.replyPrivate(context)
+            newUserSaltAndSave(user_id, base_url).then(res=>{
+                context['message'] = res
+                global.replyPrivate(context)
+            })
         } else {
             context['message'] = '您没有注册,请私聊机器人"注册"'
             global.replyPrivate(context)
@@ -154,7 +156,7 @@ async function selUserLoginCount(user_id) {
     return res
 }
 
-async function newUserSaltAndSave(userId, baseUrl, salt) {
+function newUserSaltAndSave(userId, baseUrl, salt) {
     let expireTime = 30 * 60 * 1000
     if (setting.hasOwnProperty('expireTime')) {
         let expireUnit = {
@@ -175,8 +177,14 @@ async function newUserSaltAndSave(userId, baseUrl, salt) {
     })
     if (index === -1) setting['reset_dict'].push(user_info)
     else setting['reset_dict'].splice(index, 1, user_info)
-    await global['reloadPlugin'](setting, __dirname.split("\\").pop(), true)
-    return baseUrl ? `${baseUrl}user=${user_info.user_id}&salt=${user_info.salt}` : ''
+    return new Promise((resolve, reject) => {
+        global['reloadPlugin'](setting, __dirname.split("\\").pop(), true).then(() => {
+            const res = baseUrl ? `${baseUrl}user=${user_info.user_id}&salt=${user_info.salt}` : ''
+            resolve(res)
+        }).catch(err => {
+            global['ERR'](err)
+        })
+    })
 }
 
 function savePassword(user) {
