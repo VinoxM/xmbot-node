@@ -20,9 +20,27 @@ function initSetting() {
 initSetting()
 
 const matchDict = [
-    {match: ['登录'], startWith: false, needReplace: false, rules: ['private'], func: login},
-    {match: ['注册'], startWith: false, needReplace: false, rules: ['private'], func: register},
-    {match: ['重置密码'], startWith: false, needReplace: false, rules: ['private'], func: resetPwd},
+    {
+        match: ['登录'],
+        startWith: false,
+        needReplace: false,
+        rules: ['private'],
+        func: login
+    },
+    {
+        match: ['注册'],
+        startWith: false,
+        needReplace: false,
+        rules: ['private'],
+        func: register
+    },
+    {
+        match: ['重置密码'],
+        startWith: false,
+        needReplace: false,
+        rules: ['private'],
+        func: resetPwd
+    },
 ]
 
 function match(context) {

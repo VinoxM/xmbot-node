@@ -12,10 +12,34 @@ const timeUnits = {
 }
 
 const matchDict = [
-    {match: ["屏蔽rss", "屏蔽推送"], startWith: true, needReplace: true, rules: ['admin'], func: shieldRss},
-    {match: ["订阅rss", "订阅推送"], startWith: true, needReplace: true, rules: ['admin'], func: subscribeRss},
-    {match: ["启用rss", "启用推送"], startWith: true, needReplace: true, rules: ['admin', 'private'], func: openRss},
-    {match: ["关闭rss", "关闭推送"], startWith: true, needReplace: true, rules: ['admin', 'private'], func: closeRss},
+    {
+        match: ["屏蔽rss", "屏蔽推送"],
+        startWith: true,
+        needReplace: true,
+        rules: ['admin'],
+        func: shieldRss
+    },
+    {
+        match: ["订阅rss", "订阅推送"],
+        startWith: true,
+        needReplace: true,
+        rules: ['admin'],
+        func: subscribeRss
+    },
+    {
+        match: ["启用rss", "启用推送"],
+        startWith: true,
+        needReplace: true,
+        rules: ['admin', 'private'],
+        func: openRss
+    },
+    {
+        match: ["关闭rss", "关闭推送"],
+        startWith: true,
+        needReplace: true,
+        rules: ['admin', 'private'],
+        func: closeRss
+    },
 ]
 
 function initMatchSetting() { // 初始化设置
@@ -274,8 +298,8 @@ async function closeRss(context) {
         global.replyMsg(context, `未找到推送${title}`)
     }
 }
+
 function strCompareTo(a, b) { // a>b return true; a<=b return false
-    // console.log(`Compare :a[${a}] b[${b}]`)
     if (a.length !== b.length)
         return a.length > b.length
     for (let i = 0; i < a.length; i += 4) {
@@ -289,20 +313,20 @@ function strCompareTo(a, b) { // a>b return true; a<=b return false
 }
 
 async function reloadRssPlugins(json = false) {
-    await global['reloadPlugin'](json?json:setting, __dirname.split("\\").pop())
+    await global['reloadPlugin'](json ? json : setting, __dirname.split("\\").pop())
     await initMatchSetting()
 }
 
-function rssSourceTest(source,proxy) {
+function rssSourceTest(source, proxy) {
     return new Promise((resolve, reject) => {
         request({
-            url:source,
-            proxy:proxy?global['config']['default'].proxy:null
-        },(err,res,body)=>{
+            url: source,
+            proxy: proxy ? global['config']['default'].proxy : null
+        }, (err, res, body) => {
             if (err) reject(err)
             let xmlReader = new x2js()
             let line = xmlReader.xml2js(body)
-            resolve({body:body, line:line})
+            resolve({body: body, line: line})
         })
     })
 }

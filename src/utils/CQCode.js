@@ -11,9 +11,10 @@ export const CQ = {
     isAtSelf: (context) => isAtSelf(context),
     checkAndReplaceAtSelf:(context)=>{
         if (isAtSelf(context)){
-            context['message']=context['message'].replace(`[CQ:at,qq=${context['self_id']}]`,'')
+            context['raw_message']=context['message'].replace(`[CQ:at,qq=${context['self_id']}]`,'').trim()
+            return true
         }
-        return context
+        return false
     }
 }
 

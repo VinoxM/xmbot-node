@@ -78,6 +78,7 @@ function addListener(args){
             //prefix
             let through = false
             if (conf["prefixOn"]){
+                if (CQ.checkAndReplaceAtSelf(record)) through = true
                 if (record['message_type']==='private') through = true
                 let prefix = conf.prefix;
                 for (let p of prefix){

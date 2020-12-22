@@ -2,11 +2,11 @@ const request = require('request')
 const fs = require('fs')
 
 export function generalMatch(context, matchDict) {
-    let raw_msg = context["raw_message"];
+    let raw_msg = context["raw_message"].toLowerCase();
     for (let m of matchDict) {
-        if (m.needPrefix && raw_msg === context['message'] && global['func']['checkIsGroup'](context)) continue
+        if (m.needPrefix && context["raw_message"] === context['message'] && global['func']['checkIsGroup'](context)) continue
         if (!m.startWith) {
-            let index = m.match.indexOf(raw_msg.toLowerCase())
+            let index = m.match.indexOf(raw_msg)
             if (index > -1) {
                 if (m.needReplace)
                     context['raw_message'] = context['raw_message'].replace(m.match[index], '').trim()
@@ -14,7 +14,7 @@ export function generalMatch(context, matchDict) {
             }
         } else {
             for (let s of m.match) {
-                if (raw_msg.toLowerCase().startsWith(s)) {
+                if (raw_msg.startsWith(s)) {
                     if (m.needReplace)
                         context['raw_message'] = context['raw_message'].replace(s, '').trim()
                     return checkMatchRules(m, context)
