@@ -27,7 +27,7 @@ export class PcrCalendar {
                     resolve()
                 })
                 .catch(err => {
-                    reject({err: 1, reason: err})
+                    global['ERR'](err)
                 })
         })
     }
