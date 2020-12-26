@@ -169,7 +169,7 @@ flushRoomInfo().then()
 async function startLive(context) {
     await flushRoomInfo(false)
     if (roomInfo['live_status'] === 1) {
-        global.replyMsg(context, `已开始直播\n${getLiveStr()}` + (global['func']['checkIsGroup'] ? getRtmpStr(rtmpInfo) : ''), true)
+        global.replyMsg(context, `已开始直播\n${getLiveStr(null,false,false,true)}` + (global['func']['checkIsGroup'] ? getRtmpStr(rtmpInfo) : ''), true)
         return
     }
     if (roomInfo['area_id']) {
@@ -217,7 +217,7 @@ async function startLive(context) {
                 code: res.data['rtmp']['code']
             }
             rtmpInfo = rtmp
-            let live_info = getLiveStr()
+            let live_info = getLiveStr(null,false,false,true)
             let rtmp_info = getRtmpStr(rtmp)
             global.replyMsg(context, `开始直播成功\n${live_info}` + (global['func']['checkIsGroup'](context) ? '' : rtmp_info), true)
             flushRoomInfo(false).then()
@@ -374,13 +374,14 @@ function getRtmpStr(rtmp) {
     return `您的rtmp地址:${rtmp.addr}\n直播码:${rtmp.code}\n`
 }
 
-function getLiveStr(info, needLiveStatus = false, needUserInfo = false) {
+function getLiveStr(info, needLiveStatus = false, needUserInfo = false,needYyRoom = false) {
     let room_info = {}
     if (info) room_info = info
     else room_info = roomInfo
     return (needUserInfo ? `${room_info['uname']}(${room_info['uid']})\n` : '')
         + `直播间地址:${room_info['live_url']}\n直播间标题:${room_info.title}-分区[${room_info['area_name']}]\n`
         + (needLiveStatus ? (room_info['live_status'] === 1 ? '直播中' : '未开播') : '')
+        + (needYyRoom ? `\n${setting['yy_room']}`:'')
 }
 
 function updateCookie(context) {
