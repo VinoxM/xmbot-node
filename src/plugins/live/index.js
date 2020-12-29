@@ -371,7 +371,7 @@ function getRoomInfo(context, byId = false, byRoomIds = false) {
 }
 
 function getRtmpStr(rtmp) {
-    return `您的rtmp地址:${rtmp.addr}\n直播码:${rtmp.code}\n`
+    return `\n您的rtmp地址:${rtmp.addr}\n直播码:${rtmp.code}\n`
 }
 
 function getLiveStr(info, needLiveStatus = false, needUserInfo = false,needYyRoom = false) {
