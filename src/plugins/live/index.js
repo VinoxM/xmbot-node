@@ -151,14 +151,14 @@ function getStreamInfo() {
 async function flushRoomInfo(needFlushRtmp = true) {
     await getRoomBaseInfo().then(res => {
         roomInfo = res.data['by_room_ids'][setting['room_id']]
-        if (roomInfo.online === 1 && needFlushRtmp) {
+        if (roomInfo['live_status'] === 1 && needFlushRtmp) {
             getStreamInfo().then(res => {
                 rtmpInfo = res.data['rtmp']
+                global['LOG']('已获取直播房间信息')
             }).catch(err => {
                 global['ERR'](`获取直播流信息失败:${err}`)
             })
         }
-        global['LOG']('已获取直播房间信息')
     }).catch(err => {
         global['ERR'](`获取直播房间信息失败:${err}`)
     })
