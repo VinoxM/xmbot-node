@@ -379,9 +379,9 @@ function getLiveStr(info, needLiveStatus = false, needUserInfo = false,needYyRoo
     if (info) room_info = info
     else room_info = roomInfo
     return (needUserInfo ? `${room_info['uname']}(${room_info['uid']})\n` : '')
-        + `直播间地址:${room_info['live_url']}\n直播间标题:${room_info.title}-分区[${room_info['area_name']}]\n`
-        + (needLiveStatus ? (room_info['live_status'] === 1 ? '直播中' : '未开播') : '')
-        + (needYyRoom ? `\n${setting['yy_room']}`:'')
+        + `直播间地址:${room_info['live_url']}\n直播间标题:${room_info.title}-分区[${room_info['area_name']}]`
+        + (needLiveStatus ? (room_info['live_status'] === 1 ? '\n直播中' : '\n未开播') : '')
+        + (needYyRoom ? `\nYY房间:${setting['yy_room']}`:'')
 }
 
 function updateCookie(context) {
