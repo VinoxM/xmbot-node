@@ -79,7 +79,7 @@ async function getRss(rss) { // 获取RSS源
                         rss: line.rss,
                         title: rss['title'],
                         last_id: rss.last_id,
-                        replace: rss['link_replace'],
+                        replace_link: rss['link_replace'],
                         push_list: {
                             user: rss.push_user === 'all' ? setting['push_list'].user : rss.push_user,
                             group: rss.push_group === 'all' ? setting['push_list'].group : rss.push_group
@@ -113,9 +113,9 @@ async function handleRssText() { // 处理Rss信息
         let r = Rss[key]
         let items = r.rss.channel.item
         let last_id = r.last_id
-        // console.log('Last Id :' + last_id)
+        console.log('Last Id :' + last_id)
         for (const [index, item] of items.entries()) {
-            let str = String(item.link).replace(r.replace, "")
+            let str = String(item.link).replace(r['replace_link'], "")
             if (index === 0) last_id = str
             if (strCompareTo(str, r.last_id)) {
                 let pub_date = item['pubDate'] ? global['func']['toCCTDateString'](item['pubDate']) : ''
