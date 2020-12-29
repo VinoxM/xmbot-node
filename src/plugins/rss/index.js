@@ -113,7 +113,7 @@ async function handleRssText() { // 处理Rss信息
         let r = Rss[key]
         let items = r.rss.channel.item
         let last_id = r.last_id
-        console.log('Last Id :' + last_id)
+        // console.log('Last Id :' + last_id)
         for (const [index, item] of items.entries()) {
             let str = String(item.link).replace(r['replace_link'], "")
             if (index === 0) last_id = str
