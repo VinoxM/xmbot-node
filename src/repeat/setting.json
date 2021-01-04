@@ -1,7 +1,0 @@
-{
-  "repeatOn": true,
-  "isRandom": true,
-  "repeatCount": 3,
-  "repeatRange": [2,4],
-  "imgRepeatOn": true
-}
