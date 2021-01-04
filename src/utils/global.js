@@ -1,12 +1,22 @@
 export const globalReg = obj => Object.assign(global,obj)
 
+let botReady = false
+
+globalReg({botReady})
+
 globalReg({
     now:()=>new Date().toLocaleString(),
     //控制台日志打印封装
-    LOG: msg => console.log(`[${global.now()}][INFO]${getCallerFileNameAndLine('LOG')}  `+ msg),
+    LOG: msg => consoleLog(msg),
+    log: msg => consoleLog(msg),
     //控制台错误打印封装
-    ERR: err => console.error(`[${global.now()}][ERROR]${getCallerFileNameAndLine('ERR')}  `+ err)
+    ERR: err => consoleLog(err, 'err'),
+    err: err => consoleLog(err, 'err'),
 })
+
+function consoleLog(msg, logType = 'log') {
+    console[logType==='err'?'error':'log'](`${global.botReady?'':'[notReady]'}[${global.now()}][INFO]${getCallerFileNameAndLine(logType)}  `+ msg)
+}
 
 //获取日志打印的文件名和行数
 function getCallerFileNameAndLine(logType){
@@ -24,7 +34,7 @@ function getCallerFileNameAndLine(logType){
     const stackArr = stack.split('\n');
     let callerLogIndex = 0;
     for (let i = 0; i < stackArr.length; i++) {
-        if (stackArr[i].indexOf(`at ${logType}`)>0 && i+1 < stackArr.length){
+        if (stackArr[i].indexOf(`at ${logType.toUpperCase()}`)>0 && i+1 < stackArr.length){
             callerLogIndex = i+1;
             break;
         }

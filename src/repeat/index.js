@@ -1,5 +1,7 @@
 import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
 import {resolve} from 'path'
+import {defaultConf} from "./defaultSetting";
+import path from 'path'
 
 let setting = {}
 
@@ -9,7 +11,9 @@ function loadRepeatJson(){
         global['LOG'](`已加载配置: repeat/setting.json`)
         return true
     }catch (e) {
-        global['ERR'](`repeat/setting.json文件解析失败,请检查文件配置`)
+        global['ERR'](`repeat/setting.json文件解析失败,加载默认配置`)
+        setting = defaultConf
+        saveSetting(defaultConf)
         return false
     }
 }
@@ -80,6 +84,16 @@ function removeCQCodeImgUrl(msg) {//去除复读信息中的url信息,此项可�
         }
     }
     return result;
+}
+
+function saveSetting(json) {
+    let file = path.join(__dirname, 'setting.json')
+    let j = JSON.stringify(json, null, 4)
+    fs["writeFile"](file, j, "utf8", function (err) {
+        if (err) {
+            global["LOG"](err)
+        }
+    })
 }
 
 export default {

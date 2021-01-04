@@ -1,10 +1,10 @@
 import fs, {readJsonSync, writeJsonSync} from 'fs-extra'
 import {resolve} from 'path'
 import repeat from "./repeat";
+import {defaultConf} from './defaultSetting'
 
 export const globalConf = {}
 import path from 'path'
-import {globalReg} from "./utils/global";
 
 // 加载配置信息
 function initialConf(path, name) {
@@ -12,10 +12,11 @@ function initialConf(path, name) {
     try {
         globalConf[name] = readJsonSync(file)
         global['LOG'](`已加载配置: config.json`)
-        return true
     } catch (e) {
-        global['ERR'](`config.json文件解析失败,请检查文件配置`)
-        return false
+        global['ERR'](`config.json文件解析失败,加载默认配置`)
+        globalConf[name] = defaultConf
+        saveAndReloadConfig(defaultConf, false)
+        global['LOG'](`已加载配置: config.json`)
     }
 }
 
@@ -35,16 +36,44 @@ export function loadPlugins(pluginPath) {
 // 通过名称加载配置信息
 function initSettingByName(pluginName) {
     try {
-        globalConf[pluginName] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + "/setting.json"))
-        let path = __dirname + "/plugins/" + pluginName
-        let files = fs['readdirSync'](path)
-        files = files.filter(o => {
-            return o.split('.').pop() === 'json' && o !== 'setting.json' && o.startsWith('setting-')
-        })
-        if (files.length > 0) {
-            for (let f of files) {
-                let name = f.substring(8).split('.')[0]
-                globalConf[pluginName][name] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + '/' + f))
+        let path_ = __dirname + "/plugins/" + pluginName
+        let files = fs['readdirSync'](path_)
+        if (files.indexOf('defaultSetting.js') > -1) {
+            const defaultConf = require(path.join(path_, 'defaultSetting.js'))['defaultConf']
+            let fileNames = []
+            for (const key of Object.keys(defaultConf)) {
+                fileNames.push(key === 'default' ? 'setting.json' : 'setting-' + key + '.json')
+            }
+            if (fileNames.length > 0) {
+                for (let f of fileNames) {
+                    if (f === 'setting.json') {
+                        try{
+                            globalConf[pluginName] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + "/setting.json"))
+                        } catch (e) {
+                            globalConf[pluginName] = defaultConf.default
+                            saveSetting(defaultConf.default,path.join(__dirname, "./plugins/" + pluginName + '/' + f))
+                        }
+                    } else {
+                        let name = f.substring(8).split('.')[0]
+                        try{
+                            globalConf[pluginName][name] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + '/' + f))
+                        }catch (e) {
+                            globalConf[pluginName][name] = defaultConf[name]
+                            saveSetting(defaultConf[name],path.join(__dirname, "./plugins/" + pluginName + '/' + f))
+                        }
+                    }
+                }
+            }
+        } else {
+            globalConf[pluginName] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + "/setting.json"))
+            files = files.filter(o => {
+                return o.split('.').pop() === 'json' && o !== 'setting.json' && o.startsWith('setting-')
+            })
+            if (files.length > 0) {
+                for (let f of files) {
+                    let name = f.substring(8).split('.')[0]
+                    globalConf[pluginName][name] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + '/' + f))
+                }
             }
         }
         global['LOG'](`已加载模块配置: ${pluginName}/setting.json`)
@@ -77,6 +106,21 @@ function initPluginsByName(pluginName) {
     }
 }
 
+function saveSetting(json, path) {
+    let file = path
+    let j = JSON.stringify(json, null, 2)
+    return new Promise((resolve, reject) => {
+        fs["writeFile"](file, j, "utf8", function (err) {
+            if (err) {
+                global["LOG"](err)
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 // 通过名称保存并重载配置
 export function saveAndReloadSettingByName(json, pluginName, reloadPlugin = false) {// json:配置,pluginName:插件名称,reloadPlugin:重载插件
     if (!json) {
@@ -86,7 +130,7 @@ export function saveAndReloadSettingByName(json, pluginName, reloadPlugin = fals
             return initSettingByName(pluginName)
     }
     let file = path.join(global['source']['plugins'], pluginName, "setting.json")
-    let j = JSON.stringify(json, null, 4)
+    let j = JSON.stringify(json, null, 2)
     return new Promise((resolve, reject) => {
         fs["writeFile"](file, j, "utf8", function (err) {
             if (err) {
@@ -114,21 +158,22 @@ export function saveAndReloadSettingForRepeat(json) {
             return false
         } else {
             global['repeat']['loadRepeatJson']()
-            global['repeat']['setting']=json
+            global['repeat']['setting'] = json
         }
     })
 }
 
 // 保存并重载配置
-export function saveAndReloadConfig(json) {
-    if (!json) return initialConf("./config.json", "default")
+export function saveAndReloadConfig(json, needReload = true) {
+    if (!json) {
+        initialConf("./config.json", "default")
+        return
+    }
     let file = path.join(__dirname, 'config.json')
-    let j = JSON.stringify(json, null, 4)
+    let j = JSON.stringify(json, null, 2)
     fs["writeFile"](file, j, "utf8", function (err) {
         if (err) {
             global["LOG"](err)
-            return false
-        } else
-            return initialConf("./config.json", "default")
+        } else if (needReload) initialConf("./config.json", "default")
     })
 }

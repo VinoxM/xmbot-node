@@ -1,0 +1,9 @@
+export const defaultConf = {
+    default:{
+        "uid": "26004677",
+        "room_id": "2255482",
+        "cookie": "_uuid=A6D0F477-5D25-6D6D-F437-0848488D287C79294infoc; buvid3=7E3CE483-70F4-4A78-9F20-7D0A8D0BB00B143094infoc; LIVE_BUVID=AUTO6015984198910848; sid=70ngn0lf; DedeUserID=26004677; DedeUserID__ckMd5=586cfdfce4401e38; SESSDATA=9ffb2702%2C1613971922%2Cd60e8*81; bili_jct=57fe456294c11656af70da9576bccb42; rpdid=|()kYY|l~||0J'ulm)Rk|JlY; blackside_state=1; CURRENT_FNVAL=80; bp_article_offset_26004677=450829896585371493; CURRENT_QUALITY=0; Hm_lvt_8a6e55dbd2870f0f5bc9194cddf32a02=1602953778,1603976636,1603976690,1604577415; bp_t_offset_26004677=454544785604049282; _ga=GA1.2.1235829969.1605805999; bp_video_offset_26004677=461823312056165525; PVID=2; _dfcaptcha=64ee6a2f644fc756b3126bc8dbd5e769",
+        "csrf_token": "57fe456294c11656af70da9576bccb42",
+        "yy_room": "46341030"
+    }
+}

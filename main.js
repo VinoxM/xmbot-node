@@ -4,7 +4,7 @@ import repeat from "./src/repeat"
 import * as http from './src/http'
 import path from 'path'
 import {SqliteDb} from './src/db/index'
-import {initBot,restartBot,replyMsg,replyPrivate,replyGroup} from "./src/utils/bot";
+import {chatLog,getChatLog,getChatLogMore,initBot,restartBot,replyMsg,replyPrivate,replyGroup} from "./src/utils/bot";
 import * as func from './src/utils/funcs'
 import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
 import {CQ} from './src/utils/CQCode'
@@ -44,19 +44,22 @@ globalReg({
     source:source,// 路径
     http,// http连接
     SqliteDb,// 数据库连接
-    func
+    func,
+    chatLog,
+    getChatLog,
+    getChatLogMore
 })
 
 const args = process.argv.splice(2)
-
-// 启动Bot
-initBot(args)
 
 // 加载插件
 loadPlugins('./src/plugins')
 
 // 设置本地资源
 http.useStatic(path.join(source.web,'static'))
+
+// 启动Bot
+initBot(args)
 
 function restart(user_id) {
     global['LOG']('重启xmBot...')

@@ -5,6 +5,8 @@ import uuid from 'node-uuid'
 import formidable from 'formidable'
 import {BaseRequest, ObjRequest} from "./requestClass";
 
+const request = require('request')
+
 export function addListener(app) {
     for (let key in listener) {
         for (let l in listener[key]) {
@@ -198,6 +200,22 @@ const listener = {
                 })
             }
         },
+        '/xmbot/resource/gacha/*': {
+            needAuth: false,
+            func: (req, res) => {
+                res.setHeader('Content-Type', 'image/jpeg')
+                let fileName = req.url.replace('/xmbot/resource/gacha/', '')
+                let filePath = path.join(global['source'].resource, 'gacha')
+                let fullPath = path.join(filePath, fileName)
+                fs.access(fullPath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        res.sendFile(fullPath)
+                    } else {
+                        res.send(BaseRequest.FAILED('Image Not Found!'));
+                    }
+                })
+            }
+        },
         '/xmbot/resource/icon/unit/*': {
             needAuth: false,
             func: (req, res) => {
@@ -359,8 +377,8 @@ const listener = {
                 })
             }
         },
-        '/calendar/url/test.do':{
-            func:(req,res)=>{
+        '/calendar/url/test.do': {
+            func: (req, res) => {
                 let params = req.query
                 global['plugins']['calendar'].calendarTest(params.url, !!params.needProxy).then(r => {
                     res.send(new ObjRequest(r))
@@ -368,6 +386,19 @@ const listener = {
                     global['ERR'](e)
                     res.send(BaseRequest.FAILED())
                 })
+            }
+        },
+        '/xmbot/web/image.get': {
+            func: (req, res) => {
+                let proxy = global['config'].default.proxy
+                let params = req.query
+                if (params.hasOwnProperty('url')) {
+                    request({
+                        url: params.url,
+                        proxy: proxy ? proxy : 'http://127.0.0.1:2802'
+                    }).pipe(res)
+                } else
+                    res.send(BaseRequest.FAILED())
             }
         }
     },
@@ -521,12 +552,29 @@ const listener = {
                 res.send(BaseRequest.SUCCESS())
             }
         },
-        '/setting/calendar/pcr.save':{
+        '/setting/calendar/pcr.save': {
             needAuth: true,
             needAdmin: true,
             func: async (req, res) => {
                 let params = req.body
                 await global['plugins']['calendar']['savePcrSetting'](params)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/chat/sendMsg.do': {
+            needAuth: true,
+            needAdmin: true,
+            func: (req, res) => {
+                global.replyMsg(req.body)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/chat/getMoreMsg.json': {
+            needAuth: true,
+            needAdmin: true,
+            func: (req, res) => {
+                let params = req.body
+                global.getChatLogMore(params.type,params.id,params.index)
                 res.send(BaseRequest.SUCCESS())
             }
         }
