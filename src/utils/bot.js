@@ -254,7 +254,7 @@ export const getChatLog = () => {
                 let s = r.name.split('_')
                 if (chatLog_.hasOwnProperty(s[0])) {
                     await chatLogDb.getChatLogByTableName(r.name).then(rows => {
-                        chatLog_[s[0]][s[1]] = {rows:rows,noMore:false}
+                        chatLog_[s[0]][s[1]] = {rows:rows,noMore:false,hasNew: true,newCount: 0}
                     })
                 }
             }
@@ -264,7 +264,7 @@ export const getChatLog = () => {
             if (chatLog_.group.hasOwnProperty(key)) {
                 chatLog_.group[key].rows = [...chatLog_.group[key].rows, ...elem]
             } else {
-                chatLog_.group[key] = {rows:elem,noMore:false}
+                chatLog_.group[key] = {rows:elem,noMore:false,hasNew: true,newCount: 0}
             }
         }
         for (const key of Object.keys(chatLog.private)) {
@@ -272,7 +272,7 @@ export const getChatLog = () => {
             if (chatLog_.private.hasOwnProperty(key)) {
                 chatLog_.private[key].rows = [...chatLog_.private[key].rows, ...elem]
             } else {
-                chatLog_.private[key] = {rows:elem,noMore:false}
+                chatLog_.private[key] = {rows:elem,noMore:false,hasNew: true,newCount: 0}
             }
         }
         sendWsMsg(JSON.stringify({data: chatLog_, type: 'all'}))

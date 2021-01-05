@@ -15,5 +15,6 @@ export default {
     match: (context) => global['func']['generalMatch'](context, matchDict),
     needPrefix:true,
     savePcrSetting:(json)=>pcr_.saveSetting(json),
-    calendarTest:pcr_.calendarTest
+    calendarTest:pcr_.calendarTest,
+    getAllCalendar:pcr_.getAllCalendar
 }

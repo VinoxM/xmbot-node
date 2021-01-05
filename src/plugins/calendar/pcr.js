@@ -17,6 +17,8 @@ initPcr()
 
 export const calendarTest = (url,needProxy) => getCalendar({url,needProxy})
 
+export const getAllCalendar = () => pcrCalendar.getAllCalendar()
+
 export function initPcr() {
     for (const key of Object.keys(jobs)) {
         let job = jobs[key]

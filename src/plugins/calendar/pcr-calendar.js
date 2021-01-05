@@ -86,6 +86,19 @@ export class PcrCalendar {
             global.replyMsg(context)
         }
     }
+
+    getAllCalendar = () => {
+        return new Promise(async (resolve, reject) => {
+            const areas = Object.keys(this.calendar_source)
+            const result = {}
+            for (const area of areas) {
+                await this.cal_db.selByArea(area).then(res=>{
+                    result[area] = res
+                }).catch(e=>reject(e))
+            }
+            resolve(result)
+        })
+    }
 }
 
 function initDb(db) {

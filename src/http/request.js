@@ -400,6 +400,13 @@ const listener = {
                 } else
                     res.send(BaseRequest.FAILED())
             }
+        },
+        '/calendar/getAll.json': {
+            func: (req, res) => {
+                global['plugins']['calendar'].getAllCalendar().then(result=>{
+                    res.send(new ObjRequest(result))
+                })
+            }
         }
     },
     post: {
@@ -574,7 +581,7 @@ const listener = {
             needAdmin: true,
             func: (req, res) => {
                 let params = req.body
-                global.getChatLogMore(params.type,params.id,params.index)
+                global.getChatLogMore(params.type, params.id, params.index)
                 res.send(BaseRequest.SUCCESS())
             }
         }
