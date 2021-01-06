@@ -224,7 +224,7 @@ function addChatLog(record, isSelf = false) {
     let reply_id = record[msgType[record['message_type']].reply]
     const element = {
         tableName: `${record['message_type']}_${reply_id}`,
-        user_id: user_id,
+        user_id: isSelf?'system':user_id,
         nick_name: record.sender['nickname'],
         message: record.message,
         send_time: new Date(),

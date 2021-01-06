@@ -18,6 +18,7 @@ export class userDb {
     }
 
     createUser = (user_id) => {
+        user_id = String(user_id)
         let sql = 'insert into user(user_id,password) values(?,123456)'
         return this.db.add(sql,[user_id])
     }
