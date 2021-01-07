@@ -14,7 +14,7 @@ export const chatLog = {
 
 export function initBot(args) {
     chatLogDb = new chatDb()
-    initSocket()
+    initSocket(global['config']["default"]["socket"])
     let ops = global['config']["default"]["ws"]
     bot = new CQWebSocket(ops);
     addListener(args)

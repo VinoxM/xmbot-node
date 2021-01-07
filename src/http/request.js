@@ -403,9 +403,15 @@ const listener = {
         },
         '/calendar/getAll.json': {
             func: (req, res) => {
-                global['plugins']['calendar'].getAllCalendar().then(result=>{
+                global['plugins']['calendar'].getAllCalendar().then(result => {
                     res.send(new ObjRequest(result))
                 })
+            }
+        },
+        '/setting/default.json': {
+            func: (req, res) => {
+                const defaultConf = global['config'].default
+                res.send(new ObjRequest(defaultConf))
             }
         }
     },
@@ -582,6 +588,15 @@ const listener = {
             func: (req, res) => {
                 let params = req.body
                 global.getChatLogMore(params.type, params.id, params.index)
+                res.send(BaseRequest.SUCCESS())
+            }
+        },
+        '/setting/default.save': {
+            needAuth: true,
+            needAdmin: true,
+            func: (req, res) => {
+                let params = req.body
+                global['reloadConfig'](params)
                 res.send(BaseRequest.SUCCESS())
             }
         }

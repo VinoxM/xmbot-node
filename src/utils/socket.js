@@ -1,17 +1,14 @@
-// import express from 'express'
 const WebSocketServer = require('ws').Server
 const uuid = require('node-uuid')
 
 let wss
 const client = {}
 
-export function initSocket() {
+export function initSocket({host,port}) {
     if (wss) wss.close()
-    wss = new WebSocketServer({port:9220})
+    wss = new WebSocketServer({host,port})
 
-    wss['on']('open',()=>{
-        console.log('open')
-    })
+    global['LOG'](`ws start:[${host}:${port}]`)
 
     wss['on']('connection',(ws)=>{
         ws.uuid = uuid.v4()
@@ -19,7 +16,7 @@ export function initSocket() {
         global.getChatLog()
         client[ws.uuid] = ws
         ws.on('message',(msg)=>{
-            console.log(msg)
+            global['LOG'](`ws[${ws.uuid}] received: ${msg}`)
         })
         ws.on('close',(e)=>{
             global['LOG'](`ws closed:[${ws.uuid}]`)
