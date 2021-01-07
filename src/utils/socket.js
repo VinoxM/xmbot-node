@@ -4,11 +4,11 @@ const uuid = require('node-uuid')
 let wss
 const client = {}
 
-export function initSocket({host,port}) {
+export function initSocket({port}) {
     if (wss) wss.close()
-    wss = new WebSocketServer({host,port})
+    wss = new WebSocketServer({port})
 
-    global['LOG'](`ws start:[${host}:${port}]`)
+    global['LOG'](`ws start:[${port}]`)
 
     wss['on']('connection',(ws)=>{
         ws.uuid = uuid.v4()
