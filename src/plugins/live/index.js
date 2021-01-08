@@ -9,7 +9,7 @@ let roomInfo = {}
 let rtmpInfo = {}
 
 function initSetting() {
-    setting = global["config"][__dirname.split("\\").pop()]
+    setting = global["config"][__dirname.split(global['separator']).pop()]
 }
 
 let area_info = {id: 0, name: ''}
@@ -429,7 +429,7 @@ function saveSetting(json, fileName = 'setting.json') {
 }
 
 async function reloadLive() {
-    global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
+    global['reloadPlugin'](null, __dirname.split(global['separator']).pop(), true)
     initSetting()
 }
 

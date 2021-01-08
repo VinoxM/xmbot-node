@@ -9,8 +9,6 @@ import * as func from './src/utils/funcs'
 import fs,{readJsonSync, writeJsonSync} from 'fs-extra'
 import {CQ} from './src/utils/CQCode'
 
-console.log(process.platform)
-
 const source = {// 路径
     main:__dirname,
     db:path.join(__dirname, 'database'),

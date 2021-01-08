@@ -27,9 +27,9 @@ const pool_suffix = {
 let pcrGacha = null
 
 function initPcrSetting() { // 加载配置
-    setting = global['config'][__dirname.split("\\").pop()]['pcr']
-    pools = global['config'][__dirname.split("\\").pop()]['pcr-pools']
-    character = global['config'][__dirname.split("\\").pop()]['pcr-character']
+    setting = global['config'][__dirname.split(global['separator']).pop()]['pcr']
+    pools = global['config'][__dirname.split(global['separator']).pop()]['pcr-pools']
+    character = global['config'][__dirname.split(global['separator']).pop()]['pcr-character']
 }
 
 initPcrSetting()
@@ -541,7 +541,7 @@ export function saveSetting(json, fileName = 'setting-pcr-pools.json') { // 保�
 }
 
 async function reloadGacha() { // 重载模块
-    global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
+    global['reloadPlugin'](null, __dirname.split(global['separator']).pop(), true)
     initPcrSetting()
     await initNickName()
 }

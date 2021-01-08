@@ -2,7 +2,13 @@ export const globalReg = obj => Object.assign(global,obj)
 
 let botReady = false
 
-globalReg({botReady})
+const sep = {
+    win32: '\\',
+    linux: '/',
+    darwin: '/'
+}
+
+globalReg({botReady,separator:sep[process.platform]})
 
 globalReg({
     now:()=>new Date().toLocaleString(),

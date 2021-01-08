@@ -3,7 +3,7 @@ import {matchDict} from './matchDict'
 let setting;
 
 function initMatchSetting() {
-    setting = global["config"][__dirname.split("\\").pop()]
+    setting = global["config"][__dirname.split(global['separator']).pop()]
 }
 
 initMatchSetting()

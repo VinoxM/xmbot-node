@@ -44,7 +44,7 @@ const matchDict = [
 
 function initMatchSetting() { // 初始化设置
     return new Promise((resolve, reject) => {
-        setting = global["config"][__dirname.split("\\").pop()]
+        setting = global["config"][__dirname.split(global['separator']).pop()]
         if (!setting) reject('setting is null')
         if (setting.hasOwnProperty('rss')) {
             rss = setting['rss']
@@ -313,7 +313,7 @@ function strCompareTo(a, b) { // a>b return true; a<=b return false
 }
 
 async function reloadRssPlugins(json = false) {
-    await global['reloadPlugin'](json ? json : setting, __dirname.split("\\").pop())
+    await global['reloadPlugin'](json ? json : setting, __dirname.split(global['separator']).pop())
     await initMatchSetting()
 }
 

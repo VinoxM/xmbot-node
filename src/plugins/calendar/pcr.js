@@ -8,7 +8,7 @@ let setting = null
 let jobs = {}
 
 function initSetting() {
-    setting = global['config'][__dirname.split("\\").pop()]['pcr']
+    setting = global['config'][__dirname.split(global['separator']).pop()]['pcr']
 }
 
 initSetting()
@@ -130,7 +130,7 @@ export function searchCalendar(context, area = false,type = 'today') {
 }
 
 function reloadCalendar() {
-    global['reloadPlugin'](null, __dirname.split("\\").pop(), true)
+    global['reloadPlugin'](null, __dirname.split(global['separator']).pop(), true)
     initSetting()
     initPcr()
 }

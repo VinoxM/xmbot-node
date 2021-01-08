@@ -36,7 +36,7 @@ export function loadPlugins(pluginPath) {
 // 通过名称加载配置信息
 function initSettingByName(pluginName) {
     try {
-        let path_ = __dirname + "/plugins/" + pluginName
+        let path_ = path.join(__dirname, 'plugins', pluginName)
         let files = fs['readdirSync'](path_)
         if (files.indexOf('defaultSetting.js') > -1) {
             const defaultConf = require(path.join(path_, 'defaultSetting.js'))['defaultConf']
@@ -47,32 +47,32 @@ function initSettingByName(pluginName) {
             if (fileNames.length > 0) {
                 for (let f of fileNames) {
                     if (f === 'setting.json') {
-                        try{
-                            globalConf[pluginName] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + "/setting.json"))
+                        try {
+                            globalConf[pluginName] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , "setting.json"))
                         } catch (e) {
                             globalConf[pluginName] = defaultConf.default
-                            saveSetting(defaultConf.default,path.join(__dirname, "./plugins/" + pluginName + '/' + f))
+                            saveSetting(defaultConf.default, path.join(__dirname, 'plugins' , pluginName , f))
                         }
                     } else {
                         let name = f.substring(8).split('.')[0]
-                        try{
-                            globalConf[pluginName][name] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + '/' + f))
-                        }catch (e) {
+                        try {
+                            globalConf[pluginName][name] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , f))
+                        } catch (e) {
                             globalConf[pluginName][name] = defaultConf[name]
-                            saveSetting(defaultConf[name],path.join(__dirname, "./plugins/" + pluginName + '/' + f))
+                            saveSetting(defaultConf[name], path.join(__dirname, 'plugins' , pluginName , f))
                         }
                     }
                 }
             }
         } else {
-            globalConf[pluginName] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + "/setting.json"))
+            globalConf[pluginName] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , "setting.json"))
             files = files.filter(o => {
                 return o.split('.').pop() === 'json' && o !== 'setting.json' && o.startsWith('setting-')
             })
             if (files.length > 0) {
                 for (let f of files) {
                     let name = f.substring(8).split('.')[0]
-                    globalConf[pluginName][name] = readJsonSync(resolve(__dirname, "./plugins/" + pluginName + '/' + f))
+                    globalConf[pluginName][name] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , f))
                 }
             }
         }
@@ -98,7 +98,6 @@ function initPluginsByName(pluginName) {
                     global['ERR'](`${e.code}:${pluginName}模块未找到,请检查文件配置:${e.message}`)
                     break
                 default:
-                    console.log(e)
                     global['ERR'](`${pluginName}模块加载失败:${e}`)
                     break
             }

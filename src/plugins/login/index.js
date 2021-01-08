@@ -14,7 +14,7 @@ user_db.tableExists().then(res => {
 let setting = {}
 
 function initSetting() {
-    setting = global["config"][__dirname.split("\\").pop()]
+    setting = global["config"][__dirname.split(global['separator']).pop()]
 }
 
 initSetting()
@@ -178,7 +178,7 @@ function newUserSaltAndSave(userId, baseUrl, salt) {
     if (index === -1) setting['reset_dict'].push(user_info)
     else setting['reset_dict'].splice(index, 1, user_info)
     return new Promise((resolve, reject) => {
-        global['reloadPlugin'](setting, __dirname.split("\\").pop(), true).then(() => {
+        global['reloadPlugin'](setting, __dirname.split(global['separator']).pop(), true).then(() => {
             const res = baseUrl ? `${baseUrl}user=${user_info.user_id}&salt=${user_info.salt}` : ''
             resolve(res)
         }).catch(err => {

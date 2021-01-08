@@ -4,7 +4,7 @@ import schedule from 'node-schedule'
 let setting = {}
 
 function initSetting() {
-    setting = global["config"][__dirname.split("\\").pop()]
+    setting = global["config"][__dirname.split(global['separator']).pop()]
 }
 
 initSetting()

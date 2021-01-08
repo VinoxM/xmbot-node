@@ -21,7 +21,7 @@ export async function queAndAns(context) {
         }
         if (!saved) {
             setting["Q&A"].push({question: question, answer: answer})
-            await global['reloadPlugin'](setting, __dirname.split("\\").pop())
+            await global['reloadPlugin'](setting, __dirname.split(global['separator']).pop())
             global['plugins']['chat']['initMatchSetting']()
             context["message"] = "我学会了~"
         } else context["message"] = "问答冲突,添加失败~"
@@ -54,7 +54,7 @@ export async function queAndAndDel(context) {
         })
         if (!flag) context["message"] = `未找到问答:${msg}`
         else{
-            await global['reloadPlugin'](setting, __dirname.split("\\").pop())
+            await global['reloadPlugin'](setting, __dirname.split(global['separator']).pop())
             global['plugins']['chat']['initMatchSetting']()
         }
     } else {
