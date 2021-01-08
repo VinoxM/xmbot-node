@@ -1,5 +1,6 @@
 const request = require('request')
 const fs = require('fs')
+const url_ = require('url')
 
 export function generalMatch(context, matchDict) {
     let raw_msg = context["raw_message"].toLowerCase();
@@ -55,7 +56,8 @@ export function checkIsPrivate(context) {
 
 export function getWebFile(url, type, needProxy = false) {// 获取网页图片,暂只支持http
     let proxy = global['config']['default'].proxy
-    console.log(proxy,proxy.length)
+    let p = url_.parse(proxy)
+    console.log(p)
     return new Promise((resolve, reject) => {
         request({
             url: url,
