@@ -1,6 +1,8 @@
 const request = require('request')
 const fs = require('fs')
 
+request.defaults({proxy:"http://127.0.0.1:2802"})
+
 export function generalMatch(context, matchDict) {
     let raw_msg = context["raw_message"].toLowerCase();
     for (let m of matchDict) {
@@ -59,7 +61,7 @@ export function getWebFile(url, type, needProxy = false) {// 获取网页图片,
         request({
             url: url,
             method: type ? type : 'GET',
-            proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+            // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
             timeout: 1000
         }, (err, response, body) => {
             if (err) reject(err)
@@ -74,7 +76,7 @@ export function downloadWebFile(url, file, needProxy = false) {
         request({
             url: url,
             method: 'GET',
-            proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+            // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
             timeout: 1000
         }, (err, response, body) => {
             if (!err && response.statusCode === 200) {
@@ -82,7 +84,7 @@ export function downloadWebFile(url, file, needProxy = false) {
                 request({
                     url: url,
                     method: 'GET',
-                    proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+                    // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
                     timeout: 1000
                 }).pipe(stream).on('close', (e) => {
                     if (e) reject(err)
