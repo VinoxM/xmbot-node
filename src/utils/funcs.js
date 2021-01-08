@@ -59,7 +59,7 @@ export function getWebFile(url, type, needProxy = false) {// 获取网页图片,
         request({
             url: url,
             method: type ? type : 'GET',
-            proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+            // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
             timeout: 1000
         }, (err, response, body) => {
             console.log(err)
@@ -75,7 +75,7 @@ export function downloadWebFile(url, file, needProxy = false) {
         request({
             url: url,
             method: 'GET',
-            proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+            // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
             timeout: 1000
         }, (err, response, body) => {
             if (!err && response.statusCode === 200) {
@@ -83,7 +83,7 @@ export function downloadWebFile(url, file, needProxy = false) {
                 request({
                     url: url,
                     method: 'GET',
-                    proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+                    // proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
                     timeout: 1000
                 }).pipe(stream).on('close', (e) => {
                     if (e) reject(err)
