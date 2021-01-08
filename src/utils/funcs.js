@@ -55,6 +55,7 @@ export function checkIsPrivate(context) {
 
 export function getWebFile(url, type, needProxy = false) {// 获取网页图片,暂只支持http
     let proxy = global['config']['default'].proxy
+    console.log(typeof proxy)
     return new Promise((resolve, reject) => {
         request({
             url: url,
