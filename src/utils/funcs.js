@@ -65,7 +65,7 @@ export function getWebFile(url, type, needProxy = false) {// 获取网页图片,
             proxy: needProxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
             timeout: 1000
         }, (err, response, body) => {
-            console.log(err)
+            console.log(err, response, body)
             if (err) reject(err)
             else resolve({response, body})
         })
