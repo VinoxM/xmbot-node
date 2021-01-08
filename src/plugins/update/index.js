@@ -55,7 +55,6 @@ function checkVersion(isForced = false) {
                 resolve({needUpdate:isForced||needUpdate,ver:web_ver})
             })
             .catch(err=>{
-                console.log(err)
                 global['ERR'](err)
                 reject({msg:err.message})
             })
