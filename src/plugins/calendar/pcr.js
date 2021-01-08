@@ -8,7 +8,6 @@ let setting = null
 let jobs = {}
 
 function initSetting() {
-    console.log(__dirname.split("\\").pop())
     setting = global['config'][__dirname.split("\\").pop()]['pcr']
 }
 
