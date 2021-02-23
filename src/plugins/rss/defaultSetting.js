@@ -1,5 +1,5 @@
 export const defaultConf = {
-    default:{
+    default: {
         "initial_time": {
             "time": 20,
             "units": "minutes"
@@ -29,8 +29,8 @@ export const defaultConf = {
                 ],
                 "link_replace": "https://twitter.com/priconne_redive/status/",
                 "last_id": "1345671309619970049",
-                "push_list":{
-                    "qq":{
+                "push_list": {
+                    "qq": {
                         "group": "all",
                         "private": [],
                     }
@@ -50,8 +50,8 @@ export const defaultConf = {
                 ],
                 "link_replace": "https://t.bilibili.com/",
                 "last_id": "476303296082373668",
-                "push_list":{
-                    "qq":{
+                "push_list": {
+                    "qq": {
                         "group": [],
                         "private": "all",
                     }
@@ -68,15 +68,30 @@ export const defaultConf = {
                     "GamkerB站动态"
                 ],
                 "link_replace": "https://github.com/DIYgod/RSSHub/issues/",
-                "push_list":{
-                  "qq":{
-                      "group": [],
-                      "private": [
-                          "760254674"
-                      ],
-                  }
+                "push_list": {
+                    "qq": {
+                        "group": [],
+                        "private": [
+                            "760254674"
+                        ],
+                    }
                 },
                 "last_id": "https://t.bilibili.com/474957468077871444"
+            },
+            {
+                "title": "UMM-日服推特",
+                "on": true,
+                "proxy": true,
+                "source": "https://rsshub.app/twitter/user/uma_musu",
+                "name": "umm_jp_twitter",
+                "name_filter": [
+                    "UMK日服推特",
+                    "赛马娘日服推特"
+                ],
+                "link_replace": "https://twitter.com/uma_musu/status/",
+                "push_group": "all",
+                "push_user": "all",
+                "last_id": "1364138388664672260"
             }
         ]
     }
