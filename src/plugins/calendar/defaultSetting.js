@@ -5,12 +5,14 @@ export const defaultConf = {
     pcr:{
         "on": true,
         "push_list": {
-            "group": [
-                902987930
-            ],
-            "private": [
-                760254674
-            ]
+            "qq": {
+                "group": [
+                    902987930
+                ],
+                "private": [
+                    760254674
+                ]
+            }
         },
         "default_area": "tw",
         "rules": [
@@ -34,8 +36,10 @@ export const defaultConf = {
                     "pcr今天活动"
                 ],
                 "push_list": {
-                    "group": "all",
-                    "private": []
+                    "qq": {
+                        "group": "all",
+                        "private": []
+                    }
                 },
                 "needFlush": true
             },
@@ -59,8 +63,10 @@ export const defaultConf = {
                     "pcr明天活动"
                 ],
                 "push_list": {
-                    "group": "all",
-                    "private": "all"
+                    "qq": {
+                        "group": "all",
+                        "private": "all"
+                    }
                 },
                 "needFlush": false
             },
@@ -85,8 +91,10 @@ export const defaultConf = {
                 },
                 "filter": [],
                 "push_list": {
-                    "group": "all",
-                    "private": "all"
+                    "qq": {
+                        "group": "all",
+                        "private": "all"
+                    }
                 },
                 "needFlush": false
             }

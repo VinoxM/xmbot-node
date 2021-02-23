@@ -36,7 +36,7 @@ export class CalendarDb {
     }
 
     campaignExists = ({name,start_time,end_time,area}) => {
-        const sql = 'select count(1) as count from calendar where name=?1 and start_time=?2 and end_time=?3 and area=?4'
-        return this.db.selOne(sql,[name,start_time,end_time,area])
+        const sql = 'select count(1) as count from calendar where name=?1 and start_time=?2 and area=?3'
+        return this.db.selOne(sql,[name,start_time,area])
     }
 }

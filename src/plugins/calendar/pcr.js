@@ -1,4 +1,4 @@
-import {PcrCalendar,getCalendar} from './pcr-calendar'
+import {PcrCalendar, getCalendar} from './pcr-calendar'
 import schedule from 'node-schedule'
 import fs from "fs-extra";
 import path from "path";
@@ -15,7 +15,7 @@ initSetting()
 
 initPcr()
 
-export const calendarTest = (url,needProxy) => getCalendar({url,needProxy})
+export const calendarTest = (url, needProxy) => getCalendar({url, needProxy})
 
 export const getAllCalendar = () => pcrCalendar.getAllCalendar()
 
@@ -52,8 +52,14 @@ export function initPcr() {
 
 function pushCalendar(push_list, type, all_list) {
     global['LOG'](`开始推送PCR活动日历`)
-    pcrCalendar.pushCalendar(push_list.group === 'all' ? all_list.group : push_list.group, type, setting['default_area'])
-    pcrCalendar.pushCalendar(push_list.private === 'all' ? all_list.private : push_list.private, type, setting['default_area'], false)
+    let pushList = {}
+    Object.keys(push_list).map(key => {
+        pushList[key] = {
+            group: push_list[key].group === 'all' ? all_list[key].group : push_list[key].group,
+            private: push_list[key].private === 'all' ? all_list[key].private : push_list[key].private
+        }
+    })
+    pcrCalendar.pushCalendar(pushList, type, setting['default_area'])
 }
 
 export function toggleSwitch(context, isOn = true) {
@@ -123,10 +129,14 @@ export function toggleJobPush(context, isOn = true) {
     saveSetting(setting)
 }
 
-export function searchCalendar(context, area = false,type = 'today') {
-    let key = area?area:setting['default_area']
+export function searchCalendar(context, area = false, type = 'today') {
+    let key = area ? area : setting['default_area']
     let isGroup = global['func']['checkIsGroup'](context)
-    pcrCalendar.pushCalendar([context[isGroup?'group_id':'user_id']],type,key,isGroup)
+    let push_list = {
+        [context.apiName]:{group: [], private: []}
+    }
+    push_list[context.apiName][isGroup?'group':'private'] = [context[isGroup ? 'group_id' : 'user_id']]
+    pcrCalendar.pushCalendar(push_list, type, key)
 }
 
 function reloadCalendar() {

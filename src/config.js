@@ -1,10 +1,8 @@
-import fs, {readJsonSync, writeJsonSync} from 'fs-extra'
-import {resolve} from 'path'
-import repeat from "./repeat";
-import {defaultConf} from './defaultSetting'
+import fs, {readJsonSync} from 'fs-extra'
+import path,{resolve} from 'path'
+import {defaultConf} from './defaultConfig'
 
 export const globalConf = {}
-import path from 'path'
 
 // 加载配置信息
 function initialConf(path, name) {
@@ -38,33 +36,35 @@ function initSettingByName(pluginName) {
     try {
         let path_ = path.join(__dirname, 'plugins', pluginName)
         let files = fs['readdirSync'](path_)
+        // 如果文件夹下有默认设置配置
         if (files.indexOf('defaultSetting.js') > -1) {
             const defaultConf = require(path.join(path_, 'defaultSetting.js'))['defaultConf']
             let fileNames = []
             for (const key of Object.keys(defaultConf)) {
+                // 取出默认配置中的所有键名,拼接作为文件名
                 fileNames.push(key === 'default' ? 'setting.json' : 'setting-' + key + '.json')
             }
             if (fileNames.length > 0) {
                 for (let f of fileNames) {
-                    if (f === 'setting.json') {
-                        try {
+                    if (f === 'setting.json') { // 基本配置项
+                        try { // 从文件加载基本配置项
                             globalConf[pluginName] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , "setting.json"))
-                        } catch (e) {
+                        } catch (e) { // 不存在该文件,即加载默认配置中的基本配置项,并保存基本配置项为文件
                             globalConf[pluginName] = defaultConf.default
                             saveSetting(defaultConf.default, path.join(__dirname, 'plugins' , pluginName , f))
                         }
-                    } else {
-                        let name = f.substring(8).split('.')[0]
-                        try {
+                    } else { // 额外配置项
+                        let name = f.substring(8).split('.')[0] // 取出额外配置键名
+                        try { // 从文件加载额外配置项
                             globalConf[pluginName][name] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , f))
-                        } catch (e) {
+                        } catch (e) { // 文件不存在,加载默认配置中的基本配置项,并保存为文件
                             globalConf[pluginName][name] = defaultConf[name]
                             saveSetting(defaultConf[name], path.join(__dirname, 'plugins' , pluginName , f))
                         }
                     }
                 }
             }
-        } else {
+        } else { // 文件夹下没有默认配置项,直接加载文件夹下的所有配置文件
             globalConf[pluginName] = readJsonSync(resolve(__dirname, 'plugins' , pluginName , "setting.json"))
             files = files.filter(o => {
                 return o.split('.').pop() === 'json' && o !== 'setting.json' && o.startsWith('setting-')
@@ -87,7 +87,9 @@ function initSettingByName(pluginName) {
 
 // 通过名称加载插件
 function initPluginsByName(pluginName) {
+    // 先加载配置文件
     if (initSettingByName(pluginName)) {
+        // 完成加载配置文件后,加载模块
         try {
             plugins[pluginName] = require("./plugins/" + pluginName).default
             global['LOG'](`已加载模块: ${pluginName}`)
@@ -106,6 +108,7 @@ function initPluginsByName(pluginName) {
     }
 }
 
+// 保存json为指定路径的文件
 function saveSetting(json, path) {
     let file = path
     let j = JSON.stringify(json, null, 2)
@@ -123,7 +126,7 @@ function saveSetting(json, path) {
 
 // 通过名称保存并重载配置
 export function saveAndReloadSettingByName(json, pluginName, reloadPlugin = false) {// json:配置,pluginName:插件名称,reloadPlugin:重载插件
-    if (!json) {
+    if (!json) { // 传入空json
         if (reloadPlugin)
             return initPluginsByName(pluginName)
         else
@@ -164,8 +167,8 @@ export function saveAndReloadSettingForRepeat(json) {
 }
 
 // 保存并重载配置
-export function saveAndReloadConfig(json, needReload = true) {
-    if (!json) {
+export function saveAndReloadConfig(json = null, needReload = true) {
+    if (!json) { // 传入空json,即重载config配置
         initialConf("./config.json", "default")
         return
     }

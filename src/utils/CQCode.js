@@ -1,4 +1,15 @@
-export const CQ = {
+export const CQFunc = {
+    transformCq: (message, toApi, fromApi = 'qq') => {
+        if (toApi === fromApi) return message
+        switch (fromApi) {
+            case "qq":
+                break
+        }
+        return message
+    }
+}
+
+const cqCode = {
     at: (qq) => {
         return `[CQ:at,qq=${qq}]`
     },
@@ -9,9 +20,9 @@ export const CQ = {
         return `[CQ:image,url=${path}${proxy ? ',proxy=1' : ''}]`
     },
     isAtSelf: (context) => isAtSelf(context),
-    checkAndReplaceAtSelf:(context)=>{
-        if (isAtSelf(context)){
-            context['raw_message']=context['message'].replace(`[CQ:at,qq=${context['self_id']}]`,'').trim()
+    checkAndReplaceAtSelf: (context) => {
+        if (isAtSelf(context)) {
+            context['raw_message'] = context['message'].replace(`[CQ:at,qq=${context['self_id']}]`, '').trim()
             return true
         }
         return false
@@ -28,4 +39,8 @@ function isAtSelf(context) {
         return qq_ === String(context['self_id'])
     }
     return false
+}
+
+export const CQCode = {
+    qq: cqCode
 }

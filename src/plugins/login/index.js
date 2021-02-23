@@ -48,7 +48,7 @@ function match(context) {
 }
 
 function register(context) {
-    let user_id = context['user_id']
+    let user_id = context['apiName']+'_'+context['user_id']
     checkUserExists(user_id).then((r) => {
         let url = global['config'].default['base_url'] + 'login'
         if (r === 0) {
@@ -72,12 +72,12 @@ function register(context) {
 }
 
 function login(context) {
-    let user_id = context['user_id']
-    checkUserExists(user_id).then((r) => {
+    let user_id = context['apiName']+'_'+context['user_id']
+    checkUserExists(user_id).then(async (r) => {
         if (r === 0) context['message'] = '您没有注册,请私聊机器人"注册"'
         else {
             let base_url = global['config'].default['base_url'] + 'login?'
-            context['message'] = newUserSaltAndSave(user_id, base_url)
+            context['message'] = await newUserSaltAndSave(user_id, base_url)
         }
         global.replyPrivate(context)
     }).catch((e) => {
@@ -88,7 +88,7 @@ function login(context) {
 }
 
 function resetPwd(context) {
-    let user_id = context['user_id']
+    let user_id = context['apiName']+'_'+context['user_id']
     checkUserExists(user_id).then((r) => {
         if (r === 1) {
             let base_url = global['config'].default['base_url'] + 'reset-pwd?'

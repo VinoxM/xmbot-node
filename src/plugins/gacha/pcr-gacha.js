@@ -105,11 +105,17 @@ export class PcrGacha {
             }
             result.push(res)
         }
-        await handleImage(result).then(res => {
+        await handleImage(result,false).then(res => {
             let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
             let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
             reply += global.CQ.img(res)
-            context['message'] = reply
+            let gachaResult = result.map(o=>new Array(Number(o.star)).fill('★').join('')+' '+o.name)
+            let gachaReply = ''
+            for (let i = 0; i < gachaResult.length; i++) {
+                gachaReply += gachaResult[i]+','
+                if (i===4) gachaReply += '\n'
+            }
+            context['message'] = reply + gachaReply
             global.replyMsg(context, null, true)
         })
         return lib
@@ -287,9 +293,11 @@ function getNickNameAndStar(id, nickName) { // 获取昵称和星级
     return {id: id, name: nickName[id][4], star: String(nickName[id][1]).substring(4)}
 }
 
-async function handleImage(result) { // 拼接图片
+async function handleImage(result,checkStar3 = true) { // 拼接图片
+    // if (checkStar3)
     result = result.filter(o=>o.star==='3')
     let count = result.length
+    if (count === 0) return Promise.resolve('')
     let height = Math.ceil(count / 5) * 130
     let width = 5 * 130
     const baseOpt = {

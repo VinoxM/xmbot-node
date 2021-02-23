@@ -75,15 +75,19 @@ async function getRss(rss) { // 获取RSS源
                 let xmlReader = new x2js()
                 let line = xmlReader.xml2js(body)
                 if (line.rss) {
+                    let push_list = {}
+                    for (const key of Object.keys(rss.push_list)) {
+                        push_list[key] = {
+                            group: rss.push_list[key].group==='all'?setting['push_list'][key].group:rss.push_list[key].group,
+                            private: rss.push_list[key].private==='all'?setting['push_list'][key].private:rss.push_list[key].private
+                        }
+                    }
                     Rss[rss['name']] = {
                         rss: line.rss,
                         title: rss['title'],
                         last_id: rss.last_id,
                         replace_link: rss['link_replace'],
-                        push_list: {
-                            user: rss.push_user === 'all' ? setting['push_list'].user : rss.push_user,
-                            group: rss.push_group === 'all' ? setting['push_list'].group : rss.push_group
-                        }
+                        push_list: push_list
                     }
                     global['LOG'](`成功获取RSS源:${rss.title}`)
                 } else {
@@ -125,7 +129,7 @@ async function handleRssText() { // 处理Rss信息
                     message += images.join("\n")
                 }
                 message += `\n链接:${item.link}`
-                replyMsg.push({message: message, push_group: r.push_list.group, push_user: r.push_list.user})
+                replyMsg.push({message: message, push_list:r.push_list})
             } else {
                 break
             }
@@ -138,16 +142,7 @@ async function handleRssText() { // 处理Rss信息
     if (replyMsg.length > 0) {
         global['LOG'](`RSS源共有${replyMsg.length}条新信息`)
         for (const msg of replyMsg) {
-            if (msg.push_user.length > 0) {
-                for (const user of msg.push_user) {
-                    global.replyPrivate({message: msg.message, user_id: user})
-                }
-            }
-            if (msg.push_group.length > 0) {
-                for (const group of msg.push_group) {
-                    global.replyGroup({message: msg.message, group_id: group})
-                }
-            }
+            global['pushMsg'](msg.message,msg.push_list)
         }
     } else {
         global['LOG']('RSS源没有发现新的信息')
@@ -162,7 +157,7 @@ function checkImg(description) { // 检查是否有图片
         let sub = des.substring(index_s)
         let img_sub = sub.substring(sub.indexOf("src=") + 5)
         let img = img_sub.substring(0, img_sub.indexOf("\""))
-        images.push(global.CQ.img_web(img, true))
+        images.push(global.CQ().img_web(img, true))
         if (img_sub.indexOf("<img") > -1) {
             let res = checkImg(img_sub)
             if (res.length > 0) images = [...images, ...res]
@@ -203,13 +198,14 @@ async function shieldRss(context) {
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
             let push_list = []
-            if (o['push_' + key] === 'all') {
-                push_list = new Array(setting.push_list[key])
+            let apiName = context.apiName
+            if (o.push_list[apiName][key] === 'all') {
+                push_list = new Array(setting.push_list[apiName][key])
             } else {
-                push_list = o['push_' + key]
+                push_list = o.push_list[apiName][key]
             }
             push_list.splice(push_list.indexOf(reply_id), 1)
-            o['push_' + key] = push_list
+            o.push_list[apiName][key] = push_list
         }
         return o
     })
@@ -235,15 +231,16 @@ async function subscribeRss(context) {
             let key = isGroup ? 'group' : 'user'
             let reply_id = context[key + '_id']
             let push_list = []
-            if (o['push_' + key] === 'all') {
-                push_list = setting.push_list[key]
+            let apiName = context.apiName
+            if (o.push_list[apiName][key] === 'all') {
+                push_list = new Array(setting.push_list[apiName][key])
             } else {
-                push_list = o['push_' + key]
+                push_list = o.push_list[apiName][key]
             }
             if (push_list.indexOf(reply_id) === -1) {
                 push_list.push(reply_id)
             }
-            o['push_' + key] = push_list
+            o.push_list[apiName][key] = push_list
         }
         return o
     })

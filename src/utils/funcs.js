@@ -41,7 +41,7 @@ function checkRules(rules, context) {
 }
 
 export function checkIsAdmin(context) {
-    return global["config"].default["master"].some((o) => String(o) === String(context['user_id']))
+    return global["config"].default.api[context.apiName]["master"].some((o) => String(o) === String(context['user_id']))
 }
 
 export function checkIsGroup(context) {
@@ -150,4 +150,17 @@ export function dateCompare(a, b) {
     let x_num = x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate()
     let y_num = y.getFullYear() * 10000 + (y.getMonth() + 1) * 100 + y.getDate()
     return x_num - y_num
+}
+
+export function changeBotReady() {
+    let ready = false
+    let bot = []
+    Object.keys(global.botReady.api).map(key=>{
+        if (global.botReady.api[key]) {
+            ready = true
+            bot.push(key)
+        }
+    })
+    global.botReady.ready = ready
+    global.botReady.bot = bot
 }

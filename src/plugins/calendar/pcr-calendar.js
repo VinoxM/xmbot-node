@@ -32,20 +32,20 @@ export class PcrCalendar {
         })
     }
 
-    pushCalendar = (list, type, area, isGroup = true) => {
+    pushCalendar = (push_list, type, area) => {
         let range = [new Date()]
         let reply_prefix = ''
         let needDate = false
         switch (type) {
             case 'today':
-                reply_prefix = this.calendar_source[area].title + '今日活动'
+                reply_prefix = this.calendar_source[area].title + '今日活动:'
                 break
             case 'yesterday':
-                reply_prefix = this.calendar_source[area].title + '昨日活动'
+                reply_prefix = this.calendar_source[area].title + '昨日活动:'
                 range[0].setDate(range[0].getDate() - 1)
                 break
             case 'tomorrow':
-                reply_prefix = this.calendar_source[area].title + '明日活动'
+                reply_prefix = this.calendar_source[area].title + '明日活动:'
                 range[0].setDate(range[0].getDate() + 1)
                 break
             case 'thisWeek':
@@ -74,17 +74,7 @@ export class PcrCalendar {
             }
         })
         let reply = reply_prefix + reply_list.join('\n')
-        for (const elem of list) {
-            let context = {message: reply}
-            if (isGroup) {
-                context['group_id'] = elem
-                context['message_type'] = 'group'
-            } else {
-                context['user_id'] = elem
-                context['message_type'] = 'private'
-            }
-            global.replyMsg(context)
-        }
+        global['pushMsg'](reply, push_list)
     }
 
     getAllCalendar = () => {
@@ -140,8 +130,8 @@ async function initCalendar(cal_db, calendar,calendar_source) {
             }
             if (updateCount === 0) global['LOG'](`${source.title}活动未发现更新`)
             else global['LOG'](`${source.title}活动共 ${updateCount} 个更新`)
-            await initCampaign(key, cal_db, calendar)
         }).catch(err => global['ERR'](`获取${source.title}活动日历失败:${err}`))
+        await initCampaign(key, cal_db, calendar)
     }
     global['LOG']('活动日历加载完成')
 }
