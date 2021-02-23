@@ -269,19 +269,23 @@ const getChatLog = () => {
         for (const k of Object.keys(chatLog.group)) {
             let key = k + '_' + apiName
             let elem = chatLog.group[key]
-            if (chatLog_.group.hasOwnProperty(key)) {
-                chatLog_.group[key].rows = [...chatLog_.group[key].rows, ...elem]
-            } else {
-                chatLog_.group[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+            if (!!elem) {
+                if (chatLog_.group.hasOwnProperty(key)) {
+                    chatLog_.group[key].rows = [...chatLog_.group[key].rows, ...elem]
+                } else {
+                    chatLog_.group[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+                }
             }
         }
         for (const k of Object.keys(chatLog.private)) {
             let key = k + '_' + apiName
             let elem = chatLog.private[key]
-            if (chatLog_.private.hasOwnProperty(key)) {
-                chatLog_.private[key].rows = [...chatLog_.private[key].rows, ...elem]
-            } else {
-                chatLog_.private[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+            if (!!elem) {
+                if (chatLog_.private.hasOwnProperty(key)) {
+                    chatLog_.private[key].rows = [...chatLog_.private[key].rows, ...elem]
+                } else {
+                    chatLog_.private[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+                }
             }
         }
         sendWsMsg(JSON.stringify({data: chatLog_, type: 'all'}))

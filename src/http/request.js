@@ -11,10 +11,12 @@ export function addListener(app) {
                     if (listener[key][l].needAuth)
                         checkAuthor(req, res).then(() => {
                             if (listener[key][l].needAdmin) {
-                                checkRequestAdmin(req, res).then(listener[key][l].func(req, res))
-                                    .catch(err => {
-                                        res.send(err)
-                                    })
+                                checkRequestAdmin(req, res).then(()=>{
+                                    listener[key][l].func(req, res)
+                                }).catch(err => {
+                                    console.log(err)
+                                    res.send(err)
+                                })
                             } else
                                 listener[key][l].func(req, res)
                         }).catch(err => {
@@ -54,10 +56,10 @@ function checkRequestAdmin(req, res) {
     return new Promise((resolve, reject) => {
         let user_id = req.headers.user_id
         if (user_id && user_id !== '') {
-            let apiName = req.query.user_id.split('_')[0]
+            let apiName = req.headers.user_id.split('_')[0]
             let context = {
                 apiName,
-                user_id: req.query.user_id.replace(apiName+'_','')
+                user_id: req.headers.user_id.replace(apiName+'_','')
             }
             if (global['func']['checkIsAdmin'](context)) resolve()
             else reject(BaseRequest.USER_LIMITS())
