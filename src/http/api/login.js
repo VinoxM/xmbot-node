@@ -109,7 +109,8 @@ const get = {
         needAuth: false,
         func: (req, res) => {
             let params = req.query
-            global['plugins']['login']['savePassword'](params).then(r => {
+            global['plugins']['login']['savePassword'](params).then(async r => {
+                await global['plugins']['login']['userLoginCountUp'](params.user_id)
                 res.send(BaseRequest.SUCCESS())
             }).catch(e => {
                 res.send(BaseRequest.FAILED('修改失败'))
