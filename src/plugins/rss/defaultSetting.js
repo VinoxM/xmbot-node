@@ -89,8 +89,12 @@ export const defaultConf = {
                     "赛马娘日服推特"
                 ],
                 "link_replace": "https://twitter.com/uma_musu/status/",
-                "push_group": "all",
-                "push_user": "all",
+                "push_list": {
+                    "qq": {
+                        "group": [],
+                        "private": [],
+                    }
+                },
                 "last_id": "1364138388664672260"
             }
         ]
