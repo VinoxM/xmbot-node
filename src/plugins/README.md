@@ -1,6 +1,6 @@
 ## 插件扩展开发
 
-### 文件夹名即为插件名,做为键值存储在`global.plugin`里面
+### 文件夹名即为插件名,作为键值存储在`global.plugin`里面
 
     例: 调用 global.plugin.chat 即可调用到 chat 插件 export 的方法和属性
 
