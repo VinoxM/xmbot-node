@@ -46,6 +46,7 @@ try {
 // 装填配置
 globalReg({
     version: version ? version.version : '0.0.0',// 版本信息
+    ver_url: version ? version.ver_url : '',
     replyMsg: bot.replyMsg,// 发送信息
     replyPrivate: bot.replyPrivate,// 发送私聊信息
     replyGroup: bot.replyGroup,// 发送群组信息

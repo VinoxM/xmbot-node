@@ -39,7 +39,7 @@ function checkVersion(isForced = false) {
     let ver = global['version'].split('.')
     let needUpdate = false
     return new Promise((resolve, reject) => {
-        global['func']['getWebFile']('http://raw.githubusercontent.com/VinoxM/xmbot-node/master/docs/v3/ver.json','get',true)
+        global['func']['getWebFile'](global['ver_url'],'get',true)
             .then((res)=>{
                 let web_ver = JSON.parse(res.body)
                 let new_ver = web_ver['version'].split('.')
