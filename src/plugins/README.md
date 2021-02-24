@@ -1,8 +1,8 @@
 ## 插件扩展开发
 
-### 文件夹名即为插件名,作为键值存储在`global.plugin`里面
+### 文件夹名即为插件名,作为键值存储在`global.plugins`里面
 
-    例: 调用 global.plugin.chat 即可调用到 chat 插件 export 的方法和属性
+    例: 调用 global.plugins.chat 即可调用到 chat 插件 export 的方法和属性
 
 ### 文件夹里面的文件: 
 
@@ -60,7 +60,7 @@
         
        要调用加载的配置对象时,直接从 global.config.插件名 中获取[例:global.config.chat]
         
-    2. 从文件 index.js 加载插件,保存在 global.plugin.插件名 中,要在其他插件调用插件方法时,从该属性中获取即可
+    2. 从文件 index.js 加载插件,保存在 global.plugins.插件名 中,要在其他插件调用插件方法时,从该属性中获取即可
        例: global.plugin.chat.initMatchSetting()
 
 ### 文件介绍:
