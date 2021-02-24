@@ -1,4 +1,5 @@
 export const CQFunc = {
+    // 转换CQ码
     transformCq: (message, toApi, fromApi = 'qq') => {
         if (toApi === fromApi) return message
         switch (fromApi) {
@@ -29,6 +30,7 @@ const cqCode = {
     }
 }
 
+// 是否at我
 function isAtSelf(context) {
     let message = context['message']
     const split = '[CQ:at,qq='

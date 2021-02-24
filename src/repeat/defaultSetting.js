@@ -6,5 +6,5 @@ export const defaultConf = {
         "2",
         "5"
     ],
-    "imgRepeatOn": false
+    "imgRepeatOn": true
 }

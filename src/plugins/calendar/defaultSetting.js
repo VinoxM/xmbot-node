@@ -6,12 +6,8 @@ export const defaultConf = {
         "on": true,
         "push_list": {
             "qq": {
-                "group": [
-                    902987930
-                ],
-                "private": [
-                    760254674
-                ]
+                "group": [],
+                "private": []
             }
         },
         "default_area": "tw",

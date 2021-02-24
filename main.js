@@ -12,7 +12,7 @@ import * as http from './src/http'
 import path from 'path'
 import {SqliteDb} from './src/db/index'
 import * as func from './src/utils/funcs'
-import {readJsonSync} from 'fs-extra'
+import fs,{readJsonSync} from 'fs-extra'
 import bot from './src/botApi/index'
 import {initSocket} from "./src/utils/socket"
 
@@ -25,6 +25,13 @@ const source = {
     plugins: path.join(__dirname, 'src', 'plugins'),
     resource: path.join(__dirname, 'resource')
 }
+
+// 创建路径文件夹
+Object.keys(source).forEach(k=>{
+    if (k !== 'main') {
+        fs.mkdirsSync(source[k])
+    }
+})
 
 // 版本信息
 let version;

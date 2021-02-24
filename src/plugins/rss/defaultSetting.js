@@ -1,18 +1,16 @@
 export const defaultConf = {
     default: {
         "initial_time": {
-            "time": 20,
+            "time": 1,
             "units": "minutes"
         },
         "interval": {
-            "time": 24,
+            "time": 17,
             "units": "minutes"
         },
         "push_list": {
             "qq": {
-                "group": [
-                    902987930
-                ],
+                "group": [],
                 "private": []
             }
         },
@@ -52,8 +50,8 @@ export const defaultConf = {
                 "last_id": "476303296082373668",
                 "push_list": {
                     "qq": {
-                        "group": [],
-                        "private": "all",
+                        "group": "all",
+                        "private": [],
                     }
                 },
             },
@@ -71,9 +69,7 @@ export const defaultConf = {
                 "push_list": {
                     "qq": {
                         "group": [],
-                        "private": [
-                            "760254674"
-                        ],
+                        "private": [],
                     }
                 },
                 "last_id": "https://t.bilibili.com/474957468077871444"
