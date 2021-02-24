@@ -32,9 +32,7 @@ export class chatDb {
         return this.db.sel(sql, [])
     }
 
-    close = () => [
-        this.db.close()
-    ]
+    close = () => this.db.close()
 }
 
 function createTable(db, tableName) {

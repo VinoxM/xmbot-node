@@ -26,7 +26,8 @@ export const plugins = {}
 export function loadPlugins(pluginPath) {
     fs["readdir"](pluginPath, (err, files) => {
         for (let file of files) {
-            initPluginsByName(file)
+            let isDir = fs['lstatSync'](path.join(pluginPath,file)).isDirectory()
+            if(isDir) initPluginsByName(file)
         }
     })
 }
