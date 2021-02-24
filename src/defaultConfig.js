@@ -13,7 +13,7 @@ export const defaultConf = {
             },
             "prefixOn": true,
             "prefix": ["ue"],
-            "master": [760254674],
+            "master": [],
             "isBlackGroup": true,
             "blackGroup": [],
             "whiteGroup": [],
@@ -21,7 +21,7 @@ export const defaultConf = {
             "readyFeedBack": false,
         }
     },
-    "proxy": "http://127.0.0.1:2802",
+    "proxy": null,
     "base_url": "http://localhost:9221/xmBot#/",
     "socket": {
         "host": "127.0.0.1",

@@ -81,7 +81,7 @@ export class PcrGacha {
             }
         }
         await handleImage(result).then(res => {
-            reply += global.CQ.img(res)
+            reply += global.CQ().img(res)
             context['message'] = reply + replyEnd
             global.replyMsg(context, null, true)
         })
@@ -108,7 +108,7 @@ export class PcrGacha {
         await handleImage(result,false).then(res => {
             let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
             let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
-            reply += global.CQ.img(res)
+            reply += global.CQ().img(res)
             let gachaResult = result.map(o=>new Array(Number(o.star)).fill('★').join('')+' '+o.name)
             let gachaReply = ''
             for (let i = 0; i < gachaResult.length; i++) {
@@ -132,7 +132,7 @@ export class PcrGacha {
         }
         await handleImage([result]).then(res => {
             let reply = ''
-            reply += global.CQ.img(res)
+            reply += global.CQ().img(res)
             context['message'] = reply
             global.replyMsg(context, null, true)
         })
