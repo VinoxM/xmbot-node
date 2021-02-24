@@ -20,9 +20,9 @@ const charRules = { // 角色规范
     }
 }
 const pool_suffix = {
-    cn:'国服',
-    tw:'台服',
-    jp:'日服'
+    cn: '国服',
+    tw: '台服',
+    jp: '日服'
 }
 let pcrGacha = null
 
@@ -37,7 +37,7 @@ initPcrSetting()
 export function currentPool(context) {
     let suffix = setting.default_pool
     let poolPickUp = getPoolPickUp(suffix);
-    global.replyMsg(context,`${pool_suffix[suffix]}\n->Pick Up:${poolPickUp.join(',')}`)
+    global.replyMsg(context, `${pool_suffix[suffix]}\n->Pick Up:${poolPickUp.join(',')}`)
 }
 
 export function initNickName(context, isReload = false) { // 加载角色
@@ -93,10 +93,10 @@ export function addCharacter(context) { // 新增角色
         global.replyMsg(context, null, true)
         return
     }
-    let check_ = checkCharTypeAndStar(c[0],c[1])
+    let check_ = checkCharTypeAndStar(c[0], c[1])
     let check = check_.check
-    if (check_.flag){
-        global.replyMsg(context,check,true)
+    if (check_.flag) {
+        global.replyMsg(context, check, true)
         return
     }
     let checkNames = checkName(c.slice(2))
@@ -115,11 +115,11 @@ export function addCharacter(context) { // 新增角色
     })
 }
 
-function checkName(names,id = false) { // 检查名称
+function checkName(names, id = false) { // 检查名称
     let res = []
     for (const name of names) {
         Object.values(nickNames).some((o, i) => {
-            if (id&&o[2]===id) return false
+            if (id && o[2] === id) return false
             if (i < 2) return false
             if (o.indexOf(name) > -1) {
                 res.push(name)
@@ -152,16 +152,16 @@ export function checkCharTypeAndStar(type, star) { // 检查角色类型和星�
         for (const t of Object.values(charRules.type)) {
             typeRules = [...typeRules, ...t]
         }
-        return {check:`角色类型不规范[${typeRules.join(',')}]`,flag:true}
+        return {check: `角色类型不规范[${typeRules.join(',')}]`, flag: true}
     }
     if (!check.star) {
         let starRules = []
         for (const s of Object.values(charRules.star)) {
             starRules = [...starRules, ...s]
         }
-        return {check:`角色星级不规范[${starRules.join(',')}]`,flag:true}
+        return {check: `角色星级不规范[${starRules.join(',')}]`, flag: true}
     }
-    return {flag:true,check}
+    return {flag: true, check}
 }
 
 export function delCharacter(context, byIndex = false) { // 删除角色
@@ -224,14 +224,14 @@ export function viewCharacter(context, isIndex = false) { // 查看角色
     let characters = result.characters.length > 0 ? result.characters.join('\n') : ''
     let notFound = result.notFound.length > 0 ? '角色' + result.notFound.join(',') + '未找到' : ''
     context['message'] = characters + (characters !== '' && notFound !== '' ? '\n' : '') + notFound
-    global.replyMsg(context,null,true)
+    global.replyMsg(context, null, true)
 }
 
-export function updateCharacter(context,isAddNickNames = false) {
+export function updateCharacter(context, isAddNickNames = false) {
     let msg = context['raw_message']
     let split = msg.split(':')
-    if (split.length!==2){
-        global.replyMsg(context,'输入不合规范->[要更新的角色]:[更新内容]',true)
+    if (split.length !== 2) {
+        global.replyMsg(context, '输入不合规范->[要更新的角色]:[更新内容]', true)
         return
     }
     let name = split[0]
@@ -250,28 +250,29 @@ export function updateCharacter(context,isAddNickNames = false) {
             break
         }
     }
-    if (!flag){
-        global.replyMsg(context,`角色${name}未找到`,true)
+    if (!flag) {
+        global.replyMsg(context, `角色${name}未找到`, true)
         return
     }
-    if (isAddNickNames){
-        char = Array.from(new Set([...char,...info]))
-    }else{
+    if (isAddNickNames) {
+        char = Array.from(new Set([...char, ...info]))
+    } else {
         char = info
         let check_ = checkCharTypeAndStar(char[0], char[1]) // 检查添加信息的角色类型和星级规范
         let check = check_.check
-        if(check_.flag){
-            global.replyMsg(context,check,true)
+        if (check_.flag) {
+            global.replyMsg(context, check, true)
             return
         }
-        char[0]=check.type;char[1]=check.star
+        char[0] = check.type;
+        char[1] = check.star
     }
     let checkNames = checkName(char.slice(2), char[2])
-    if (checkNames.length>0) {
-        global.replyMsg(context,`已有相同的昵称存在:${checkNames.join(',')}`,true)
+    if (checkNames.length > 0) {
+        global.replyMsg(context, `已有相同的昵称存在:${checkNames.join(',')}`, true)
         return
     }
-    nickNames[char[2]]=char
+    nickNames[char[2]] = char
     saveNickNames().then(() => {
         context['message'] = '保存成功'
         global.replyMsg(context)
@@ -308,8 +309,8 @@ function characterFilter(raw_message, isIndex) { // 筛选角色
     return result
 }
 
-export function saveNickNames(fileName = 'nickname.csv',json = false) { // 保存角色到文件
-    let nickName = json?json:nickNames
+export function saveNickNames(fileName = 'nickname.csv', json = false) { // 保存角色到文件
+    let nickName = json ? json : nickNames
     return new Promise((resolve, reject) => {
         let values = Object.values(nickName);
         values.sort((a, b) => Number(a[2]) - Number(b[2]))
@@ -317,7 +318,7 @@ export function saveNickNames(fileName = 'nickname.csv',json = false) { // 保�
             return o.join(',')
         }).join('\n')
         let buffer = Buffer.from(str);
-        fs['writeFile'](path.join(nickNamePath, fileName?fileName:'nickname.csv'), buffer, (err) => {
+        fs['writeFile'](path.join(nickNamePath, fileName ? fileName : 'nickname.csv'), buffer, (err) => {
             if (err) {
                 global['ERR'](err)
                 reject(err)
@@ -386,7 +387,7 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
         global.replyMsg(context, null, true)
         return
     }
-    let pool_name = suffix?suffix:setting.default_pool
+    let pool_name = suffix ? suffix : setting.default_pool
     let pool = pools['pool_' + pool_name]
     let stars = {
         star3: [],
@@ -399,9 +400,9 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
             let p = pool.pools['star' + s].pool
             p = [...p, ...pool.pools[key].pool]
             let set = new Set(p)
-            let new_pool =[]
+            let new_pool = []
             for (const e of set) {
-                if (nickNames[e][0]!=='limited')
+                if (nickNames[e][0] !== 'limited')
                     new_pool.push(e)
             }
             pool.pools['star' + s].pool = new_pool
@@ -448,27 +449,27 @@ export function changePoolPickUp(context, suffix) { // 切换当前卡池up角�
     })
 }
 
-export function addCharIntoPool(context,suffix = false) {
+export function addCharIntoPool(context, suffix = false) {
 
 }
 
-export function removeCharFromPool(context,suffix = false) {
+export function removeCharFromPool(context, suffix = false) {
     let msg = context['raw_message']
     if (msg === '') {
-        global.replyMsg(context,'请输入要移除的角色名',true)
+        global.replyMsg(context, '请输入要移除的角色名', true)
     }
     let pool_name = setting.default_pool
-    if (suffix) pool_name = 'pool_'+suffix
-    let pool  = pools[pool_name]
-    let filter = characterFilter(msg,true)
-    if (filter.notFound.length>0){
-        global.replyMsg(context,`角色${filter.notFound.join(',')}未找到`,true)
+    if (suffix) pool_name = 'pool_' + suffix
+    let pool = pools[pool_name]
+    let filter = characterFilter(msg, true)
+    if (filter.notFound.length > 0) {
+        global.replyMsg(context, `角色${filter.notFound.join(',')}未找到`, true)
         return
     }
     let keys = Object.keys(pool.pools)
     let isPickUp = []
     for (const key of keys) {
-        if (key.startsWith('pick_up')){
+        if (key.startsWith('pick_up')) {
             filter.charInfo.some(obj => {
                 let o = obj[0]
                 if (pool.pools[key].pool.indexOf(String(o.id)) > -1) {
@@ -479,29 +480,28 @@ export function removeCharFromPool(context,suffix = false) {
             })
         }
     }
-    if (isPickUp.length>0){
-        global.replyMsg(context,`角色${isPickUp.join(',')}正UP中`,true)
+    if (isPickUp.length > 0) {
+        global.replyMsg(context, `角色${isPickUp.join(',')}正UP中`, true)
         return
     }
     let notInPool = []
     let spliced = []
-    filter.charInfo.forEach(obj=>{
+    filter.charInfo.forEach(obj => {
         let o = obj[0]
         let p = pool.pools[o.star].pool
         let index = p.indexOf(String(o.id))
-        if (index>-1) {
+        if (index > -1) {
             p.splice(index, 1)
             spliced.push(o.inputName)
-        }
-        else notInPool.push(o.inputName)
+        } else notInPool.push(o.inputName)
     })
-    let reply_spliced = spliced.length>0?('角色'+spliced.join(',')+'已移除'):''
-    let reply_notInPool = notInPool.length>0?('角色'+notInPool.join(',')+'不在卡池中'):''
-    global.replyMsg(context,`${reply_spliced}${reply_spliced===''||reply_notInPool===''?'':','}${reply_notInPool}`,true)
+    let reply_spliced = spliced.length > 0 ? ('角色' + spliced.join(',') + '已移除') : ''
+    let reply_notInPool = notInPool.length > 0 ? ('角色' + notInPool.join(',') + '不在卡池中') : ''
+    global.replyMsg(context, `${reply_spliced}${reply_spliced === '' || reply_notInPool === '' ? '' : ','}${reply_notInPool}`, true)
 }
 
-function saveCharacters(fileName = 'setting-pcr-character.json',json = false) { // 保存角色
-    let nickName = json?json:nickNames
+function saveCharacters(fileName = 'setting-pcr-character.json', json = false) { // 保存角色
+    let nickName = json ? json : nickNames
     let char = {
         hidden: {
             star1: {}, star2: {}, star3: {}
@@ -547,15 +547,15 @@ async function reloadGacha() { // 重载模块
 }
 
 function getPoolPickUp(suffix) {
-    let pool_ = pools['pool_'+suffix].pools
+    let pool_ = pools['pool_' + suffix].pools
     let key = Object.keys(pool_)
     let pick_up = []
     for (const k of key) {
-        if (k.startsWith('pick_up')){
+        if (k.startsWith('pick_up')) {
             let p = pool_[k].pool
             for (const e of p) {
                 let charName = nickNames[e][4]
-                pick_up.push(pool_[k].prefix+charName)
+                pick_up.push(pool_[k].prefix + charName)
             }
         }
     }
@@ -585,7 +585,7 @@ function getPoolPickUp(suffix) {
 
 export async function gacha(context, prefix) { // 十连
     const times = 10
-    const user_id = context['user_id']
+    const user_id = context.apiName + '_' + context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
         global.replyMsg(context, null, true)
@@ -598,7 +598,7 @@ export async function gacha(context, prefix) { // 十连
 
 export async function simple(context, prefix) { // 单抽
     const times = 1
-    const user_id = context['user_id']
+    const user_id = context.apiName + '_' + context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
         global.replyMsg(context, null, true)
@@ -611,7 +611,7 @@ export async function simple(context, prefix) { // 单抽
 
 export async function thirty(context, prefix) { // 一井
     const times = 300
-    const user_id = context['user_id']
+    const user_id = context.apiName + '_' + context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
         context['message'] = `您今天剩余抽卡次数不足${times}次`
         global.replyMsg(context, null, true)
