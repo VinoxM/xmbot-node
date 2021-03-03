@@ -22,7 +22,11 @@ function initApi(args, arr = ['qq']) {
     arr.forEach(e => {
         botApi[e] = Api[e].default
         let api = Api[e].default
-        api.initBot(args)
+        let arg = []
+        if (args.length > 0 && Array.from(args).slice(2).indexOf(e) > -1) {
+            arg = args.slice(0, 2)
+        }
+        api.initBot(arg)
     })
 }
 

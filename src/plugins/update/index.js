@@ -24,7 +24,7 @@ function update(context,isForce = false) {
     checkVersion(isForce).then(res=>{
         if (res.needUpdate){
             context['message']='最新版本:'+res.ver.version+',正在下载更新...'
-            doUpdate(context['user_id'])
+            doUpdate(context['user_id'],context.apiName)
         }else {
             context['message']='已是最新版本'
         }
@@ -62,7 +62,7 @@ function checkVersion(isForced = false) {
     })
 }
 
-function doUpdate(user_id) {
+function doUpdate(user_id, apiName) {
     let dir = global['source'].main
     let pid = process.ppid
     let script =
@@ -70,7 +70,7 @@ function doUpdate(user_id) {
         'taskkill /pid '+pid+' /f\n' +
         'git pull\n' +
         'ping 127.0.0.1 -n 3\n' +
-        'node index.js update ' + user_id
+        'node index.js update ' + user_id + ' ' +apiName
     let filePath = dir+'/update.bat'
     fs['writeFile'](filePath,Buffer.from(script),(err)=>{
         if (err) return false
