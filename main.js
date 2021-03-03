@@ -57,6 +57,7 @@ globalReg({
         loadPlugins('./src/plugins')
         bot.restartBot(apiName, user_id)
     },
+    restartApi: bot.restartApi,
     config: globalConf,// 配置信息
     plugins,// 插件
     repeat,// 复读

@@ -33,7 +33,17 @@ function initApi(args, arr = ['qq']) {
 export default {
     botApi,
     initApi,
-    restartBot: (apiName, userId) => botApi[apiName].restartBot(userId),
+    restartBot: (apiName, userId) => {
+        if (!!apiName){
+            botApi[apiName].restartBot(userId)
+        } else {
+            for (const key of Object.keys(botApi)) {
+                let botElem = botApi[key]
+                botElem.restartBot(key===apiName?userId:null)
+            }
+        }
+    },
+    restartApi: (apiName) => botApi[apiName].restartBot(),
     CQ: (apiName = 'qq') => botApi[apiName].CQ,
     chatLog: (apiName) => botApi[apiName].chatLog,
     chatLogDb: (apiName) => botApi[apiName].chatLogDb.db,

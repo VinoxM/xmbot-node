@@ -145,7 +145,7 @@ function replyMsg(context, message, at = false) {
     context = global['func']['checkContextError'](context)
     let replyType = msgType[context["message_type"]]["reply"];//通过消息类型确定回复目标(群组->group_id,私聊->private_id)
     let replyId = context[replyType];//获取回复目标号码
-    if (message) context['message'] = message
+    if (!!message) context['message'] = message
     // message = message ? message : context["message"]
     if (context['message_type'] !== 'private' && at) {//是否@发送人
         context['message'] = CQ.at(context["user_id"]) + context['message']
