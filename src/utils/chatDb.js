@@ -17,8 +17,8 @@ export class chatDb {
         })
     }
 
-    getChatTables = () => {
-        const sql = `select name from sqlite_master where type = 'table' and name != 'sqlite_sequence'`
+    getChatTables = (apiName) => {
+        const sql = `select name from sqlite_master where type = 'table' and name != 'sqlite_sequence' and name like '%_${apiName}'`
         return this.db.sel(sql, [])
     }
 

@@ -53,7 +53,7 @@ function register(context) {
         let url = global['config'].default['base_url'] + 'login'
         if (r === 0) {
             user_db.createUser(user_id).then(() => {
-                context['message'] = `注册成功(账号为您的qq号码,密码123456),请前往网页登录:${url}`
+                context['message'] = `注册成功(账号:[${context['apiName']}]${context['user_id']},密码123456),请前往网页登录:${url}`
                 global.replyPrivate(context)
             }).catch((e) => {
                 global['ERR'](e)
@@ -61,7 +61,7 @@ function register(context) {
                 global.replyPrivate(context)
             })
         } else {
-            context['message'] = `您已注册,请前往网页登录:${url}`
+            context['message'] = `您已注册账号:[${context['apiName']}]${context['user_id']},请前往网页登录:${url}`
             global.replyPrivate(context)
         }
     }).catch((e) => {

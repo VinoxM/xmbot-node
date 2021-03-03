@@ -1,9 +1,8 @@
 import {CQWebSocket} from "cq-websocket";
 import {CQCode} from "../utils/CQCode";
 import {chatDb} from '../utils/chatDb'
-import {sendWsMsg} from "../utils/socket";
 
-let chatLogDb = null
+let chatLogDb = {db:null}
 let bot = null
 let con_count = 0
 const con_err_count = 2
@@ -16,7 +15,7 @@ const apiName = __filename.split(global['separator']).pop().split('.')[0]
 const CQ = CQCode[apiName]
 
 function initBot(args) {
-    chatLogDb = new chatDb()
+    chatLogDb.db = new chatDb()
     const apiConf = global['config'].default['api'][apiName]
     let ops = apiConf["ws"]
     bot = new CQWebSocket(ops);
@@ -25,7 +24,7 @@ function initBot(args) {
 }
 
 function restartBot(user_id) {
-    if (chatLogDb) chatLogDb.close()
+    if (chatLogDb.db) chatLogDb.db.close()
     bot.disconnect()
     initBot(user_id ? ['restart', user_id] : [])
 }
@@ -73,7 +72,7 @@ function addListener(args, apiConf) {
                 private: (params) => bot("send_private_msg", params),
                 group: (params) => bot("send_group_msg", params)
             }
-            global['LOG']('xmBot已启动')
+            global['LOG'](`xmBot已启动API [${apiName}]`)
             let isRestart = args && args.length > 0 && args[0] === 'restart'
             let isUpdate = args && args.length > 0 && args[0] === 'update'
             if (isUpdate) {
@@ -89,7 +88,7 @@ function addListener(args, apiConf) {
             }
         })
         .on('message', (event, record, tags) => {// 监听接收信息处理
-            onReceiveLog(record);
+            global['func']['onReceiveLog'](record,apiName);
 
             // let conf = global["config"]["default"]
             let type = record["message_type"]
@@ -143,7 +142,7 @@ function addListener(args, apiConf) {
 }
 
 function replyMsg(context, message, at = false) {
-    context = checkContextError(context)
+    context = global['func']['checkContextError'](context)
     let replyType = msgType[context["message_type"]]["reply"];//通过消息类型确定回复目标(群组->group_id,私聊->private_id)
     let replyId = context[replyType];//获取回复目标号码
     if (message) context['message'] = message
@@ -153,162 +152,31 @@ function replyMsg(context, message, at = false) {
     }
     let params = {[replyType]: replyId, message: context['message']}//回复消息体(例:{group_id:123456}或{user_id:123456})
     let func = msgType[context["message_type"]]["type"]//获取发送api的方法名称(private()或group())
-    onSendLog(context["message_type"], replyId, context["self_id"], context['message']);
+    global['func']['onSendLog'](context["message_type"], replyId, context["self_id"], context['message'],apiName);
     bot.send[func](params).then(r => {
         if (func === 'group') global['repeat']['handleRepeat'](context)// 发送群组信息,处理复读
     })
 }
 
 function replyPrivate(context) {
-    context = checkContextError(context)
-    onSendLog('private', context["user_id"], context["self_id"], context["message"]);
+    context = global['func']['checkContextError'](context)
+    global['func']['onSendLog']('private', context["user_id"], context["self_id"], context["message"],apiName);
     bot.send.private({user_id: context["user_id"], message: context["message"]}).then(r => {
 
     })
 }
 
 function replyGroup(context, at = false) {
-    context = checkContextError(context)
+    context = global['func']['checkContextError'](context)
     if (at) {
         context["message"] = CQ.at(context["user_id"]) + context["message"]
     }
-    onSendLog('group', context["group_id"], context["self_id"], context["message"]);
+    global['func']['onSendLog']('group', context["group_id"], context["self_id"], context["message"],apiName);
     bot.send.group({group_id: context["group_id"], message: context["message"]}).then(r => {
         global['repeat']['handleRepeat'](context)// 发送群组信息,处理复读
     })
 }
 
-function checkContextError(context) {
-    if (context.hasOwnProperty('err')) {
-        switch (context.err) {
-            case 'isNotAdmin':
-            case 0:
-                context['message'] = '只有主人可以这么命令我'
-                break;
-            case 'isNotPrivate':
-            case 1:
-                context['message'] = '请私聊使用该指令'
-                break;
-            case 'isNotGroup':
-            case 2:
-                context['message'] = '请在群聊中使用该指令'
-                break;
-        }
-    }
-    return context
-}
-
-// 收到信息日志
-function onReceiveLog(record) {
-    let sender = `[${apiName}]`;
-    if (record["message_type"] === 'group') {
-        sender += `[${record["group_id"]}] `;
-    }
-    sender += `${record["sender"]["nickname"]}(${record["user_id"]}): -> `;
-    let message = record["message"];
-    global['LOG'](sender + message);
-    addChatLog(record)
-}
-
-// 发送信息日志
-function onSendLog(msgType_, replyId, selfId, message) {
-    let receiver = `[${apiName}]`;
-    if (msgType_ === 'group') {
-        receiver += `[${replyId}] `;
-    }
-    receiver += `${selfId ? selfId : 'system'}: <- `;
-    global['LOG'](receiver + message);
-    const record = {message_type: msgType_, message: message, user_id: selfId ? selfId : 'system'}
-    record[msgType[msgType_].reply] = replyId
-    record.sender = {nickname: 'system'}
-    addChatLog(record, true)
-}
-
-const chatSaveCount = 5
-
-function addChatLog(record, isSelf = false) {
-    let user_id = String(record['user_id'])
-    let reply_id = record[msgType[record['message_type']].reply]
-    const element = {
-        tableName: `${record['message_type']}_${reply_id}_${apiName}`,
-        user_id: isSelf ? 'system' : user_id,
-        nick_name: record.sender['nickname'],
-        message: record.message,
-        send_time: new Date(),
-        is_self: isSelf ? 1 : 0
-    }
-    if (chatLog[record['message_type']][reply_id]) {
-        chatLog[record['message_type']][reply_id].push(element)
-    } else {
-        chatLog[record['message_type']][reply_id] = [element]
-    }
-    sendWsMsg(JSON.stringify({data: element, type: 'elem'}))
-    if (chatLog[record['message_type']][reply_id].length >= chatSaveCount) {
-        let rows = []
-        for (const elem of chatLog[record['message_type']][reply_id]) {
-            rows = [...rows, ...[elem.user_id, elem.nick_name, elem.message, elem.send_time, elem.is_self]]
-        }
-        chatLogDb.saveBatch(element.tableName, rows)
-        chatLog[record['message_type']][reply_id] = []
-    }
-}
-
-const getChatLog = () => {
-    chatLogDb.getChatTables().then(async (res) => {
-        const chatLog_ = {group: {}, private: {}}
-        if (res.length > 0) {
-            for (const r of res) {
-                let s = r.name.split('_')
-                if (chatLog_.hasOwnProperty(s[0])) {
-                    await chatLogDb.getChatLogByTableName(r.name).then(rows => {
-                        chatLog_[s[0]][s[1] + '_' + s[2]] = {rows: rows, noMore: false, hasNew: true, newCount: 0}
-                    })
-                }
-            }
-        }
-        for (const k of Object.keys(chatLog.group)) {
-            let key = k + '_' + apiName
-            let elem = chatLog.group[key]
-            if (!!elem) {
-                if (chatLog_.group.hasOwnProperty(key)) {
-                    chatLog_.group[key].rows = [...chatLog_.group[key].rows, ...elem]
-                } else {
-                    chatLog_.group[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
-                }
-            }
-        }
-        for (const k of Object.keys(chatLog.private)) {
-            let key = k + '_' + apiName
-            let elem = chatLog.private[key]
-            if (!!elem) {
-                if (chatLog_.private.hasOwnProperty(key)) {
-                    chatLog_.private[key].rows = [...chatLog_.private[key].rows, ...elem]
-                } else {
-                    chatLog_.private[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
-                }
-            }
-        }
-        sendWsMsg(JSON.stringify({data: chatLog_, type: 'all'}))
-    })
-}
-
-const getChatLogMore = ({type, id, index}) => {
-    let tableName = type + '_' + id;
-    chatLogDb.getChatLogCountByTableName(tableName, index).then(res => {
-        if (res.count >= 20) {
-            chatLogDb.getChatLogByTableName(tableName, 20, index).then(rows => {
-                sendWsMsg(JSON.stringify({data: {tableName, rows}, type: 'more'}))
-            })
-        } else if (res.count > 0) {
-            chatLogDb.getChatLogByTableName(tableName, res.count, index).then(rows => {
-                sendWsMsg(JSON.stringify({data: {tableName, rows}, type: 'more'}))
-            })
-        } else {
-            sendWsMsg(JSON.stringify({data: {tableName, rows: []}, type: 'more'}))
-        }
-    })
-}
-
 export default {
-    CQ, chatLog, getChatLog, getChatLogMore, initBot, restartBot, replyMsg, replyPrivate, replyGroup
+    CQ, chatLog, chatLogDb, initBot, restartBot, replyMsg, replyPrivate, replyGroup
 }

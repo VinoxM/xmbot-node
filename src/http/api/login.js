@@ -55,7 +55,7 @@ const get = {
                     break
                 case 0:
                 default:
-                    let fullUserName = user_info.apiName + '_' + user_info.user
+                    let fullUserName = user_info.user
                     global['plugins']['login']['checkUserExists'](fullUserName).then(async (r) => {
                         if (r === 1) {
                             let check = await global['plugins']['login']['selUserLoginCount'](fullUserName)

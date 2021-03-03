@@ -5,7 +5,7 @@ import {CQFunc} from "../utils/CQCode";
 const Api = {}
 
 function loadApi() {
-    const files = fs['readdirSync'](__dirname).filter(o => o !== 'index.js')
+    const files = fs['readdirSync'](__dirname).filter(o => o !== 'index.js' && o.split('.').pop() === 'js')
     if (files && files.length > 0) {
         files.forEach(file => {
             let fileName = file.split('.')[0]
@@ -32,34 +32,32 @@ export default {
     restartBot: (apiName, userId) => botApi[apiName].restartBot(userId),
     CQ: (apiName = 'qq') => botApi[apiName].CQ,
     chatLog: (apiName) => botApi[apiName].chatLog,
+    chatLogDb: (apiName) => botApi[apiName].chatLogDb.db,
     getChatLog: (apiName) => {
         if (apiName) {
-            botApi[apiName].getChatLog()
+            global['func'].getChatLog(apiName)
         } else {
-            Object.values(botApi).map(o=>{
-                o.getChatLog()
-            })
-        }
-    },
-    getChatLogMore: (params, apiName) => {
-        if (apiName) {
-            botApi[apiName].getChatLogMore(params)
-        } else {
-            Object.values(botApi).map(o=>{
-                o.getChatLogMore(params)
-            })
+            for (const key of Object.keys(botApi)) {
+                global['func'].getChatLog(key)
+            }
         }
     },
     replyMsg: (context, message, at) => {
         let apiName = context.apiName
+        let fromApi = !!context['fromApi'] ? context['fromApi'] : 'qq'
+        context['message'] = CQFunc.transformCq(context['message'], apiName, fromApi)
         botApi[apiName].replyMsg(context, message, at)
     },
     replyPrivate: (context) => {
         let apiName = context.apiName
+        let fromApi = !!context['fromApi'] ? context['fromApi'] : 'qq'
+        context['message'] = CQFunc.transformCq(context['message'], apiName, fromApi)
         botApi[apiName].replyPrivate(context)
     },
     replyGroup: (context, at) => {
         let apiName = context.apiName
+        let fromApi = !!context['fromApi'] ? context['fromApi'] : 'qq'
+        context['message'] = CQFunc.transformCq(context['message'], apiName, fromApi)
         botApi[apiName].replyGroup(context, at)
     },
     pushMsg: (msg, pushList) => {

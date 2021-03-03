@@ -8,6 +8,10 @@ export const defaultConf = {
             "qq": {
                 "group": [],
                 "private": []
+            },
+            "discord": {
+                "group": [],
+                "private": []
             }
         },
         "default_area": "tw",
@@ -34,6 +38,10 @@ export const defaultConf = {
                 "push_list": {
                     "qq": {
                         "group": "all",
+                        "private": []
+                    },
+                    "discord": {
+                        "group": [],
                         "private": []
                     }
                 },
@@ -62,6 +70,10 @@ export const defaultConf = {
                     "qq": {
                         "group": "all",
                         "private": "all"
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
                 "needFlush": false
@@ -90,6 +102,10 @@ export const defaultConf = {
                     "qq": {
                         "group": "all",
                         "private": "all"
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
                 "needFlush": false

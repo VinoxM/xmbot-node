@@ -20,7 +20,7 @@ export async function queAndAns(context) {
             saved = setting["Q&A"].some((o) => o.question === question)
         }
         if (!saved) {
-            setting["Q&A"].push({question: question, answer: answer})
+            setting["Q&A"].push({question: question, answer: answer, apiName: context.apiName})
             await global['reloadPlugin'](setting, __dirname.split(global['separator']).pop())
             global['plugins']['chat']['initMatchSetting']()
             context["message"] = "我学会了~"
@@ -29,15 +29,15 @@ export async function queAndAns(context) {
     global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }
 
-export function queAndAnsView(context){
+export function queAndAnsView(context) {
     let setting = global['config']['chat']
     let msg = "";
     let qa = setting["Q&A"];
     for (let o of qa) {
-        msg += o.question+":"+o.answer+"\n"
+        msg += o.question + ":" + o.answer + "\n"
     }
-    context["message"]=msg;
-    global.replyMsg(context,null,global['func']['checkIsGroup'](context))
+    context["message"] = msg;
+    global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }
 
 export async function queAndAndDel(context) {
@@ -53,7 +53,7 @@ export async function queAndAndDel(context) {
             return false
         })
         if (!flag) context["message"] = `未找到问答:${msg}`
-        else{
+        else {
             await global['reloadPlugin'](setting, __dirname.split(global['separator']).pop())
             global['plugins']['chat']['initMatchSetting']()
         }

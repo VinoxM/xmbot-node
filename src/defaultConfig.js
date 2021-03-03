@@ -3,13 +3,13 @@ export const defaultConf = {
         "qq": {
             "on": true,
             "ws": {
-                "host":"127.0.0.1",
-                "port":9222,
-                "enableAPI":true,
-                "enableEvent":true,
-                "reconnection":true,
-                "reconnectionAttempts":10,
-                "reconnectionDelay":2000
+                "host": "127.0.0.1",
+                "port": 9222,
+                "enableAPI": true,
+                "enableEvent": true,
+                "reconnection": true,
+                "reconnectionAttempts": 10,
+                "reconnectionDelay": 2000
             },
             "prefixOn": true,
             "prefix": ["ue"],
@@ -19,6 +19,18 @@ export const defaultConf = {
             "whiteGroup": [],
             "enablePrivate": true,
             "readyFeedBack": false,
+        },
+        "discord": {
+            "on": false,
+            "token": "",
+            "prefixOn": true,
+            "prefix": ["ue"],
+            "master": [],
+            "isBlackGroup": true,
+            "blackGroup": [],
+            "whiteGroup": [],
+            "enablePrivate": true,
+            "readyFeedBack": false
         }
     },
     "proxy": null,

@@ -69,8 +69,8 @@ globalReg({
     SqliteDb,// 数据库连接
     func,
     chatLog: bot.chatLog,
-    getChatLog: bot.getChatLog,
-    getChatLogMore: bot.getChatLogMore
+    chatLogDb: bot.chatLogDb,
+    getChatLog: bot.getChatLog
 })
 
 // 加载插件

@@ -33,7 +33,7 @@ const post = {
         needAdmin: true,
         func: (req, res) => {
             let params = req.body
-            global.getChatLogMore({type: params.type, id: params.id, index: params.index})
+            global['func']['getChatLogMore']({type: params.type, id: params.id,apiName: params.apiName, index: params.index})
             res.send(BaseRequest.SUCCESS())
         }
     },

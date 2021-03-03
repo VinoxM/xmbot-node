@@ -1,5 +1,21 @@
+import {sendWsMsg} from "./socket";
+
 const request = require('request')
 const fs = require('fs')
+const CQ = require('./CQCode')
+
+const msgType = {
+    group: {
+        label: "群组消息",
+        reply: "group_id",
+        type: "group"
+    },
+    private: {
+        label: "私聊消息",
+        reply: "user_id",
+        type: "private"
+    }
+}
 
 // 默认匹配方法
 export function generalMatch(context, matchDict) {
@@ -171,7 +187,7 @@ export function dateCompare(a, b) {
 export function changeBotReady() {
     let ready = false
     let bot = []
-    Object.keys(global.botReady.api).map(key=>{
+    Object.keys(global.botReady.api).map(key => {
         if (global.botReady.api[key]) {
             ready = true
             bot.push(key)
@@ -179,4 +195,164 @@ export function changeBotReady() {
     })
     global.botReady.ready = ready
     global.botReady.bot = bot
+}
+
+export function checkContextError(context) {
+    if (context.hasOwnProperty('err')) {
+        switch (context.err) {
+            case 'isNotAdmin':
+            case 0:
+                context['message'] = '只有主人可以这么命令我'
+                break;
+            case 'isNotPrivate':
+            case 1:
+                context['message'] = '请私聊使用该指令'
+                break;
+            case 'isNotGroup':
+            case 2:
+                context['message'] = '请在群聊中使用该指令'
+                break;
+        }
+    }
+    return context
+}
+
+// 收到信息日志
+export function onReceiveLog(record, apiName) {
+    let sender = `[${apiName}]`;
+    if (record["message_type"] === 'group') {
+        sender += `[${record["group_id"]}] `;
+    }
+    sender += `${record["sender"]["nickname"]}(${record["user_id"]}): -> `;
+    let message = record["message"];
+    global['LOG'](sender + message);
+    addChatLog(record, false, apiName)
+}
+
+// 发送信息日志
+export function onSendLog(msgType_, replyId, selfId, message, apiName) {
+    let receiver = `[${apiName}]`;
+    if (msgType_ === 'group') {
+        receiver += `[${replyId}] `;
+    }
+    receiver += `${selfId ? selfId : 'system'}: <- `;
+    global['LOG'](receiver + message);
+    const record = {message_type: msgType_, message: message, user_id: selfId ? selfId : 'system'}
+    record[msgType[msgType_].reply] = replyId
+    record.sender = {nickname: 'system'}
+    addChatLog(record, true, apiName)
+}
+
+export function addChatLog(record, isSelf = false, apiName) {
+
+    let chatLog = global.chatLog(apiName)
+    let chatLogDb = global.chatLogDb(apiName)
+    const chatSaveCount = 5
+
+    let user_id = String(record['user_id'])
+    let reply_id = record[msgType[record['message_type']].reply]
+    const element = {
+        tableName: `${record['message_type']}_${reply_id}_${apiName}`,
+        user_id: isSelf ? 'system' : user_id,
+        nick_name: record.sender['nickname'],
+        message: CQ.CQFunc.transformCq(record.message, 'qq', apiName),
+        send_time: new Date(),
+        is_self: isSelf ? 1 : 0
+    }
+    if (chatLog[record['message_type']][reply_id]) {
+        chatLog[record['message_type']][reply_id].push(element)
+    } else {
+        chatLog[record['message_type']][reply_id] = [element]
+    }
+    sendWsMsg(JSON.stringify({data: element, type: 'elem'}))
+    if (chatLog[record['message_type']][reply_id].length >= chatSaveCount) {
+        let rows = []
+        for (const elem of chatLog[record['message_type']][reply_id]) {
+            rows = [...rows, ...[elem.user_id, elem.nick_name, elem.message, elem.send_time, elem.is_self]]
+        }
+        chatLogDb.saveBatch(element.tableName, rows)
+        chatLog[record['message_type']][reply_id] = []
+    }
+}
+
+export const getChatLog = (apiName) => {
+    let chatLog = global.chatLog(apiName)
+    let chatLogDb = global.chatLogDb(apiName)
+
+    chatLogDb.getChatTables(apiName).then(async (res) => {
+        const chatLog_ = {group: {}, private: {}}
+        if (res.length > 0) {
+            for (const r of res) {
+                let s = r.name.split('_')
+                if (chatLog_.hasOwnProperty(s[0])) {
+                    await chatLogDb.getChatLogByTableName(r.name).then(rows => {
+                        chatLog_[s[0]][s[1] + '_' + s[2]] = {rows: rows, noMore: false, hasNew: true, newCount: 0}
+                    })
+                }
+            }
+        }
+        for (const k of Object.keys(chatLog.group)) {
+            let key = k + '_' + apiName
+            let elem = chatLog.group[key]
+            if (!!elem) {
+                if (chatLog_.group.hasOwnProperty(key)) {
+                    chatLog_.group[key].rows = [...chatLog_.group[key].rows, ...elem]
+                } else {
+                    chatLog_.group[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+                }
+            }
+        }
+        for (const k of Object.keys(chatLog.private)) {
+            let key = k + '_' + apiName
+            let elem = chatLog.private[key]
+            if (!!elem) {
+                if (chatLog_.private.hasOwnProperty(key)) {
+                    chatLog_.private[key].rows = [...chatLog_.private[key].rows, ...elem]
+                } else {
+                    chatLog_.private[key] = {rows: elem, noMore: false, hasNew: true, newCount: 0}
+                }
+            }
+        }
+        for (const key of Object.keys(chatLog_.private)) {
+            const elem = chatLog_.private[key]
+            elem.rows.map(o => {
+                o.message = CQ.CQFunc.transformCq(o.message, 'qq', apiName)
+                return o
+            })
+        }
+        for (const key of Object.keys(chatLog_.group)) {
+            const elem = chatLog_.group[key]
+            elem.rows.map(o => {
+                o.message = CQ.CQFunc.transformCq(o.message, 'qq', apiName)
+                return o
+            })
+        }
+        sendWsMsg(JSON.stringify({data: chatLog_, type: 'all'}))
+    })
+}
+
+export const getChatLogMore = ({type, id, apiName, index}) => {
+    let tableName = type + '_' + id;
+    let chatLogDb = global.chatLogDb(apiName)
+    chatLogDb.getChatLogCountByTableName(tableName, index).then(res => {
+        if (res.count >= 20) {
+            chatLogDb.getChatLogByTableName(tableName, 20, index).then(rows => {
+                rows.map(o=>{
+                    o.message = CQ.CQFunc.transformCq(o.message, 'qq', apiName)
+                    return o
+                })
+                sendWsMsg(JSON.stringify({data: {tableName, rows}, type: 'more'}))
+            })
+        } else if (res.count > 0) {
+            chatLogDb.getChatLogByTableName(tableName, res.count, index).then(rows => {
+                rows.map(o=>{
+                    o.message = CQ.CQFunc.transformCq(o.message, 'qq', apiName)
+                    return o
+                })
+                sendWsMsg(JSON.stringify({data: {tableName, rows}, type: 'more'}))
+            })
+        } else {
+            sendWsMsg(JSON.stringify({data: {tableName, rows: []}, type: 'more'}))
+        }
+    })
 }

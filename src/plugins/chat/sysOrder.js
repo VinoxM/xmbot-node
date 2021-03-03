@@ -1,6 +1,6 @@
 export function dictUrl(context) {
     let base_url = global['config'].default.base_url
-    global.replyMsg(context,`${base_url}plugins-dict`)
+    global.replyMsg(context, `${base_url}plugins-dict`)
 }
 
 export function version(context) {
@@ -37,7 +37,7 @@ export function reloadPlugins(context) {
 export function restart(context) {
     if (global['func']['checkIsAdmin'](context)) {
         if (context['message_type'] === 'private') {
-            global['restartBot'](context['user_id'])
+            global['restartBot'](context.apiName, context['user_id'])
             return
         } else context['err'] = 1
     } else context['err'] = 0

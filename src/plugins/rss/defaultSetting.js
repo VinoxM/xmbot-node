@@ -12,6 +12,10 @@ export const defaultConf = {
             "qq": {
                 "group": [],
                 "private": []
+            },
+            "discord": {
+                "group": [],
+                "private": []
             }
         },
         "rss": [
@@ -31,6 +35,10 @@ export const defaultConf = {
                     "qq": {
                         "group": "all",
                         "private": [],
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
             },
@@ -52,6 +60,10 @@ export const defaultConf = {
                     "qq": {
                         "group": "all",
                         "private": [],
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
             },
@@ -70,6 +82,10 @@ export const defaultConf = {
                     "qq": {
                         "group": [],
                         "private": [],
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
                 "last_id": "https://t.bilibili.com/474957468077871444"
@@ -89,6 +105,10 @@ export const defaultConf = {
                     "qq": {
                         "group": [],
                         "private": [],
+                    },
+                    "discord": {
+                        "group": [],
+                        "private": []
                     }
                 },
                 "last_id": "1364138388664672260"
