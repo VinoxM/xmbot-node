@@ -91,7 +91,7 @@ function checkImageWeb(message, apiName, fromApi) {
         let path = end.substring(0, j)
         end = end.substr(end.indexOf(cqEnd) + 1)
         message = start + CQCode[apiName].img_web(path) + end
-        message = checkImage(message, apiName)
+        message = checkImageWeb(message, apiName)
     }
     return message
 }
