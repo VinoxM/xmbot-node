@@ -13,5 +13,6 @@ export const matchDict=[
     {match: ['全部重启'],needPrefix:true,rules:['admin','private'],func:(context)=>sysOrder.restart(context,true)},
     {match: ['重启api:'],needPrefix:true,startWith: true,needReplace: true,rules:['admin','private'],func:sysOrder.restartApi},
     {match: ['api状态','查看api','机器人状态','bot状态'],rules:[],func:sysOrder.apiStatus},
+    {match: ['启动api:'],needPrefix:true,startWith: true,needReplace: true,rules:['admin','private'],func:sysOrder.initApi},
     {match: ['帮助手册'],needPrefix:true,rules:[],func:sysOrder.dictUrl},
 ]

@@ -38,6 +38,32 @@ export function restartApi(context) {
     global['restartApi'](context['raw_message'])
 }
 
+export function initApi(context) {
+    let apiName = context['raw_message'].split('|')
+    let arr = []
+    let arrNotOn = []
+    let arrNotExist = []
+    for (const api of apiName) {
+        if (global['config'].default.api.hasOwnProperty(api)) {
+            if (global['config'].default.api[api].on) {
+                arr.push(api)
+            } else
+                arrNotOn.push(api)
+        } else
+            arrNotExist.push(api)
+    }
+    global['initApi']([],arr)
+    if (arr.length>0) {
+        global.replyMsg(context,`api${arr.join(',')}已启动`)
+    }
+    if (arrNotOn.length>0) {
+        global.replyMsg(context,`api${arr.join(',')}未启用`)
+    }
+    if (arrNotExist.length>0) {
+        global.replyMsg(context,`api${arr.join(',')}未找到`)
+    }
+}
+
 export function apiStatus(context) {
     let api = []
     for (const key of Object.keys(global.botReady.api)) {

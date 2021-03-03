@@ -34,12 +34,12 @@ export default {
     botApi,
     initApi,
     restartBot: (apiName, userId) => {
-        if (!!apiName){
+        if (!!apiName) {
             botApi[apiName].restartBot(userId)
         } else {
             for (const key of Object.keys(botApi)) {
                 let botElem = botApi[key]
-                botElem.restartBot(key===apiName?userId:null)
+                botElem.restartBot(key === apiName ? userId : null)
             }
         }
     },
@@ -80,12 +80,16 @@ export default {
             let message = CQFunc.transformCq(msg, key)
             if (list.hasOwnProperty('private')) {
                 list.private.forEach(o => {
-                    botApi[key].replyPrivate({message: message, user_id: o})
+                    if (botApi.hasOwnProperty(key)) {
+                        botApi[key].replyPrivate({message: message, user_id: o})
+                    }
                 })
             }
             if (list.hasOwnProperty('group')) {
                 list.group.forEach(o => {
-                    botApi[key].replyGroup({message: message, group_id: o})
+                    if (botApi.hasOwnProperty(key)) {
+                        botApi[key].replyGroup({message: message, group_id: o})
+                    }
                 })
             }
         }
