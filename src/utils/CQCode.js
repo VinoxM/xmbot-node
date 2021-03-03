@@ -57,7 +57,7 @@ function checkAt(message, apiName, fromApi) {
         let id = end.substring(0, i)
         end = end.substr(i + 1)
         message = start + CQCode[apiName].at(id) + end
-        message = checkAt(message, apiName)
+        message = checkAt(message, apiName, fromApi)
     }
     return message
 }
@@ -74,7 +74,7 @@ function checkImage(message, apiName, fromApi) {
         let url = end.substring(0, j)
         end = end.substr(end.indexOf(cqEnd) + 1)
         message = start + CQCode[apiName].img(url,fromApi !== 'qq') + end
-        message = checkImage(message, apiName)
+        message = checkImage(message, apiName, fromApi)
     }
     return message
 }
@@ -91,7 +91,7 @@ function checkImageWeb(message, apiName, fromApi) {
         let path = end.substring(0, j)
         end = end.substr(end.indexOf(cqEnd) + 1)
         message = start + CQCode[apiName].img_web(path) + end
-        message = checkImageWeb(message, apiName)
+        message = checkImageWeb(message, apiName, fromApi)
     }
     return message
 }
