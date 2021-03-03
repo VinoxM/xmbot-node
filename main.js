@@ -51,6 +51,7 @@ globalReg({
     replyPrivate: bot.replyPrivate,// 发送私聊信息
     replyGroup: bot.replyGroup,// 发送群组信息
     pushMsg: bot.pushMsg,
+    initApi:bot.initApi,
     restartBot: (apiName, user_id) => {
         global['LOG']('重启xmBot...')
         saveAndReloadConfig()
