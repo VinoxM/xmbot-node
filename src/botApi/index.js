@@ -33,6 +33,9 @@ function initApi(args, arr = ['qq']) {
 export default {
     botApi,
     initApi,
+    closeApi: (apiName) => {
+        botApi[apiName].closeBot()
+    },
     restartBot: (apiName, userId) => {
         if (!!apiName) {
             botApi[apiName].restartBot(userId)

@@ -54,13 +54,39 @@ export function initApi(context) {
     }
     global['initApi']([],arr)
     if (arr.length>0) {
-        global.replyMsg(context,`api${arr.join(',')}已启动`)
+        global.replyMsg(context,`api[${arr.join(',')}]已启动`)
     }
     if (arrNotOn.length>0) {
-        global.replyMsg(context,`api${arr.join(',')}未启用`)
+        global.replyMsg(context,`api[${arrNotOn.join(',')}]未启用`)
     }
     if (arrNotExist.length>0) {
-        global.replyMsg(context,`api${arr.join(',')}未找到`)
+        global.replyMsg(context,`api[${arrNotExist.join(',')}]未找到`)
+    }
+}
+
+export function closeApi(context){
+    let apiName = context['raw_message'].split('|')
+    let arr = []
+    let arrNotOn = []
+    let arrNotExist = []
+    for (const api of apiName) {
+        if (global['config'].default.api.hasOwnProperty(api)) {
+            if (global['config'].default.api[api].on) {
+                arr.push(api)
+            } else
+                arrNotOn.push(api)
+        } else
+            arrNotExist.push(api)
+    }
+    global['closeApi']([],arr)
+    if (arr.length>0) {
+        global.replyMsg(context,`api[${arr.join(',')}]已关闭`)
+    }
+    if (arrNotOn.length>0) {
+        global.replyMsg(context,`api[${arrNotOn.join(',')}]未启用`)
+    }
+    if (arrNotExist.length>0) {
+        global.replyMsg(context,`api[${arrNotExist.join(',')}]未找到`)
     }
 }
 
