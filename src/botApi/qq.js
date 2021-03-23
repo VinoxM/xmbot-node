@@ -29,6 +29,15 @@ function restartBot(user_id) {
     initBot(user_id ? ['restart', user_id] : [])
 }
 
+function closeBot(){
+    if (chatLogDb.db) chatLogDb.db.close()
+    bot.disconnect()
+    bot = null
+    global['LOG'](`已关闭Bot:${apiName}`)
+    global.botReady.api[apiName] = false
+    global['func']['changeBotReady']()
+}
+
 const msgType = {
     group: {
         label: "群组消息",
@@ -178,5 +187,5 @@ function replyGroup(context, at = false) {
 }
 
 export default {
-    CQ, chatLog, chatLogDb, initBot, restartBot, replyMsg, replyPrivate, replyGroup
+    CQ, chatLog, chatLogDb, initBot, restartBot, closeBot,replyMsg, replyPrivate, replyGroup
 }

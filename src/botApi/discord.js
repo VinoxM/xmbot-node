@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import {CQCode} from "../utils/CQCode";
 import {chatDb} from "../utils/chatDb";
 import request from "request";
+import fs from 'fs-extra'
 
 let bot = null
 const apiName = __filename.split(global['separator']).pop().split('.')[0]
@@ -40,6 +41,15 @@ function restartBot(user_id) {
     if (chatLogDb.db) chatLogDb.db.close()
     bot.destroy()
     initBot(user_id ? ['restart', user_id] : [])
+}
+
+function closeBot(){
+    if (chatLogDb.db) chatLogDb.db.close()
+    bot.destroy()
+    bot = null
+    global['LOG'](`已关闭Bot:${apiName}`)
+    global.botReady.api[apiName] = false
+    global['func']['changeBotReady']()
 }
 
 function addListener(args, apiConf) {
@@ -203,9 +213,11 @@ function handleCq(message) {
         let i = -1;
         let img1 = '<CQ:image,url=', img2 = '<CQ:image,file='
         let i1 = msg.indexOf(img1), i2 = msg.indexOf(img2);
+        let isWebFile = false
         if (i1 > -1) {
             i = i1;
             cqImg = img1;
+            isWebFile = true
         } else {
             i = i2;
             cqImg = img2;
@@ -219,14 +231,27 @@ function handleCq(message) {
             end = end.substr(j + 1)
             msg = start + end
             message.msg = msg
-            getWebFileBuffer(url).then(res=>{
-                message.file.push(res)
-                message = handleCq(message)
-                resolve(message)
-            }).catch(err=>{
-                global['ERR'](`[${err}]无法获取图片:${url}`)
-                resolve(message)
-            })
+            if (isWebFile){
+                getWebFileBuffer(url).then(res=>{
+                    message.file.push(res)
+                    message = handleCq(message)
+                    resolve(message)
+                }).catch(err=>{
+                    global['ERR'](`[${err}]无法获取网络图片:${url}`)
+                    resolve(message)
+                })
+            } else {
+                fs['readFile'](url,(err,buffer)=>{
+                    if (err) {
+                        global['ERR'](`[${err}]无法获取本地图片:${url}`)
+                        resolve(message)
+                    } else {
+                        message.file.push(buffer)
+                        message = handleCq(message)
+                        resolve(message)
+                    }
+                })
+            }
         } else {
             resolve(message)
         }
@@ -261,5 +286,6 @@ function getSuffixType(str) {
 export default {
     CQ,
     initBot,
+    closeBot,
     chatLog, chatLogDb, restartBot, replyMsg, replyPrivate, replyGroup
 }
