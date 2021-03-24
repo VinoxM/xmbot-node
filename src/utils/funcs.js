@@ -195,6 +195,11 @@ export function changeBotReady() {
     })
     global.botReady.ready = ready
     global.botReady.bot = bot
+    sendBotStatusToWs()
+}
+
+export function sendBotStatusToWs(){
+    sendWsMsg(JSON.stringify({data:global.botReady,type:'status'}))
 }
 
 export function checkContextError(context) {

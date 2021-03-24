@@ -26,6 +26,7 @@ function initApi(args, arr = ['qq']) {
         if (args.length > 0 && Array.from(args).slice(2).indexOf(e) > -1) {
             arg = args.slice(0, 2)
         }
+        global.LOG(`启动api:[${e}]`)
         api.initBot(arg)
     })
 }
@@ -33,8 +34,11 @@ function initApi(args, arr = ['qq']) {
 export default {
     botApi,
     initApi,
-    closeApi: (apiName) => {
-        botApi[apiName].closeBot()
+    closeApi: (arr) => {
+        arr.forEach(e => {
+            global.LOG(`关闭api:[${e}]`)
+            botApi[e].closeBot()
+        })
     },
     restartBot: (apiName, userId) => {
         if (!!apiName) {
