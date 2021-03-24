@@ -54,6 +54,12 @@ export const listener = {
                 let api = Object.keys(global['config'].default.api)
                 res.send(new ObjRequest(api))
             }
+        },
+        '/getBotReady.json': {
+            func: (req, res) => {
+                global.func['sendBotStatusToWs']()
+                res.send(BaseRequest.SUCCESS())
+            }
         }
     },
     post: {}

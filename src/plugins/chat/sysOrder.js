@@ -78,7 +78,7 @@ export function closeApi(context){
         } else
             arrNotExist.push(api)
     }
-    global['closeApi']([],arr)
+    global['closeApi'](arr)
     if (arr.length>0) {
         global.replyMsg(context,`api[${arr.join(',')}]已关闭`)
     }

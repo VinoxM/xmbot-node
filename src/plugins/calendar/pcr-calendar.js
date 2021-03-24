@@ -187,7 +187,9 @@ async function initCampaign(area, cal_db, calendar) {
                 let reply = r.name
                 if (elem === s && elem !== e) reply += `[New->${getDateTime(sTime)}]`
                 if (elem === e && elem !== s) reply += `[End->${getDateTime(eTime)}]`
-                cal[elem].push(reply)
+                if (cal[elem].indexOf(reply) === -1) {
+                    cal[elem].push(reply)
+                }
             }
         }
         calendar[area] = cal
