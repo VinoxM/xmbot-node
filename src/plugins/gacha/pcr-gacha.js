@@ -30,13 +30,13 @@ export class PcrGacha {
         let pick_up = {}
         for (let i = 1; i <= 300; i++) {
             let res = simple(pool, i % 10 === 0 ? 'prop_last' : 'prop', this.nickName)
-            if (lib.hasOwnProperty(res.id)){
+            if (lib.hasOwnProperty(res.id)) {
                 lib[res.id].count++
-            }else{
-                lib[res.id]={
-                    nickName:res.name,
-                    count:1,
-                    star:res.star
+            } else {
+                lib[res.id] = {
+                    nickName: res.name,
+                    count: 1,
+                    star: res.star
                 }
             }
             if (res.isPickUp) {
@@ -94,26 +94,26 @@ export class PcrGacha {
         let lib = {}
         for (let i = 0; i < 10; i++) {
             let res = simple(pool, i === 9 ? 'prop_last' : 'prop', this.nickName)
-            if (lib.hasOwnProperty(res.id)){
+            if (lib.hasOwnProperty(res.id)) {
                 lib[res.id].count++
-            }else{
-                lib[res.id]={
-                    nickName:res.name,
-                    count:1,
-                    star:res.star
+            } else {
+                lib[res.id] = {
+                    nickName: res.name,
+                    count: 1,
+                    star: res.star
                 }
             }
             result.push(res)
         }
-        await handleImage(result,false).then(res => {
+        await handleImage(result, false).then(res => {
             let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
             let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
             reply += global.CQ().img(res)
-            let gachaResult = result.map(o=>new Array(Number(o.star)).fill('★').join('')+' '+o.name)
+            let gachaResult = result.map(o => new Array(Number(o.star)).fill('★').join('') + ' ' + o.name)
             let gachaReply = ''
             for (let i = 0; i < gachaResult.length; i++) {
-                gachaReply += gachaResult[i]+','
-                if (i===4) gachaReply += '\n'
+                gachaReply += gachaResult[i] + ','
+                if (i === 4) gachaReply += '\n'
             }
             context['message'] = reply + gachaReply
             global.replyMsg(context, null, true)
@@ -125,14 +125,16 @@ export class PcrGacha {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = simple(pool, 'prop', this.nickName)
         let lib = {}
-        lib[result.id]={
-            nickName:result.name,
-            count:1,
-            star:result.star
+        lib[result.id] = {
+            nickName: result.name,
+            count: 1,
+            star: result.star
         }
-        await handleImage([result]).then(res => {
-            let reply = ''
+        await handleImage([result], false).then(res => {
+            let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
+            let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
             reply += global.CQ().img(res)
+            reply += new Array(Number(result.star)).fill('★').join('') + ' ' + result.name
             context['message'] = reply
             global.replyMsg(context, null, true)
         })
@@ -168,18 +170,18 @@ export class PcrGacha {
     }
 
     tableCreate = () => {
-        return this.db.create('gacha', ['user_id TEXT PRIMARY KEY NOT NULL', 'last_time TEXT', 'today_times INT DEFAULT 0', 'all_times INT DEFAULT 0','libraries TEXT'])
+        return this.db.create('gacha', ['user_id TEXT PRIMARY KEY NOT NULL', 'last_time TEXT', 'today_times INT DEFAULT 0', 'all_times INT DEFAULT 0', 'libraries TEXT'])
     }
 
-    userExists = async (user_id) => userExists(user_id,this.db)
+    userExists = async (user_id) => userExists(user_id, this.db)
 
-    userCreate = (map) => userCreate(map,this.db)
+    userCreate = (map) => userCreate(map, this.db)
 
     getGachaCountByUserId = async (user_id) => {
         const sql = 'select today_times from gacha where user_id=? and last_time=?'
         let count = 0
-        await this.db.sel(sql,[user_id,getTodayNum()]).then(rows=>{
-            if (rows.length>0){
+        await this.db.sel(sql, [user_id, getTodayNum()]).then(rows => {
+            if (rows.length > 0) {
                 count = rows[0].today_times
             }
         })
@@ -187,19 +189,24 @@ export class PcrGacha {
     }
 
     updateGachaCount = async (user_id, count) => {
-        let check = await userExists(user_id,this.db)
-        if (!check){
-            await userCreate({user_id:user_id,last_time:getTodayNum(),today_times:count,all_times:count},this.db)
-        }else{
+        let check = await userExists(user_id, this.db)
+        if (!check) {
+            await userCreate({
+                user_id: user_id,
+                last_time: getTodayNum(),
+                today_times: count,
+                all_times: count
+            }, this.db)
+        } else {
             const sql = 'select last_time from gacha where user_id = ?'
-            this.db.sel(sql,[user_id]).then(rows=>{
+            this.db.sel(sql, [user_id]).then(rows => {
                 let last_time = rows[0].last_time
-                if (checkIsToday(last_time)){
+                if (checkIsToday(last_time)) {
                     const sql1 = 'update gacha set today_times=today_times+?,all_times=all_times+? where user_id = ?'
-                    this.db.update(sql1,[count,count,user_id])
-                }else{
+                    this.db.update(sql1, [count, count, user_id])
+                } else {
                     const sql2 = 'update gacha set today_times=today_times+?,all_times=all_times+?,last_time=? where user_id = ?'
-                    this.db.update(sql2,[count,count,getTodayNum(),user_id])
+                    this.db.update(sql2, [count, count, getTodayNum(), user_id])
                 }
             })
         }
@@ -207,56 +214,56 @@ export class PcrGacha {
 
     updateUserLibraries = async (user_id, json) => {
         const sql = 'select libraries from gacha where user_id = ?'
-        await this.db.sel(sql,[user_id]).then(rows=>{
-            if (rows.length>0){
+        await this.db.sel(sql, [user_id]).then(rows => {
+            if (rows.length > 0) {
                 let lib = rows[0].libraries
                 let data = {}
-                if (lib&&lib!==''){
+                if (lib && lib !== '') {
                     data = JSON.parse(lib)
                     let keys = Object.keys(json)
                     for (const key of keys) {
-                        if (data.hasOwnProperty(key)){
+                        if (data.hasOwnProperty(key)) {
                             data[key].count += json[key].count
-                        }else{
+                        } else {
                             data[key] = {
-                                nick_name:json[key].nickName,
-                                star:json[key].star,
-                                count:json[key].count
+                                nick_name: json[key].nickName,
+                                star: json[key].star,
+                                count: json[key].count
                             }
                         }
                     }
-                }else data = json
+                } else data = json
                 const sql1 = 'update gacha set libraries = ? where user_id = ?'
-                this.db.update(sql1,[JSON.stringify(data),user_id])
+                this.db.update(sql1, [JSON.stringify(data), user_id])
             }
         })
     }
 }
 
-async function userExists(user_id,db){
+async function userExists(user_id, db) {
     let flag = false
     const sql = 'select count(1) as count from gacha where user_id = ?'
-    await db.sel(sql,[user_id]).then((rows)=>{
-        flag = rows.length&&rows[0].count>0
+    await db.sel(sql, [user_id]).then((rows) => {
+        flag = rows.length && rows[0].count > 0
     })
     return flag
 }
 
-function userCreate(map,db) {
+function userCreate(map, db) {
     let params = Object.values(map)
-    const sql = `insert into gacha(${Object.keys(map).join(',')}) values(${params.map(o=>'?').join(',')})`
-    return db.add(sql,params)
+    const sql = `insert into gacha(${Object.keys(map).join(',')}) values(${params.map(o => '?').join(',')})`
+    return db.add(sql, params)
 }
 
 function checkIsToday(last) {
     if (!last) return false
     let today = getTodayNum()
-    return today-Number(last)===0
+    return today - Number(last) === 0
 }
 
 function getTodayNum() {
     let date = new Date()
-    return date.getFullYear()*10000+date.getMonth()*100+date.getDate()
+    return date.getFullYear() * 10000 + date.getMonth() * 100 + date.getDate()
 }
 
 function simple(pool, prop, nickName) { // 单抽
@@ -293,13 +300,12 @@ function getNickNameAndStar(id, nickName) { // 获取昵称和星级
     return {id: id, name: nickName[id][4], star: String(nickName[id][1]).substring(4)}
 }
 
-async function handleImage(result,checkStar3 = true) { // 拼接图片
-    // if (checkStar3)
-    result = result.filter(o=>o.star==='3')
+async function handleImage(result, checkStar3 = true) { // 拼接图片
+    if (checkStar3) result = result.filter(o => o.star === '3');
     let count = result.length
     if (count === 0) return Promise.resolve('')
     let height = Math.ceil(count / 5) * 130
-    let width = 5 * 130
+    let width = (count < 5 ? count : 5) * 130
     const baseOpt = {
         width: width,
         height: height,

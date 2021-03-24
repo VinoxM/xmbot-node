@@ -38,6 +38,7 @@ export default {
         arr.forEach(e => {
             global.LOG(`关闭api:[${e}]`)
             botApi[e].closeBot()
+            delete botApi[e]
         })
     },
     restartBot: (apiName, userId) => {
