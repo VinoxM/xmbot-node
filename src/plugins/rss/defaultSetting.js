@@ -29,11 +29,14 @@ export const defaultConf = {
                     "PCR日服推特",
                     "PCR-日服推特"
                 ],
+                "word_filter": [
+                    "RT"
+                ],
                 "link_replace": "https://twitter.com/priconne_redive/status/",
                 "last_id": "1345671309619970049",
                 "push_list": {
                     "qq": {
-                        "group": "all",
+                        "group": [],
                         "private": [],
                     },
                     "discord": {
@@ -54,32 +57,13 @@ export const defaultConf = {
                     "PCR国服动态",
                     "PCR国服B站动态"
                 ],
+                "word_filter": [
+                    "互动抽奖"
+                ],
                 "link_replace": "https://t.bilibili.com/",
                 "last_id": "476303296082373668",
                 "push_list": {
                     "qq": {
-                        "group": "all",
-                        "private": [],
-                    },
-                    "discord": {
-                        "group": [],
-                        "private": []
-                    }
-                },
-            },
-            {
-                "title": "Gamker攻壳Bili动态",
-                "on": false,
-                "proxy": true,
-                "source": "https://rsshub.app/bilibili/user/dynamic/13297724",
-                "name": "gamker_bili",
-                "name_filter": [
-                    "Gamker动态",
-                    "GamkerB站动态"
-                ],
-                "link_replace": "https://github.com/DIYgod/RSSHub/issues/",
-                "push_list": {
-                    "qq": {
                         "group": [],
                         "private": [],
                     },
@@ -88,7 +72,6 @@ export const defaultConf = {
                         "private": []
                     }
                 },
-                "last_id": "https://t.bilibili.com/474957468077871444"
             },
             {
                 "title": "UMM-日服推特",
@@ -99,6 +82,9 @@ export const defaultConf = {
                 "name_filter": [
                     "UMK日服推特",
                     "赛马娘日服推特"
+                ],
+                "word_filter": [
+                    "RT"
                 ],
                 "link_replace": "https://twitter.com/uma_musu/status/",
                 "push_list": {

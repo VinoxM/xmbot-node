@@ -86,6 +86,7 @@ async function getRss(rss) { // 获取RSS源
                         rss: line.rss,
                         title: rss['title'],
                         last_id: rss.last_id,
+                        word_filter: rss['word_filter'],
                         replace_link: rss['link_replace'],
                         push_list: push_list
                     }
@@ -119,10 +120,15 @@ async function handleRssText() { // 处理Rss信息
         let last_id = r.last_id
         // console.log('Last Id :' + last_id)
         if (!Array.isArray(items)) items = [items]
+        let isLast = true
         for (const [index, item] of items.entries()) {
-            if (item.description.startsWith('RT')) continue
+            if (checkWordFilter(item.description,r.word_filter)) continue
             let str = String(item.link).replace(r['replace_link'], "")
-            if (index === 0) last_id = str
+            if (isLast) {
+                last_id = str
+                isLast = false
+            }
+            // console.log(str)
             if (strCompareTo(str, r.last_id)) {
                 let pub_date = item['pubDate'] ? global['func']['toCCTDateString'](item['pubDate']) : ''
                 let message = `${r.title}(${pub_date}):\n${item.title}`
@@ -149,6 +155,12 @@ async function handleRssText() { // 处理Rss信息
     } else {
         global['LOG']('RSS源没有发现新的信息')
     }
+}
+
+function checkWordFilter(title,filters) {
+    return filters.some(o=>{
+        return title.indexOf(o) > -1
+    })
 }
 
 function checkImg(description) { // 检查是否有图片
