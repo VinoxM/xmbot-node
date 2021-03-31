@@ -8,7 +8,7 @@
 
 已实现QQ机器人 [ 需要与 `Mirai-bot` 搭配使用 ]
 
-> Web端 [`xmbot-web`](https://github.com/VinoxM/xmbot-web) 
+> Web端 [`xmbot-elec`](https://github.com/VinoxM/xmbot-elec) 
 
 使用`Vue`开发,打包覆盖放在`web`文件夹中
 
