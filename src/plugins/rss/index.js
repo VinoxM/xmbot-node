@@ -158,7 +158,7 @@ async function handleRssText() { // 处理Rss信息
 }
 
 function checkWordFilter(title,filters) {
-    return filters.some(o=>{
+    return !!filters&&filters.some(o=>{
         return title.indexOf(o) > -1
     })
 }

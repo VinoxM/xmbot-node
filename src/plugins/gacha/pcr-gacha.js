@@ -8,7 +8,11 @@ const path = require('path')
 const unitPath = path.join(global.source.resource, 'icon', 'unit')
 const gachaPath = path.join(global.source.resource, 'gacha')
 const gachaUnitPath = path.join(global.source.resource, 'gacha', 'unit')
+const gachaUnitBorderPath = path.join(global.source.resource, 'gacha', 'unit', 'border')
 const starPath = path.join(global.source.resource, 'gacha', 'utils', 'star.png')
+const backgroundPath = path.join(global.source.resource, 'gacha', 'utils', 'background.jpg')
+
+// const borderPath = path.join(global.source.resource, 'gacha', 'utils', 'border.png')
 
 export class PcrGacha {
     constructor(setting, pool, nick) {
@@ -18,7 +22,7 @@ export class PcrGacha {
         this.db = new SqliteDb('gacha')
     }
 
-    thirty = async (context, prefix) => {
+    multiple = async (context, prefix) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
         let lib = {}
@@ -28,7 +32,7 @@ export class PcrGacha {
         }
         let first_pick_up = 0
         let pick_up = {}
-        for (let i = 1; i <= 300; i++) {
+        for (let i = 1; i <= 200; i++) {
             let res = simple(pool, i % 10 === 0 ? 'prop_last' : 'prop', this.nickName)
             if (lib.hasOwnProperty(res.id)) {
                 lib[res.id].count++
@@ -105,16 +109,12 @@ export class PcrGacha {
             }
             result.push(res)
         }
-        await handleImage(result, false).then(res => {
+        await handleImage(result, false, true).then(res => {
             let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
             let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
             reply += global.CQ().img(res)
             let gachaResult = result.map(o => new Array(Number(o.star)).fill('★').join('') + ' ' + o.name)
-            let gachaReply = ''
-            for (let i = 0; i < gachaResult.length; i++) {
-                gachaReply += gachaResult[i] + ','
-                if (i === 4) gachaReply += '\n'
-            }
+            let gachaReply = gachaResult.slice(0, 5).join(',') + '\n' + gachaResult.slice(5).join(',')
             context['message'] = reply + gachaReply
             global.replyMsg(context, null, true)
         })
@@ -300,46 +300,60 @@ function getNickNameAndStar(id, nickName) { // 获取昵称和星级
     return {id: id, name: nickName[id][4], star: String(nickName[id][1]).substring(4)}
 }
 
-async function handleImage(result, checkStar3 = true) { // 拼接图片
+async function handleImage(result, checkStar3 = true, needBackground = false) { // 拼接图片
     if (checkStar3) result = result.filter(o => o.star === '3');
     let count = result.length
     if (count === 0) return Promise.resolve('')
-    let height = Math.ceil(count / 5) * 130
-    let width = (count < 5 ? count : 5) * 130
-    const baseOpt = {
-        width: width,
-        height: height,
-        channels: 4,
-        background: {
-            r: 255, g: 255, b: 255, alpha: 0,
-        },
+    const _width = needBackground ? 180 : 130
+    const _height = needBackground ? 150 : 130
+    let baseOpt = null
+    if (!needBackground) {
+        let height = Math.ceil(count / 5) * _width
+        let width = (count < 5 ? count : 5) * _width
+        baseOpt = {
+            create: {
+                width: width,
+                height: height,
+                channels: 4,
+                background: {
+                    r: 255, g: 255, b: 255, alpha: 0,
+                },
+            }
+        }
+    } else {
+        await sharp(backgroundPath).resize(1280, 720).toBuffer().then(data => baseOpt = Buffer.from(data))
     }
 
     let compositeArr = []
+    const _left = needBackground ? 214 : 1
+    const _top = needBackground ? 148 : 1
     for (let i = 0; i < result.length; i++) {
         let current = result[i]
         let row = Math.floor(i / 5)
         let col = i % 5
-        let top = 1 + row * 130
-        let left = 1 + col * 130
+        let top = _top + row * _height
+        let left = _left + col * _width
         let full_id = current.id + (current.star === '2' ? '1' : current.star) + '1'
-        let fileName = full_id + '.jpg'
+        let fileName = full_id + '.png'
         let imageExists = await checkImageExists(unitPath, full_id)
-        if (imageExists) {
-            let starImgExists = await checkImageExists(gachaUnitPath, full_id)
-            if (!starImgExists) await handleImageStar(full_id, Number(current.star))
-        } else {
-            await getImageFromWeb(unitPath, full_id, path.join(unitPath, full_id + '.jpg'))
+        if (!imageExists) {
+            await getImageFromWeb(unitPath, full_id, path.join(unitPath, full_id + '.png'))
         }
-        let path_ = path.join(gachaUnitPath, fileName)
-        compositeArr.push({input: path_, top, left})
+        await handleImageStar(full_id, Number(current.star), needBackground)
+        let path_ = path.join(needBackground ? gachaUnitBorderPath : gachaUnitPath, fileName)
+        let input = path_
+        if (needBackground) {
+            await sharp(path_).toBuffer().then(data => {
+                input = Buffer.from(data)
+            }).catch(e => global.ERR(e))
+        }
+        compositeArr.push({input, top, left})
     }
-
 
     let fileName = new Date().getTime() + '.jpg'
     let filePath = path.join(global.source.resource, 'gacha', fileName)
     return new Promise((resolve, reject) => {
-        sharp({create: baseOpt})['composite'](compositeArr).png().toFile(filePath).then(r => {
+        sharp(baseOpt)['composite'](compositeArr).png().toFile(filePath).then(r => {
             resolve(filePath)
         }).catch(err => {
             reject(err)
@@ -348,7 +362,7 @@ async function handleImage(result, checkStar3 = true) { // 拼接图片
 }
 
 async function checkImageExists(filePath, full_id) { // 检查图片是否存在
-    let fullPath = path.join(filePath, full_id + '.jpg')
+    let fullPath = path.join(filePath, full_id + '.png')
     try {
         fs.statSync(fullPath)
         return true
@@ -369,8 +383,30 @@ function getImageFromWeb(filePath, full_id, fullPath) { // 从网页获取图片
     })
 }
 
-async function handleImageStar(full_id, star) { // 拼接角色星级图片
+async function addImageBorder(input, star3 = false) {
+    const ra = Buffer.from('' +
+        '<svg>' +
+        '<rect x="0" y="0" width="138" height="138" rx="5" ry="5" style="fill:#545767"/>' +
+        `<rect x="1" y="1" width="136" height="136" rx="5" ry="5" style="fill:${star3 ? '#fdeb9c' : '#f9f9f8'}"/>` +
+        '<rect x="4" y="4" width="130" height="130" rx="10" ry="10" style="fill:#545767"/>' +
+        '</svg>'
+    )
+    let result = null
+    await sharp(ra).composite([{
+        input, top: 5, left: 5
+    }]).toBuffer().then(data => {
+        result = Buffer.from(data)
+    })
+    return result
+}
+
+async function handleImageStar(full_id, star, needBorder = false) { // 拼接角色星级图片
+    let outputPath = needBorder ? gachaUnitBorderPath : gachaUnitPath
+    let starImgExists = await checkImageExists(outputPath, full_id)
+    if (starImgExists) return Promise.resolve()
     let buffer = null
+    let unitFile = path.join(unitPath, full_id + '.png')
+    if (needBorder) unitFile = await addImageBorder(unitFile, star === 3)
     await sharp(starPath)['png']().extract({
         left: 15,
         top: 15,
@@ -380,12 +416,14 @@ async function handleImageStar(full_id, star) { // 拼接角色星级图片
         buffer = Buffer.from(data)
     })
     let arr = []
+    let split = needBorder ? 10 : 6
+    let top = needBorder ? 108 : 104
     for (let i = 0; i < star; i++) {
-        arr.push({input: buffer, left: 18 * i.toFixed(0) + 4, top: 104})
+        arr.push({input: buffer, left: 20 * i.toFixed(0) + split, top})
     }
     return new Promise((resolve, reject) => {
-        fs['mkdir'](gachaUnitPath, {recursive: true}, (e) => {
-            sharp(path.join(unitPath, full_id + '.jpg'))['jpeg']().resize(128, 128)['composite'](arr).jpeg().toFile(path.join(gachaUnitPath, full_id + '.jpg'))
+        fs['mkdir'](outputPath, {recursive: true}, (e) => {
+            sharp(unitFile)['composite'](arr).png().toFile(path.join(outputPath, full_id + '.png'))
                 .then(r => {
                     resolve()
                 })

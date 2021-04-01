@@ -106,28 +106,28 @@ export const matchDict = [
         startWith: false,
         needReplace: false,
         rules: [],
-        func: (context) => pcr.thirty(context)
+        func: (context) => pcr.multiple(context)
     },
     {
         match: ['国服来一井'],
         startWith: false,
         needReplace: false,
         rules: [],
-        func: (context) => pcr.thirty(context, 'cn')
+        func: (context) => pcr.multiple(context, 'cn')
     },
     {
         match: ['日服来一井'],
         startWith: false,
         needReplace: false,
         rules: [],
-        func: (context) => pcr.thirty(context, 'jp')
+        func: (context) => pcr.multiple(context, 'jp')
     },
     {
         match: ['台服来一井'],
         startWith: false,
         needReplace: false,
         rules: [],
-        func: (context) => pcr.thirty(context, 'tw')
+        func: (context) => pcr.multiple(context, 'tw')
     },
     {
         match: ['清空抽卡缓存'],

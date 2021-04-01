@@ -609,7 +609,7 @@ export async function simple(context, prefix) { // 单抽
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
 }
 
-export async function thirty(context, prefix) { // 一井
+export async function multiple(context, prefix) { // 一井
     const times = 300
     const user_id = context.apiName + '_' + context['user_id']
     if (!await checkGachaTimes(user_id, times)) {
@@ -617,7 +617,7 @@ export async function thirty(context, prefix) { // 一井
         global.replyMsg(context, null, true)
         return
     }
-    let json = await pcrGacha.thirty(context, prefix ? prefix : setting['default_pool'])
+    let json = await pcrGacha.multiple(context, prefix ? prefix : setting['default_pool'])
     await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
 }
