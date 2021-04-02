@@ -92,7 +92,7 @@ export class PcrGacha {
         return lib
     }
 
-    gacha = async (context, prefix) => {
+    gacha = async (context, prefix, isOnline = false) => {
         let pool = this.pools['pool_' + prefix]['pools']
         let result = []
         let lib = {}
@@ -109,6 +109,7 @@ export class PcrGacha {
             }
             result.push(res)
         }
+        if (isOnline) return {result,lib}
         await handleImage(result, false, true).then(res => {
             let curPickUp = getPoolPickUp(pool, this.nickName).join(',')
             let reply = `>${this.pools['pool_' + prefix]['info']['name']}:${curPickUp}\n素敵な仲間が増えますよ！\n`
@@ -361,7 +362,7 @@ async function handleImage(result, checkStar3 = true, needBackground = false) { 
     })
 }
 
-async function checkImageExists(filePath, full_id) { // 检查图片是否存在
+export async function checkImageExists(filePath, full_id) { // 检查图片是否存在
     let fullPath = path.join(filePath, full_id + '.png')
     try {
         fs.statSync(fullPath)
@@ -371,7 +372,7 @@ async function checkImageExists(filePath, full_id) { // 检查图片是否存在
     }
 }
 
-function getImageFromWeb(filePath, full_id, fullPath) { // 从网页获取图片
+export function getImageFromWeb(filePath, full_id, fullPath) { // 从网页获取图片
     return new Promise((resolve, reject) => {
         fs['mkdir'](filePath, {recursive: true}, (e) => {
             getPcrPng(full_id, fullPath).then(r => {
@@ -400,7 +401,7 @@ async function addImageBorder(input, star3 = false) {
     return result
 }
 
-async function handleImageStar(full_id, star, needBorder = false) { // 拼接角色星级图片
+export async function handleImageStar(full_id, star, needBorder = false) { // 拼接角色星级图片
     let outputPath = needBorder ? gachaUnitBorderPath : gachaUnitPath
     let starImgExists = await checkImageExists(outputPath, full_id)
     if (starImgExists) return Promise.resolve()

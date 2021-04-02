@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import path from 'path'
-import {PcrGacha} from './pcr-gacha'
+import {PcrGacha, handleImageStar, checkImageExists, getImageFromWeb} from './pcr-gacha'
 
 let setting = null;
 let pools = null;
@@ -594,6 +594,34 @@ export async function gacha(context, prefix) { // 十连
     let json = await pcrGacha.gacha(context, prefix ? prefix : setting['default_pool'])
     await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
     await pcrGacha.updateUserLibraries(user_id, json).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
+}
+
+export async function onlineGacha(user_id, prefix) {
+    const times = 10
+    let reply = {
+        data: null,
+        msg: null,
+        code: 0
+    }
+    if (!await checkGachaTimes(user_id, times)) {
+        reply.msg = `您今天剩余抽卡次数不足${times}次`
+        reply.code = 500
+        return reply
+    }
+    let {result, lib} = await pcrGacha.gacha(null, prefix ? prefix : setting['default_pool'], true)
+    await pcrGacha.updateGachaCount(user_id, times).then(() => global['LOG'](`已记录用户[${user_id}]抽卡次数`))
+    await pcrGacha.updateUserLibraries(user_id, lib).then(() => global['LOG'](`已记录用户[${user_id}]抽卡结果`))
+    reply.data = result
+    return reply
+}
+
+export async function getBorderImage(full_id, star) {
+    const unitPath = path.join(global.source.resource, 'icon', 'unit')
+    let imageExists = await checkImageExists(unitPath, full_id)
+    if (!imageExists) {
+        await getImageFromWeb(unitPath, full_id, path.join(unitPath, full_id + '.png'))
+    }
+    await handleImageStar(full_id, parseInt(star), true)
 }
 
 export async function simple(context, prefix) { // 单抽

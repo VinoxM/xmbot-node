@@ -48,9 +48,13 @@ const get = {
     },
     '/xmbot/resource/gacha/*': {
         needAuth: false,
-        func: (req, res) => {
-            res.setHeader('Content-Type', 'image/jpeg')
+        func: (req, res, next) => {
             let fileName = req.url.replace('/xmbot/resource/gacha/', '')
+            if (fileName.indexOf('/') > -1) {
+                next()
+                return
+            }
+            res.setHeader('Content-Type', 'image/jpeg')
             let filePath = path.join(global['source'].resource, 'gacha')
             let fullPath = path.join(filePath, fileName)
             fs.access(fullPath, fs.constants.F_OK, (err) => {
@@ -59,6 +63,23 @@ const get = {
                 } else {
                     res.send(BaseRequest.FAILED('Image Not Found!'));
                 }
+            })
+        }
+    },
+    '/xmbot/resource/gacha/unit/border/*': {
+        needAuth: false,
+        func: (req, res) => {
+            res.setHeader('Content-Type', 'image/jpeg')
+            let fileName = req.url.replace('/xmbot/resource/gacha/unit/border/', '')
+            let filePath = path.join(global['source'].resource, 'gacha', 'unit', 'border')
+            let fullPath = path.join(filePath, fileName)
+            fs.access(fullPath, fs.constants.F_OK, async (err) => {
+                if (err) {
+                    let full_id = fileName.split('.')[0]
+                    let star = full_id.substr(4, 1)
+                    await global.plugins.gacha.pcr['getBorderImage'](full_id, star)
+                }
+                res.sendFile(fullPath)
             })
         }
     },
@@ -95,7 +116,7 @@ const get = {
                 }
             })
         }
-    },
+    }
 }
 
 const post = {
@@ -201,6 +222,14 @@ const post = {
             }
         }
     },
+    '/gacha/pcr/online.do': {
+        needAuth: true,
+        func: async (req, res) => {
+            let params = req.body
+            let result = await global.plugins.gacha.pcr['onlineGacha'](params.user_id, params.area)
+            res.send(result)
+        }
+    }
 }
 
 export default {get, post}

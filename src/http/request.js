@@ -6,24 +6,24 @@ export function addListener(app) {
     for (let key in listener) {
         for (let l in listener[key]) {
             if (listener[key].hasOwnProperty(l)) {
-                app[key](l, (req, res) => {
+                app[key](l, (req, res, next) => {
                     if (!req.url.startsWith('/xmbot')) global['LOG'](`user access[${req.method}:${req.url}]`)
                     if (listener[key][l].needAuth)
                         checkAuthor(req, res).then(() => {
                             if (listener[key][l].needAdmin) {
-                                checkRequestAdmin(req, res).then(()=>{
-                                    listener[key][l].func(req, res)
+                                checkRequestAdmin(req, res).then(() => {
+                                    listener[key][l].func(req, res, next)
                                 }).catch(err => {
                                     console.log(err)
                                     res.send(err)
                                 })
                             } else
-                                listener[key][l].func(req, res)
+                                listener[key][l].func(req, res, next)
                         }).catch(err => {
                             res.send(err)
                         })
                     else
-                        listener[key][l].func(req, res)
+                        listener[key][l].func(req, res, next)
                 })
             }
         }
@@ -59,7 +59,7 @@ function checkRequestAdmin(req, res) {
             let apiName = req.headers.user_id.split('_')[0]
             let context = {
                 apiName,
-                user_id: req.headers.user_id.replace(apiName+'_','')
+                user_id: req.headers.user_id.replace(apiName + '_', '')
             }
             if (global['func']['checkIsAdmin'](context)) resolve()
             else reject(BaseRequest.USER_LIMITS())
