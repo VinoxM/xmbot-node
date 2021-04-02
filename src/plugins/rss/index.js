@@ -117,7 +117,7 @@ async function handleRssText() { // 处理Rss信息
     for (const key of Object.keys(Rss)) {
         let r = Rss[key]
         let items = r.rss.channel.item
-        let last_id = r.last_id
+        let last_id = ''
         // console.log('Last Id :' + last_id)
         if (!Array.isArray(items)) items = [items]
         let isLast = true
@@ -143,7 +143,9 @@ async function handleRssText() { // 处理Rss信息
             }
         }
         let index = rss.findIndex((e) => e.name === key)
-        rss[index].last_id = last_id
+        if (last_id !== '') {
+            rss[index].last_id = last_id
+        }
     }
     setting.rss = rss
     await reloadRssPlugins()
