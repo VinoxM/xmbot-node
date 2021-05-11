@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import path from 'path'
-import {CQFunc} from "../utils/CQCode";
+import {CQFunc,CQCode} from "../utils/CQCode";
 
 const Api = {}
 
@@ -52,7 +52,7 @@ export default {
         }
     },
     restartApi: (apiName) => botApi[apiName].restartBot(),
-    CQ: (apiName = 'qq') => botApi[apiName].CQ,
+    CQ: (apiName = 'qq') => botApi.hasOwnProperty(apiName)?botApi[apiName].CQ:CQCode[apiName],
     chatLog: (apiName) => botApi[apiName].chatLog,
     chatLogDb: (apiName) => botApi[apiName].chatLogDb.db,
     getChatLog: (apiName) => {

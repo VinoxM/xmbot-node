@@ -1,1 +1,5 @@
-const request = require('request')
+import * as bili from './bili-spider'
+
+export default {
+    bili
+}
