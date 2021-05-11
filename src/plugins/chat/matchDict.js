@@ -6,6 +6,7 @@ export const matchDict=[
     {match: ["有人说","有人问","有人骂"],startWith:true,func:qAa.queAndAns},
     {match: ["骂"],startWith:true,needReplace:true,func:chat.curse},
     {match: ["查看问答"],func:qAa.queAndAnsView},
+    {match: ["查看所有问答","查看全部问答"],func:(context) => qAa.queAndAnsView(context,true)},
     {match: ["删除问答:"],startWith: true,func:qAa.queAndAndDel},
     {match: ["version","ver","版本"],func:sysOrder.version},
     {match: ['重载模块:'],needPrefix:true,startWith: true,rules:['admin','private'],func:sysOrder.reloadPlugins},

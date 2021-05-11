@@ -15,6 +15,7 @@ import * as func from './src/utils/funcs'
 import fs,{readJsonSync} from 'fs-extra'
 import bot from './src/botApi/index'
 import {initSocket} from "./src/utils/socket"
+import {CQFunc} from "./src/utils/CQCode"
 
 // 路径
 const source = {
@@ -64,6 +65,7 @@ globalReg({
     plugins,// 插件
     repeat,// 复读
     CQ: bot.CQ,
+    CQFunc,
     reloadPlugin: saveAndReloadSettingByName,// 通过名称重载配置信息(json:配置,path:路径,name:名称)
     reloadRepeat: saveAndReloadSettingForRepeat,// 重载复读信息
     reloadConfig: saveAndReloadConfig,

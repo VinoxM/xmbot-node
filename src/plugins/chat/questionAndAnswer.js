@@ -29,12 +29,19 @@ export async function queAndAns(context) {
     global.replyMsg(context, null, global['func']['checkIsGroup'](context))
 }
 
-export function queAndAnsView(context) {
+export function queAndAnsView(context, isAll = false) {
     let setting = global['config']['chat']
     let msg = "";
     let qa = setting["Q&A"];
-    for (let o of qa) {
-        msg += o.question + ":" + o.answer + "\n"
+    if (qa.length > 0) {
+        for (let o of qa) {
+            const isCurApi = context.apiName === o.apiName;
+            const answer = isCurApi ? o.answer : global.CQFunc.transformCq(o.answer, context.apiName, o.apiName);
+            if (isCurApi || isAll)
+                msg += `[${o.apiName}]${o.question}:${answer}\n`
+        }
+    } else {
+        msg = "无问答";
     }
     context["message"] = msg;
     global.replyMsg(context, null, global['func']['checkIsGroup'](context))
@@ -45,7 +52,7 @@ export async function queAndAndDel(context) {
     if (global['func']['checkIsAdmin'](context)) {
         let msg = context["raw_message"].replace("删除问答:", "")
         let flag = setting["Q&A"].some((o, i) => {
-            if (o.question === msg) {
+            if (o.question === msg && o.apiName === context.apiName) {
                 setting["Q&A"].splice(i, 1)
                 context["message"] = `已删除问答:${msg}`
                 return true
