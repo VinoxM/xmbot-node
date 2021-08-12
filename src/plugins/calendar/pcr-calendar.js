@@ -68,7 +68,8 @@ export class PcrCalendar {
         range.map(r => {
             let num = r.getFullYear() * 10000 + (r.getMonth() + 1) * 100 + r.getDate()
             if (this.calendar[area].hasOwnProperty(num)) {
-                let info = this.calendar[area][num].join('\n')
+                let list_ = this.calendar[area][num]
+                let info = list_.length > 0 ? list_.join('\n') : '-'
                 let d = r.getFullYear() + '/' + (r.getMonth() + 1) + '/' + r.getDate()
                 reply_list.push(`${needDate ? ('[' + d + ']') : ''}\n${info}`)
             }
@@ -165,7 +166,7 @@ async function initCampaign(area, cal_db, calendar) {
             let eTime = new Date(r['end_time'])
             let e = 0
             if (eTime.getHours() <= 5) {
-                eTime.setDate(eTime.getDate()-1)
+                eTime.setDate(eTime.getDate() - 1)
             }
             e = eTime.getFullYear() * 10000 + (eTime.getMonth() + 1) * 100 + eTime.getDate()
             let ran = []
