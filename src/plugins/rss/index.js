@@ -63,39 +63,39 @@ async function getRss(rss) { // 获取RSS源
     global['LOG'](`正在获取RSS源:${rss.title}`)
     let proxy = global['config']['default'].proxy
     return new Promise((resolve, reject) => {
+        const headers = rss.headers || null
         request({
             url: rss.source,
-            headers: rss.headers,
-            proxy: rss.proxy ? (proxy ? proxy : 'http://127.0.0.1:2802') : null,
+            headers: headers,
+            proxy: rss.proxy ? (proxy ? proxy : 'http://127.0.0.1:1080') : null,
         }, (err, res, body) => {
             if (err) {
-                global['ERR'](`获取RSS源失败:${rss.title}`)
                 reject(err)
-            } else {
+            }
+            try {
                 let xmlReader = new x2js()
                 let line = xmlReader.xml2js(body)
-                if (line.rss) {
-                    let push_list = {}
-                    for (const key of Object.keys(rss.push_list)) {
-                        push_list[key] = {
-                            group: rss.push_list[key].group==='all'?setting['push_list'][key].group:rss.push_list[key].group,
-                            private: rss.push_list[key].private==='all'?setting['push_list'][key].private:rss.push_list[key].private
-                        }
+                if (!line.rss) {
+                    reject('Xml Read Null')
+                }
+                let push_list = {}
+                for (const key of Object.keys(rss.push_list)) {
+                    push_list[key] = {
+                        group: rss.push_list[key].group === 'all' ? setting['push_list'][key].group : rss.push_list[key].group,
+                        private: rss.push_list[key].private === 'all' ? setting['push_list'][key].private : rss.push_list[key].private
                     }
-                    Rss[rss['name']] = {
-                        rss: line.rss,
-                        title: rss['title'],
-                        last_id: rss.last_id,
-                        word_filter: rss['word_filter'],
-                        replace_link: rss['link_replace'],
-                        push_list: push_list
-                    }
-                    global['LOG'](`成功获取RSS源:${rss.title}`)
-                } else {
-                    global['ERR'](`获取RSS源失败:${rss.title}`)
-                    reject(err)
+                }
+                Rss[rss['name']] = {
+                    rss: line.rss,
+                    title: rss['title'],
+                    last_id: rss.last_id,
+                    word_filter: rss['word_filter'],
+                    replace_link: rss['link_replace'],
+                    push_list: push_list
                 }
                 resolve()
+            } catch (e) {
+                reject(e)
             }
         })
     })
@@ -106,7 +106,7 @@ async function loadAllRss() { // 加载所有RSS订阅
     for (const s of rss) {
         if (!s.on) continue
         await getRss(s).catch(e => {
-            global['ERR'](e)
+            global['ERR'](`获取RSS源[${s.title}]失败: ${e}`)
         })
     }
     await handleRssText()
@@ -116,13 +116,14 @@ async function handleRssText() { // 处理Rss信息
     let replyMsg = []
     for (const key of Object.keys(Rss)) {
         let r = Rss[key]
+        if (!r.rss || !r.rss.channel) continue
         let items = r.rss.channel.item
         let last_id = ''
         // console.log('Last Id :' + last_id)
         if (!Array.isArray(items)) items = [items]
         let isLast = true
         for (const [index, item] of items.entries()) {
-            if (checkWordFilter(item.description,r.word_filter)) continue
+            if (checkWordFilter(item.description, r.word_filter)) continue
             let str = String(item.link).replace(r['replace_link'], "")
             if (isLast) {
                 last_id = str
@@ -137,7 +138,7 @@ async function handleRssText() { // 处理Rss信息
                     message += images.join("\n")
                 }
                 message += `\n链接:${item.link}`
-                replyMsg.push({message: message, push_list:r.push_list})
+                replyMsg.push({message: message, push_list: r.push_list})
             } else {
                 break
             }
@@ -152,15 +153,15 @@ async function handleRssText() { // 处理Rss信息
     if (replyMsg.length > 0) {
         global['LOG'](`RSS源共有${replyMsg.length}条新信息`)
         for (const msg of replyMsg) {
-            global['pushMsg'](msg.message,msg.push_list)
+            global['pushMsg'](msg.message, msg.push_list)
         }
     } else {
         global['LOG']('RSS源没有发现新的信息')
     }
 }
 
-function checkWordFilter(title,filters) {
-    return !!filters&&filters.some(o=>{
+function checkWordFilter(title, filters) {
+    return !!filters && filters.some(o => {
         return title.indexOf(o) > -1
     })
 }

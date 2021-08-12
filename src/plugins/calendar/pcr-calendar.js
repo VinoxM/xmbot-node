@@ -21,7 +21,7 @@ export class PcrCalendar {
         return new Promise((resolve, reject) => {
             if (this.onInit) reject({err: 0, reason: '正在初始化中'})
             this.onInit = true
-            initCalendar(this.cal_db, this.calendar,this.calendar_source)
+            initCalendar(this.cal_db, this.calendar, this.calendar_source)
                 .then(() => {
                     this.onInit = false
                     resolve()
@@ -69,8 +69,8 @@ export class PcrCalendar {
             let num = r.getFullYear() * 10000 + (r.getMonth() + 1) * 100 + r.getDate()
             if (this.calendar[area].hasOwnProperty(num)) {
                 let info = this.calendar[area][num].join('\n')
-                let d = r.getFullYear() + '/' + r.getMonth() + '/' + r.getDate()
-                reply_list.push(`${needDate ? ('['+d+']') : ''}\n${info}`)
+                let d = r.getFullYear() + '/' + (r.getMonth() + 1) + '/' + r.getDate()
+                reply_list.push(`${needDate ? ('[' + d + ']') : ''}\n${info}`)
             }
         })
         let reply = reply_prefix + reply_list.join('\n')
@@ -82,9 +82,9 @@ export class PcrCalendar {
             const areas = Object.keys(this.calendar_source)
             const result = {}
             for (const area of areas) {
-                await this.cal_db.selByArea(area).then(res=>{
+                await this.cal_db.selByArea(area).then(res => {
                     result[area] = res
-                }).catch(e=>reject(e))
+                }).catch(e => reject(e))
             }
             resolve(result)
         })
@@ -104,7 +104,7 @@ function initDb(db) {
     })
 }
 
-async function initCalendar(cal_db, calendar,calendar_source) {
+async function initCalendar(cal_db, calendar, calendar_source) {
     global['LOG']('开始加载活动日历')
     for (const key of Object.keys(calendar_source)) {
         let source = calendar_source[key]
@@ -126,7 +126,7 @@ async function initCalendar(cal_db, calendar,calendar_source) {
                             cal_db.addCalendar(params)
                             updateCount++
                         }
-                    }).catch(err=>global['ERR'](err))
+                    }).catch(err => global['ERR'](err))
             }
             if (updateCount === 0) global['LOG'](`${source.title}活动未发现更新`)
             else global['LOG'](`${source.title}活动共 ${updateCount} 个更新`)
@@ -163,7 +163,11 @@ async function initCampaign(area, cal_db, calendar) {
             let sTime = new Date(r['start_time'])
             let s = sTime.getFullYear() * 10000 + (sTime.getMonth() + 1) * 100 + sTime.getDate()
             let eTime = new Date(r['end_time'])
-            let e = eTime.getFullYear() * 10000 + (eTime.getMonth() + 1) * 100 + (eTime.getHours() === 4 ? eTime.getDate() - 1 : eTime.getDate())
+            let e = 0
+            if (eTime.getHours() <= 5) {
+                eTime.setDate(eTime.getDate()-1)
+            }
+            e = eTime.getFullYear() * 10000 + (eTime.getMonth() + 1) * 100 + eTime.getDate()
             let ran = []
             if (s < range[0]) {
                 if (e < range[0]) continue // range外
@@ -186,21 +190,22 @@ async function initCampaign(area, cal_db, calendar) {
             for (const elem of ran) {
                 let reply = r.name
                 if (elem === s && elem !== e) reply += `[New->${getDateTime(sTime)}]`
-                if (elem === e && elem !== s) reply += `[End->${getDateTime(eTime)}]`
+                if (elem === e && elem !== s) reply += `[End->${getDateTime(eTime, true)}]`
                 if (cal[elem].indexOf(reply) === -1) {
                     cal[elem].push(reply)
                 }
             }
         }
         calendar[area] = cal
-    }).catch(err=>global['ERR'](err))
+    }).catch(err => global['ERR'](err))
 }
 
-function getDateTime(date) {
+function getDateTime(date, isEnd = false) {
     let reply = ''
     let hours = date.getHours()
     let minutes = date.getMinutes()
-    if (hours < 5) reply += '明天'
+    // let isToday = (date.getFullYear() * 10000 + date.getMonth() * 100 + date.getDate())-
+    if (hours < 5 && isEnd) reply += '明天'
     reply += `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
     return reply
 }
